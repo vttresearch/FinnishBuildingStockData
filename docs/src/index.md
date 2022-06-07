@@ -1,7 +1,7 @@
 # FinnishBuildingStockData.jl
 
 A Julia module for processing Finnish building stock data for the
-[ArchetypeBuildingModel.jl](https://vttgit.vtt.fi/flexib/archetypebuildingmodel) module.
+[ArchetypeBuildingModel.jl](https://github.com/vttresearch/ArchetypeBuildingModel) module.
 Essentially, this module takes building stock statistics describing the number and
 floor area in a given building stock, as well as data describing structures,
 fenestration, and ventilation systems, and combines them into a single dataset with
@@ -33,7 +33,7 @@ Essentially, this section explains the `process_datastore.jl` main program,
 step by step.
 Finally, the [Output data format](@ref) section explains the final format
 the data is processed into,
-ready to be used by [ArchetypeBuildingModel.jl](https://vttgit.vtt.fi/flexib/archetypebuildingmodel).
+ready to be used by [ArchetypeBuildingModel.jl](https://github.com/vttresearch/ArchetypeBuildingModel).
 The [Library](@ref) contains the full documentation of all the functions
 contained in this module, automatically generated based on the docstrings
 in the codebase.
