@@ -54,6 +54,10 @@ However, this is only necessary for more advanced usage.
 
 ## Documentation
 
+[Online documentation is hosted here](https://vttresearch.github.io/FinnishBuildingStockData/),
+but so far I haven't bothered to set up automatic workflows for keeping it up to date.
+Thus, for accessing the newest documentation, one has to build it locally.
+
 The source for the documentation is included in the repository under the `docs` folder,
 but is not hosted online at the moment.
 In order to build and read the documentation locally,
