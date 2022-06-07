@@ -7,7 +7,7 @@ as well as the optional detailed data in
 [*Finnish building stock detailed RT-card structural data*](http://urn.fi/urn:nbn:fi:att:61b72dc7-2e51-4598-bd65-95b099fabd0c),
 along with the building stock statistical data in
 [*Finnish building stock forecasts for 2020, 2030, 2040, and 2050*](http://urn.fi/urn:nbn:fi:att:a567a84b-fea4-4ca8-84a1-fe97f52caff4),
-and processes them into something usable by the [ArchetypeBuildingModel.jl](https://vttgit.vtt.fi/flexib/archetypebuildingmodel).
+and processes them into something usable by the [ArchetypeBuildingModel.jl](https://github.com/vttresearch/ArchetypeBuildingModel).
 
 
 ## Key contents
@@ -36,10 +36,10 @@ Instead, the module needs to be downloaded manually and installed using the `dev
 This module is intended to be used as a part of a [Spine Toolbox](https://github.com/Spine-project/Spine-Toolbox) workflow,
 with the following rough steps:
 
-1. Create a Spine Data Connection referring to the `datapackage.json` in [`finnish_building_stock_forecasts`](https://vttgit.vtt.fi/flexib/finnish_building_stock_forecasts).
-2. Create a Spine Importer with the `import_finnish_building_stock_forecasts.json` specification from [`finnish_building_stock_forecasts`](https://vttgit.vtt.fi/flexib/finnish_building_stock_forecasts).
-3. Create a Spine Data Conenction referring to **AT LEAST** the `datapackage.json` in [`finnish_default_structural_data`](https://vttgit.vtt.fi/flexib/finnish_default_structural_data), and optionally to the corresponding file in [`finnish_RT_structural_data`](https://vttgit.vtt.fi/flexib/finnish_RT_structural_data) as well.
-4. Create a Spine Importer with the `import_finnish_structural_data.json` specification from [`finnish_default_structural_data`](https://vttgit.vtt.fi/flexib/finnish_default_structural_data).
+1. Create a Spine Data Connection referring to the `datapackage.json` in [`finnish_building_stock_forecasts`](http://urn.fi/urn:nbn:fi:att:a567a84b-fea4-4ca8-84a1-fe97f52caff4).
+2. Create a Spine Importer with the `import_finnish_building_stock_forecasts.json` specification from [`finnish_building_stock_forecasts`](http://urn.fi/urn:nbn:fi:att:a567a84b-fea4-4ca8-84a1-fe97f52caff4).
+3. Create a Spine Data Conenction referring to **AT LEAST** the `datapackage.json` in [`finnish_default_structural_data`](http://urn.fi/urn:nbn:fi:att:6c6697fc-c601-40b7-a1c9-ad85b0423d38), and optionally to the corresponding file in [`finnish_RT_structural_data`](http://urn.fi/urn:nbn:fi:att:61b72dc7-2e51-4598-bd65-95b099fabd0c) as well.
+4. Create a Spine Importer with the `import_finnish_structural_data.json` specification from [`finnish_default_structural_data`](http://urn.fi/urn:nbn:fi:att:6c6697fc-c601-40b7-a1c9-ad85b0423d38).
 5. Create a new Spine Datastore, and connect the above Importers to it.
 6. Create a Spine Tool with the `process_datastore.json` tool specification.
 7. Create a new Spine Datastore as the output for the `process_datastore` tool.
@@ -88,9 +88,7 @@ MIT, see `LICENSE` for more information.
 <td valign="middle" width=100px>
 <img src=https://www.aka.fi/globalassets/vanhat/y_kuvat/aka_logo_en.svg alt="AKA emblem" width=100%></td>
 <td valign="middle">
-This module was built for the [Academy of Finland](https://www.aka.fi/en) project
-[*"Integration of building flexibility into future energy systems (FlexiB)"*](https://cris.vtt.fi/en/projects/integration-of-building-flexibility-into-future-energy-systems)
-under grant agreement No 332421.
+This module was built for the Academy of Finland project "Integration of building flexibility into future energy systems (FlexiB)" under grant agreement No 332421.
 </td>
 </table>
 </center>
