@@ -484,7 +484,7 @@ function create_structure_statistics!(
             tuple(inds...) => _structure_type_parameter_values(
                 building_structures,
                 inds,
-                is_load_bearing;
+                mod.is_load_bearing;
                 mod = mod,
             ) for inds in rels
         ),
