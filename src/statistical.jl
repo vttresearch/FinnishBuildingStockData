@@ -511,7 +511,8 @@ end
 
 
 """
-    create_ventilation_and_fenestration_statistics(;
+    create_ventilation_and_fenestration_statistics!(
+        mod::Module;
         building_type=anything,
         location_id=anything,
         building_period=anything,
@@ -521,7 +522,6 @@ end
         HRU_efficiency_weight::Float64=0.5,
         lookback_if_empty::Int64=10,
         max_lookbacks::Int64=20,
-        mod::Module = Main,
     )
 
 Create the `ventilation_and_fenestration_statistics` `RelationshipClass`
@@ -539,7 +539,8 @@ The `RelationshipClass` stores the following ventilation and fenestration parame
 - `window_U_value_W_m2K`: Calculated using [`mean_window_U_value`](@ref)
 - `total_normal_solar_energy_transmittance`: Calculated using [`mean_total_normal_solar_energy_transmittance`](@ref)
 """
-function create_ventilation_and_fenestration_statistics(;
+function create_ventilation_and_fenestration_statistics!(
+    mod::Module;
     building_type = anything,
     location_id = anything,
     building_period = anything,
@@ -549,7 +550,6 @@ function create_ventilation_and_fenestration_statistics(;
     HRU_efficiency_weight::Float64 = 0.5,
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
 )
     obj_clss = [:building_type, :building_period, :location_id]
     rels = [
@@ -561,7 +561,7 @@ function create_ventilation_and_fenestration_statistics(;
             _compact = false,
         )
     ]
-    RelationshipClass(
+    ventilation_and_fenestration_statistics = RelationshipClass(
         :ventilation_and_fenestration_statistics,
         obj_clss,
         rels,
@@ -628,4 +628,15 @@ function create_ventilation_and_fenestration_statistics(;
             ]
         ),
     )
+    # Create the associated parameters
+    params = [
+        name => Parameter(name, [ventilation_and_fenestration_statistics]) for
+        name in keys(ventilation_and_fenestration_statistics.parameter_defaults)
+    ]
+    # Evaluate the RelationshipClass and parameters to the desired `mod`
+    @eval mod ventilation_and_fenestration_statistics =
+        $ventilation_and_fenestration_statistics
+    for (name, param) in params
+        @eval mod $name = $param
+    end
 end

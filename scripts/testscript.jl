@@ -158,8 +158,7 @@ lids = m.location_id()[1:number_of_included_municipalities]
     variation_period = variation_period,
 )
 @info "Creating ventilation and fenestration statistics"
-@time ventilation_and_fenestration_statistics =
-    create_ventilation_and_fenestration_statistics(; location_id = lids, mod = m)
+@time create_ventilation_and_fenestration_statistics!(m; location_id = lids)
 
 
 ## Filter out unused location_ids
@@ -261,18 +260,18 @@ end
 
 sorted_rels = [
     tuple(rel...) for rel in sort(
-        ventilation_and_fenestration_statistics.relationships;
+        m.ventilation_and_fenestration_statistics.relationships;
         by = x -> x.building_period,
     )
 ]
 data_parameters = [
     (
         year = m.period_end(building_period = rel[2]),
-        window_U_value = ventilation_and_fenestration_statistics.parameter_values[rel][:window_U_value_W_m2K].value,
-        infiltration_rate = ventilation_and_fenestration_statistics.parameter_values[rel][:infiltration_rate_1_h].value,
-        ventilation_rate = ventilation_and_fenestration_statistics.parameter_values[rel][:ventilation_rate_1_h].value,
-        HRU_efficiency = ventilation_and_fenestration_statistics.parameter_values[rel][:HRU_efficiency].value,
-        solar_transmittance = ventilation_and_fenestration_statistics.parameter_values[rel][:total_normal_solar_energy_transmittance].value,
+        window_U_value = m.ventilation_and_fenestration_statistics.parameter_values[rel][:window_U_value_W_m2K].value,
+        infiltration_rate = m.ventilation_and_fenestration_statistics.parameter_values[rel][:infiltration_rate_1_h].value,
+        ventilation_rate = m.ventilation_and_fenestration_statistics.parameter_values[rel][:ventilation_rate_1_h].value,
+        HRU_efficiency = m.ventilation_and_fenestration_statistics.parameter_values[rel][:HRU_efficiency].value,
+        solar_transmittance = m.ventilation_and_fenestration_statistics.parameter_values[rel][:total_normal_solar_energy_transmittance].value,
     ) for rel in sorted_rels
 ]
 plt = scatter(; title = "Ventilation and fenestration properties")
