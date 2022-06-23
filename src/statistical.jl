@@ -155,19 +155,19 @@ end
 
 
 """
-    _add_light_wall_types_and_is_load_bearing!(; mod::Module = Main)
+    _add_light_wall_types_and_is_load_bearing!(mod::Module)
 
 Add new `structure_type`s for non-load-bearing exterior and partition walls,
 as well as a new parameter `is_load_bearing` for whether the structure type is load-bearing.
 
-Note that this function operates in Module `mod`, set to `Main` by default!
+Note that this function operates in Module `mod`!
 
 Essentially, all the structure types in the raw data are assumed to be load-bearing.
 This function creates the `light_exterior_wall` and `light_partition_wall`
 `structure_types` assuming identical properties to their load-bearing counterparts,
 except that the `:is_load_bearing` flag is set to `false`.
 """
-function _add_light_wall_types_and_is_load_bearing!(; mod::Module = Main)
+function _add_light_wall_types_and_is_load_bearing!(mod::Module)
     # Create new parameter
     is_load_bearing = Parameter(:is_load_bearing, [mod.structure_type])
     # Add parameter values for existing structure types
@@ -197,7 +197,8 @@ function _add_light_wall_types_and_is_load_bearing!(; mod::Module = Main)
         mod.structure_type.parameter_values[obj][:is_internal] =
             mod.structure_type.parameter_values[parent][:is_internal]
     end
-    return is_load_bearing
+    # Eval is_load_bearing to the desired `mod`
+    @eval mod is_load_bearing = $is_load_bearing
 end
 
 
@@ -457,7 +458,7 @@ function create_structure_statistics!(
     variation_period::Float64,
 )
     # Add non-load bearing wall types and a parameter to indicate this.
-    is_load_bearing = _add_light_wall_types_and_is_load_bearing!(; mod = mod)
+    _add_light_wall_types_and_is_load_bearing!(mod)
     # Form the building structures.
     building_structures = _form_building_structures(
         thermal_conductivity_weight = thermal_conductivity_weight,
