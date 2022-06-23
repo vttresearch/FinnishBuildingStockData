@@ -145,7 +145,7 @@ number_of_included_municipalities =
 lids = m.location_id()[1:number_of_included_municipalities]
 
 @info "Add `building_stock_year` parameter"
-@time building_stock_year = add_building_stock_year!(; mod = m)
+@time add_building_stock_year!(m)
 
 @info "Creating building stock statistics"
 @time building_stock_statistics =

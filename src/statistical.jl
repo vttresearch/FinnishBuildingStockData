@@ -124,14 +124,14 @@ end
 
 
 """
-    add_building_stock_year!(; mod::Module = Main)
+    add_building_stock_year!(mod::Module)
 
 Add the `building_stock_year` parameter for the `building_stock` objects in `mod`.
 
 Currently, the `building_stock_year` is parsed from the name of the `building_stock`
 objects, assuming the names are formatted like `<NAME>_<YEAR>`.
 """
-function add_building_stock_year!(; mod::Module = Main)
+function add_building_stock_year!(mod::Module)
     # Create new parameter
     building_stock_year = Parameter(:building_stock_year, [mod.building_stock])
     # Add parameter values for existing `building_stock` objects.
@@ -139,8 +139,10 @@ function add_building_stock_year!(; mod::Module = Main)
         mod.building_stock.parameter_values[bs][:building_stock_year] =
             parameter_value(parse(Float64, split(string(bs.name), "_")[2]))
     end
+    # Add default parameter value
     mod.building_stock.parameter_defaults[:building_stock_year] = parameter_value(nothing)
-    return building_stock_year
+    # Eval the created parameter into the correct module.
+    @eval mod building_stock_year = $building_stock_year
 end
 
 
