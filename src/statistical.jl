@@ -336,7 +336,7 @@ function _structure_type_parameter_values(
     mod::Module = Main,
 )
     (bt, bp, lid, st) = inds
-    st_map = _map_structure_types(is_load_bearing)
+    st_map = _map_structure_types(is_load_bearing; mod = mod)
     # Only consider structures for the correct period and building type.
     relevant_building_structures = _filter_relevant_building_structures(
         building_structures,
@@ -345,6 +345,7 @@ function _structure_type_parameter_values(
         st,
         st_map;
         lookback_if_empty = 10,
+        mod = mod,
     )
     # Calculate the frame material weights for the structures.
     total_frame_material_share = sum(

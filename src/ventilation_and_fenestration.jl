@@ -87,6 +87,7 @@ function mean_ventilation_rate(
         mod.ventilation_source__building_type;
         lookback_if_empty = lookback_if_empty,
         max_lookbacks = max_lookbacks,
+        mod = mod,
     )
     rels = mod.ventilation_source__building_type(
         source = relevant_sources,
@@ -148,6 +149,7 @@ function mean_infiltration_rate(
         mod.ventilation_source__building_type;
         lookback_if_empty = lookback_if_empty,
         max_lookbacks = max_lookbacks,
+        mod = mod,
     )
     rels = mod.ventilation_source__building_type(
         source = relevant_sources,
@@ -208,6 +210,7 @@ function mean_hru_efficiency(
         mod.ventilation_source__building_type;
         lookback_if_empty = lookback_if_empty,
         max_lookbacks = max_lookbacks,
+        mod = mod,
     )
     rels = mod.ventilation_source__building_type(
         source = relevant_sources,
@@ -256,6 +259,7 @@ function mean_window_U_value(
         mod.fenestration_source__building_type;
         lookback_if_empty = lookback_if_empty,
         max_lookbacks = max_lookbacks,
+        mod = mod,
     )
     rels = mod.fenestration_source__building_type(
         source = relevant_sources,
@@ -303,6 +307,7 @@ function mean_total_normal_solar_energy_transmittance(
         mod.fenestration_source__building_type;
         lookback_if_empty = lookback_if_empty,
         max_lookbacks = max_lookbacks,
+        mod = mod,
     )
     rels = mod.fenestration_source__building_type(
         source = relevant_sources,
