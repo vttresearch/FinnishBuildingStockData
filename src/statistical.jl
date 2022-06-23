@@ -57,16 +57,15 @@ end
 
 
 """
-    create_building_stock_statistics(;
+    create_building_stock_statistics!(mod::Module;
         building_stock=anything,
         building_type=anything,
         building_period=anything,
         location_id=anything,
         heat_source=anything,
-        mod::Module = Main
     )
 
-Create the `building_stock_statistics` `RelationshipClass` to house the building stock forecasts.
+Create the `building_stock_statistics` `RelationshipClass` in `mod` to house the building stock forecasts.
 
 Based on the `building_stock__building_type__building_period__location_id__heat_source` relationship,
 but with some renaming to make the data more flexible.
@@ -74,13 +73,13 @@ Furthermore, includes the `average_floor_area_m2` data as well.
 Optional keyword arguments can be used to limit the scope of the calculations,
 and the `mod` keyword is used to tweak the Module scope of the calculations.
 """
-function create_building_stock_statistics(;
+function create_building_stock_statistics!(
+    mod::Module;
     building_stock = anything,
     building_type = anything,
     building_period = anything,
     location_id = anything,
     heat_source = anything,
-    mod::Module = Main,
 )
     object_class_names =
         [:building_stock, :building_type, :building_period, :location_id, :heat_source]
@@ -119,7 +118,16 @@ function create_building_stock_statistics(;
             Dict(:average_gross_floor_area_m2_per_building => parameter_value(nothing)),
         ),
     )
-    return building_stock_statistics
+    # Create the associated parameters
+    params = [
+        key => Parameter(key, [building_stock_statistics]) for
+        key in keys(building_stock_statistics.parameter_defaults)
+    ]
+    # Evaluate the RelationshipClass and the associated parameters into the desired `mod`.
+    @eval mod building_stock_statistics = $building_stock_statistics
+    for (name, param) in params
+        @eval mod $name = $param
+    end
 end
 
 

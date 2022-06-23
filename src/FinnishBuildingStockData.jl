@@ -29,7 +29,7 @@ export using_spinedb,
     import_processed_data
 # Exports required for testscript
 export add_building_stock_year!,
-    create_building_stock_statistics,
+    create_building_stock_statistics!,
     create_structure_statistics,
     create_ventilation_and_fenestration_statistics,
     scramble_parameter_data!,

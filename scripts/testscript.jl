@@ -148,8 +148,7 @@ lids = m.location_id()[1:number_of_included_municipalities]
 @time add_building_stock_year!(m)
 
 @info "Creating building stock statistics"
-@time building_stock_statistics =
-    create_building_stock_statistics(; location_id = lids, mod = m)
+@time create_building_stock_statistics!(m; location_id = lids)
 @info "Creating structural statistics"
 @time structure_statistics = create_structure_statistics(;
     location_id = lids,
