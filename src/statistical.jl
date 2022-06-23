@@ -176,10 +176,15 @@ function _add_light_wall_types_and_is_load_bearing!(mod::Module)
     end
     mod.structure_type.parameter_defaults[:is_load_bearing] = parameter_value(nothing)
     # Add the new structure type objects for light structures and their "parents".
+    # NOTE! Link to pre-existing objects instead of creating new ones if possible.
     objs = [
-        Object(Symbol("light_exterior_wall")) =>
+        isnothing(mod.structure_type(Symbol("light_exterior_wall"))) ?
+        Object(Symbol("light_exterior_wall")) :
+        mod.structure_type(Symbol("light_exterior_wall")) =>
             mod.structure_type(Symbol("exterior_wall")),
-        Object(Symbol("light_partition_wall")) =>
+        isnothing(mod.structure_type(Symbol("light_partition_wall"))) ?
+        Object(Symbol("light_partition_wall")) :
+        mod.structure_type(Symbol("light_partition_wall")) =>
             mod.structure_type(Symbol("partition_wall")),
     ]
     add_objects!(mod.structure_type, getfield.(objs, 1))
