@@ -58,25 +58,25 @@ However, this is only necessary for more advanced usage.
 but so far I haven't bothered to set up automatic workflows for keeping it up to date.
 Thus, for accessing the newest documentation, one has to build it locally.
 
-The source for the documentation is included in the repository under the `docs` folder,
+The source for the documentation is included in the repository under the `documentation` folder,
 but is not hosted online at the moment.
 In order to build and read the documentation locally,
 start a Julia REPL from the root folder of this module and perform the following steps:
 
-1. Activate the `docs` environment from the Julia Package manager
+1. Activate the `documentation` environment from the Julia Package manager
 ```julia
 julia> ]
-(FinnishBuildingStockData) pkg> Activate docs
+(FinnishBuildingStockData) pkg> Activate documentation
 (docs) pkg> ]
 julia>
 ```
 
-2. Run the `docs/make.jl` script.
+2. Run the `documentation/make.jl` script.
 ```julia
-julia> include("docs/make.jl")
+julia> include("documentation/make.jl")
 ```
 
-3. Open the newly built `docs/build/index.html` to start browsing the documentation.
+3. Open the newly built `documentation/build/index.html` to start browsing the documentation.
 
 
 ## License

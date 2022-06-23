@@ -33,7 +33,7 @@ The steps performed by the main program can be summarized in the following steps
 2. Open the input *Spine Datastore* using *Spine Interface*, and run input data tests using [`run_structural_tests`](@ref) and [`run_statistical_tests`](@ref), in order to ensure the input data makes sense.
 3. Limit the set of `location_id`s based on the given `num_lids` keyword argument.
 4. Create the `building_stock_year` parameter based on parsing the names of the `building_stock` *objects* in the input data using [`add_building_stock_year!`](@ref).
-5. Create the `building_stock_statistics` output *relationship class* using the [`create_building_stock_statistics`](@ref) function.
-6. Create the `structure_statistics` output *relationship class* using the [`create_structure_statistics`](@ref) function with the desired `thermal_conductivity_weight`, `interior_node_depth`, and `variation_period` keyword arguments.
-7. Create the `ventilation_and_fenestration_statistics` output *relationship class* using the [`create_ventilation_and_fenestration_statistics`](@ref) function.
+5. Create the `building_stock_statistics` output *relationship class* using the [`create_building_stock_statistics!`](@ref) function.
+6. Create the `structure_statistics` output *relationship class* using the [`create_structure_statistics!`](@ref) function with the desired `thermal_conductivity_weight`, `interior_node_depth`, and `variation_period` keyword arguments.
+7. Create the `ventilation_and_fenestration_statistics` output *relationship class* using the [`create_ventilation_and_fenestration_statistics!`](@ref) function.
 8. Import the newly created output *relationship classes* into the output *Spine Datastore*, scrambling them if the `scramble=true` keyword has been set.

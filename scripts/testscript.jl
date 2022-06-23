@@ -14,6 +14,7 @@ using Statistics
 @time using FinnishBuildingStockData
 
 # Set properties for testing script
+m = Module()
 number_of_included_municipalities = Inf
 scramble_data = false
 thermal_conductivity_weight = 1 / 2
@@ -26,19 +27,19 @@ variation_period = 5.0 * 24 * 60 * 60
 @info "Opening database"
 db_url = "sqlite:///<REDACTED>"
 db_out_url = "sqlite:///<REDACTED>"
-@time using_spinedb(db_url, Main; upgrade = true)
+@time using_spinedb(db_url, m; upgrade = true)
 
 
 ## Run input database tests for structural data
 
 @info "Running structural tests"
-@time run_structural_tests(; limit = Inf)
+@time run_structural_tests(; limit = Inf, mod = m)
 
 
 ## Run input data tests for statistical data
 
 @info "Running statistical tests"
-@time run_statistical_tests(; limit = Inf)
+@time run_statistical_tests(; limit = Inf, mod = m)
 
 
 ## Form the `Structure` objects and statistical data
@@ -48,6 +49,7 @@ db_out_url = "sqlite:///<REDACTED>"
     thermal_conductivity_weight = thermal_conductivity_weight,
     interior_node_depth = interior_node_depth,
     variation_period = variation_period,
+    mod = m,
 );
 
 
@@ -76,7 +78,7 @@ end
 
 # U-value progression
 plt = plot()
-for typ in structure_type()
+for typ in m.structure_type()
     if typ.name in [Symbol("exterior_wall"), Symbol("roof"), Symbol("base_floor")]
         plotarray = map(
             s -> (s.year, s.U_value_dict[:total].min),
@@ -92,7 +94,7 @@ display(plt)
 # Effective thermal mass progression
 
 plt = plot()
-for typ in structure_type()
+for typ in m.structure_type()
     plotarray = map(
         s -> (s.year, s.effective_thermal_mass.min),
         sort!(filter(b -> b.type == typ, building_structures); by = b -> b.year),
@@ -105,7 +107,7 @@ display(plt)
 
 # Design U-value comparison.
 plt3 = plot()
-for typ in structure_type()
+for typ in m.structure_type()
     plotarray = map(
         s -> (
             s.year,
@@ -138,31 +140,31 @@ display(plot(internal_U_values))
 ## Create the statistical tables
 
 number_of_included_municipalities =
-    Int64(min(number_of_included_municipalities, length(location_id.objects)))
+    Int64(min(number_of_included_municipalities, length(m.location_id.objects)))
 @info "Number of included municipalities: $(number_of_included_municipalities)"
-lids = location_id()[1:number_of_included_municipalities]
+lids = m.location_id()[1:number_of_included_municipalities]
 
 @info "Add `building_stock_year` parameter"
-@time building_stock_year = add_building_stock_year!()
+@time add_building_stock_year!(m)
 
 @info "Creating building stock statistics"
-@time building_stock_statistics = create_building_stock_statistics(location_id = lids)
+@time create_building_stock_statistics!(m; location_id = lids)
 @info "Creating structural statistics"
-@time structure_statistics = create_structure_statistics(
+@time structure_statistics = create_structure_statistics!(
+    m;
     location_id = lids,
     thermal_conductivity_weight = thermal_conductivity_weight,
     interior_node_depth = interior_node_depth,
     variation_period = variation_period,
 )
 @info "Creating ventilation and fenestration statistics"
-@time ventilation_and_fenestration_statistics =
-    create_ventilation_and_fenestration_statistics(location_id = lids)
+@time create_ventilation_and_fenestration_statistics!(m; location_id = lids)
 
 
 ## Filter out unused location_ids
 
 @info "Filtering out unused `location_id`s"
-@time filter_entity_class!(location_id; location_id = lids)
+@time filter_entity_class!(m.location_id; location_id = lids)
 
 
 ## Scramble the statistical tables
@@ -189,9 +191,9 @@ end
 
 ## Plot detailed structures vs statistical data diagnostics
 
-for bt in building_type()
-    for st in structure_type()
-        if structure_type.parameter_values[st][:is_load_bearing].value
+for bt in m.building_type()
+    for st in m.structure_type()
+        if m.structure_type.parameter_values[st][:is_load_bearing].value
             property = :loadbearing
         else
             property = :min
@@ -206,20 +208,20 @@ for bt in building_type()
         ])
         data_parameters = sort!([
             (
-                year = period_end(building_period = bp),
-                design_U_value = structure_statistics.parameter_values[(
+                year = m.period_end(building_period = bp),
+                design_U_value = m.structure_statistics.parameter_values[(
                     bt,
                     bp,
                     lid,
                     st,
                 )][:design_U_value_W_m2K].value,
-                total_U_value = structure_statistics.parameter_values[(
+                total_U_value = m.structure_statistics.parameter_values[(
                     bt,
                     bp,
                     lid,
                     st,
                 )][:total_U_value_W_m2K].value,
-            ) for bp in building_period() for lid in location_id()
+            ) for bp in m.building_period() for lid in m.location_id()
         ])
         plt = scatter(
             getfield.(structure_parameters, :year),
@@ -258,18 +260,18 @@ end
 
 sorted_rels = [
     tuple(rel...) for rel in sort(
-        ventilation_and_fenestration_statistics.relationships;
+        m.ventilation_and_fenestration_statistics.relationships;
         by = x -> x.building_period,
     )
 ]
 data_parameters = [
     (
-        year = period_end(building_period = rel[2]),
-        window_U_value = ventilation_and_fenestration_statistics.parameter_values[rel][:window_U_value_W_m2K].value,
-        infiltration_rate = ventilation_and_fenestration_statistics.parameter_values[rel][:infiltration_rate_1_h].value,
-        ventilation_rate = ventilation_and_fenestration_statistics.parameter_values[rel][:ventilation_rate_1_h].value,
-        HRU_efficiency = ventilation_and_fenestration_statistics.parameter_values[rel][:HRU_efficiency].value,
-        solar_transmittance = ventilation_and_fenestration_statistics.parameter_values[rel][:total_normal_solar_energy_transmittance].value,
+        year = m.period_end(building_period = rel[2]),
+        window_U_value = m.ventilation_and_fenestration_statistics.parameter_values[rel][:window_U_value_W_m2K].value,
+        infiltration_rate = m.ventilation_and_fenestration_statistics.parameter_values[rel][:infiltration_rate_1_h].value,
+        ventilation_rate = m.ventilation_and_fenestration_statistics.parameter_values[rel][:ventilation_rate_1_h].value,
+        HRU_efficiency = m.ventilation_and_fenestration_statistics.parameter_values[rel][:HRU_efficiency].value,
+        solar_transmittance = m.ventilation_and_fenestration_statistics.parameter_values[rel][:total_normal_solar_energy_transmittance].value,
     ) for rel in sorted_rels
 ]
 plt = scatter(; title = "Ventilation and fenestration properties")

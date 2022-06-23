@@ -57,16 +57,15 @@ end
 
 
 """
-    create_building_stock_statistics(;
+    create_building_stock_statistics!(mod::Module;
         building_stock=anything,
         building_type=anything,
         building_period=anything,
         location_id=anything,
         heat_source=anything,
-        mod::Module = Main
     )
 
-Create the `building_stock_statistics` `RelationshipClass` to house the building stock forecasts.
+Create the `building_stock_statistics` `RelationshipClass` in `mod` to house the building stock forecasts.
 
 Based on the `building_stock__building_type__building_period__location_id__heat_source` relationship,
 but with some renaming to make the data more flexible.
@@ -74,13 +73,13 @@ Furthermore, includes the `average_floor_area_m2` data as well.
 Optional keyword arguments can be used to limit the scope of the calculations,
 and the `mod` keyword is used to tweak the Module scope of the calculations.
 """
-function create_building_stock_statistics(;
+function create_building_stock_statistics!(
+    mod::Module;
     building_stock = anything,
     building_type = anything,
     building_period = anything,
     location_id = anything,
     heat_source = anything,
-    mod::Module = Main,
 )
     object_class_names =
         [:building_stock, :building_type, :building_period, :location_id, :heat_source]
@@ -119,19 +118,28 @@ function create_building_stock_statistics(;
             Dict(:average_gross_floor_area_m2_per_building => parameter_value(nothing)),
         ),
     )
-    return building_stock_statistics
+    # Create the associated parameters
+    params = [
+        key => Parameter(key, [building_stock_statistics]) for
+        key in keys(building_stock_statistics.parameter_defaults)
+    ]
+    # Evaluate the RelationshipClass and the associated parameters into the desired `mod`.
+    @eval mod building_stock_statistics = $building_stock_statistics
+    for (name, param) in params
+        @eval mod $name = $param
+    end
 end
 
 
 """
-    add_building_stock_year!(; mod::Module = Main)
+    add_building_stock_year!(mod::Module)
 
 Add the `building_stock_year` parameter for the `building_stock` objects in `mod`.
 
 Currently, the `building_stock_year` is parsed from the name of the `building_stock`
 objects, assuming the names are formatted like `<NAME>_<YEAR>`.
 """
-function add_building_stock_year!(; mod::Module = Main)
+function add_building_stock_year!(mod::Module)
     # Create new parameter
     building_stock_year = Parameter(:building_stock_year, [mod.building_stock])
     # Add parameter values for existing `building_stock` objects.
@@ -139,8 +147,10 @@ function add_building_stock_year!(; mod::Module = Main)
         mod.building_stock.parameter_values[bs][:building_stock_year] =
             parameter_value(parse(Float64, split(string(bs.name), "_")[2]))
     end
+    # Add default parameter value
     mod.building_stock.parameter_defaults[:building_stock_year] = parameter_value(nothing)
-    return building_stock_year
+    # Eval the created parameter into the correct module.
+    @eval mod building_stock_year = $building_stock_year
 end
 
 
@@ -336,7 +346,7 @@ function _structure_type_parameter_values(
     mod::Module = Main,
 )
     (bt, bp, lid, st) = inds
-    st_map = _map_structure_types(is_load_bearing)
+    st_map = _map_structure_types(is_load_bearing; mod = mod)
     # Only consider structures for the correct period and building type.
     relevant_building_structures = _filter_relevant_building_structures(
         building_structures,
@@ -345,6 +355,7 @@ function _structure_type_parameter_values(
         st,
         st_map;
         lookback_if_empty = 10,
+        mod = mod,
     )
     # Calculate the frame material weights for the structures.
     total_frame_material_share = sum(
@@ -404,14 +415,14 @@ end
 
 
 """
-    create_structure_statistics(;
+    create_structure_statistics!(
+        mod::Module;
         building_type=anything,
         building_period=anything,
         location_id=anything,
         thermal_conductivity_weight::Float64,
         interior_node_depth::Float64,
         variation_period::Float64,
-        mod::Module = Main,
     )
 
 Create the `structure_statistics` `RelationshipClass` to house the structural data from `mod`.
@@ -436,14 +447,14 @@ The `RelationshipClass` stores the following structural parameters:
 - `external_U_value_to_ground_W_m2K`: U-value portion from inside the structure into the ground.
 - `internal_U_value_to_structure_W_m2K`: U-value portion from the interior air into the structure.
 """
-function create_structure_statistics(;
+function create_structure_statistics!(
+    mod::Module;
     building_type = anything,
     building_period = anything,
     location_id = anything,
     thermal_conductivity_weight::Float64,
     interior_node_depth::Float64,
     variation_period::Float64,
-    mod::Module = Main,
 )
     # Add non-load bearing wall types and a parameter to indicate this.
     is_load_bearing = _add_light_wall_types_and_is_load_bearing!(; mod = mod)
@@ -464,7 +475,7 @@ function create_structure_statistics(;
             _compact = false,
         ) for st in mod.structure_type()
     ]
-    RelationshipClass(
+    structure_statistics = RelationshipClass(
         :structure_statistics,
         obj_clss,
         rels,
@@ -486,11 +497,22 @@ function create_structure_statistics(;
             :internal_U_value_to_structure_W_m2K => parameter_value(nothing),
         ),
     )
+    # Create the associated parameters
+    params = [
+        key => Parameter(key, [structure_statistics]) for
+        key in keys(structure_statistics.parameter_defaults)
+    ]
+    # Eval the RelationshipClass and parameters to the desired `mod`
+    @eval mod structure_statistics = $structure_statistics
+    for (name, param) in params
+        @eval mod $name = $param
+    end
 end
 
 
 """
-    create_ventilation_and_fenestration_statistics(;
+    create_ventilation_and_fenestration_statistics!(
+        mod::Module;
         building_type=anything,
         location_id=anything,
         building_period=anything,
@@ -500,7 +522,6 @@ end
         HRU_efficiency_weight::Float64=0.5,
         lookback_if_empty::Int64=10,
         max_lookbacks::Int64=20,
-        mod::Module = Main,
     )
 
 Create the `ventilation_and_fenestration_statistics` `RelationshipClass`
@@ -518,7 +539,8 @@ The `RelationshipClass` stores the following ventilation and fenestration parame
 - `window_U_value_W_m2K`: Calculated using [`mean_window_U_value`](@ref)
 - `total_normal_solar_energy_transmittance`: Calculated using [`mean_total_normal_solar_energy_transmittance`](@ref)
 """
-function create_ventilation_and_fenestration_statistics(;
+function create_ventilation_and_fenestration_statistics!(
+    mod::Module;
     building_type = anything,
     location_id = anything,
     building_period = anything,
@@ -528,7 +550,6 @@ function create_ventilation_and_fenestration_statistics(;
     HRU_efficiency_weight::Float64 = 0.5,
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
 )
     obj_clss = [:building_type, :building_period, :location_id]
     rels = [
@@ -540,7 +561,7 @@ function create_ventilation_and_fenestration_statistics(;
             _compact = false,
         )
     ]
-    RelationshipClass(
+    ventilation_and_fenestration_statistics = RelationshipClass(
         :ventilation_and_fenestration_statistics,
         obj_clss,
         rels,
@@ -607,4 +628,15 @@ function create_ventilation_and_fenestration_statistics(;
             ]
         ),
     )
+    # Create the associated parameters
+    params = [
+        name => Parameter(name, [ventilation_and_fenestration_statistics]) for
+        name in keys(ventilation_and_fenestration_statistics.parameter_defaults)
+    ]
+    # Evaluate the RelationshipClass and parameters to the desired `mod`
+    @eval mod ventilation_and_fenestration_statistics =
+        $ventilation_and_fenestration_statistics
+    for (name, param) in params
+        @eval mod $name = $param
+    end
 end

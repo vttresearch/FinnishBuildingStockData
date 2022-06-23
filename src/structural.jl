@@ -189,7 +189,8 @@ end
         layer::Layer,
         thickness::SpineInterface.Parameter,
         R_itp::Interpolations.Extrapolation;
-        weight::Float64=0.5
+        weight::Float64 = 0.5,
+        mod::Module = Main,
     )
 
 Calculate the thermal resistance [W/m2K] of a single homogeneous structural `layer`.
@@ -210,6 +211,7 @@ function _thermal_resistance(
     thickness::SpineInterface.Parameter,
     R_itp::Interpolations.Extrapolation;
     weight::Float64 = 0.5,
+    mod::Module = Main,
 )
     if layer.material.name == Symbol("ventilation space")
         R = R_itp(
@@ -227,7 +229,7 @@ function _thermal_resistance(
                 structure = structure,
                 layer_id = layer.id,
                 structure_material = layer.material,
-            ) * 1e-3 / thermal_conductivity(layer.material; weight = weight)
+            ) * 1e-3 / thermal_conductivity(layer.material; weight = weight, mod = mod)
         )
     end
     return R
@@ -281,6 +283,7 @@ function layer_thermal_resistance(
                     thickness,
                     R_itp;
                     weight = weight,
+                    mod = mod,
                 ) for l in layers if !isnothing(
                     thickness(
                         source = source,
