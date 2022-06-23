@@ -150,12 +150,12 @@ lids = m.location_id()[1:number_of_included_municipalities]
 @info "Creating building stock statistics"
 @time create_building_stock_statistics!(m; location_id = lids)
 @info "Creating structural statistics"
-@time structure_statistics = create_structure_statistics(;
+@time structure_statistics = create_structure_statistics!(
+    m;
     location_id = lids,
     thermal_conductivity_weight = thermal_conductivity_weight,
     interior_node_depth = interior_node_depth,
     variation_period = variation_period,
-    mod = m,
 )
 @info "Creating ventilation and fenestration statistics"
 @time ventilation_and_fenestration_statistics =
@@ -210,13 +210,13 @@ for bt in m.building_type()
         data_parameters = sort!([
             (
                 year = m.period_end(building_period = bp),
-                design_U_value = structure_statistics.parameter_values[(
+                design_U_value = m.structure_statistics.parameter_values[(
                     bt,
                     bp,
                     lid,
                     st,
                 )][:design_U_value_W_m2K].value,
-                total_U_value = structure_statistics.parameter_values[(
+                total_U_value = m.structure_statistics.parameter_values[(
                     bt,
                     bp,
                     lid,
