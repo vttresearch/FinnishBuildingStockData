@@ -47,11 +47,11 @@ Note that there is a lot of overlap between these and the [Input object classes]
 
 ## Output relationship classes
 
->`building_stock_statistics`: The final building stock statistics containing the number of buildings and average gross-floor area per building for each `(building_stock, building_type, building_period, location_id, heat_source)`, created using the [`create_building_stock_statistics`](@ref) function.
+>`building_stock_statistics`: The final building stock statistics containing the number of buildings and average gross-floor area per building for each `(building_stock, building_type, building_period, location_id, heat_source)`, created using the [`create_building_stock_statistics!`](@ref) function.
 - `average_gross_floor_area_m2_per_building`: The average gross-floor area in [m2] of buildings of `building_type`, built during `building_period` in `location_id`, heated using `heat_source` of the `building_stock` dataset.
 - `number_of_buildings`: The number of buildings of `building_type`, built during `building_period` in `location_id`, heated using `heat_source` of the `building_stock` dataset.
 
->`structure_statistics`: The processed average structural properties for each `(building_type, building_period, location_id, structure_type)`, created using the [`create_structure_statistics`](@ref) function.
+>`structure_statistics`: The processed average structural properties for each `(building_type, building_period, location_id, structure_type)`, created using the [`create_structure_statistics!`](@ref) function.
 - `design_U_W_m2K`: The average design U-value of the aggregated structures in [W/m2K].
 - `effective_thermal_mass_J_m2K`: Mean calculated effective thermal mass [J/m2K] of the structures corresponding to the statistics, per area of the structure.
 - `external_U_value_to_ambient_air_W_m2K`: Mean calculated U-value [W/m2K] from the structure into the ambient air.

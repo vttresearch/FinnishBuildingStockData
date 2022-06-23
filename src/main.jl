@@ -24,9 +24,9 @@ The arguments are used to tweak details regarding the processing:
 Essentially performs the following steps:
 1. Limit `location_id`s based on the given `num_lids`.
 2. Call [`add_building_stock_year!`](@ref) to parse years from `building_stock` names.
-3. Call [`create_building_stock_statistics`](@ref) to create processed building stock statistics.
-4. Call [`create_structure_statistics`](@ref) to create processed structural statistics.
-5. Call [`create_ventilation_and_fenestration_statistics`](@ref) to create processed ventilation and fenestration statistics.
+3. Call [`create_building_stock_statistics!`](@ref) to create processed building stock statistics.
+4. Call [`create_structure_statistics!`](@ref) to create processed structural statistics.
+5. Call [`create_ventilation_and_fenestration_statistics!`](@ref) to create processed ventilation and fenestration statistics.
 """
 function create_processed_statistics!(
     mod::Module,

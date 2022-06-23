@@ -24,10 +24,10 @@ This section lists all types and functions exported by the module.
 
 ```@docs
 add_building_stock_year!
-create_building_stock_statistics
-create_processed_statistics
-create_structure_statistics
-create_ventilation_and_fenestration_statistics
+create_building_stock_statistics!
+create_processed_statistics!
+create_structure_statistics!
+create_ventilation_and_fenestration_statistics!
 filter_entity_class!
 import_processed_data
 run_structural_tests
