@@ -25,7 +25,7 @@ export using_spinedb,
     filter_entity_class!,
     run_structural_tests,
     run_statistical_tests,
-    create_processed_statistics,
+    create_processed_statistics!,
     import_processed_data
 # Exports required for testscript
 export add_building_stock_year!,

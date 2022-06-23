@@ -43,11 +43,7 @@ else
     @time run_statistical_tests(; limit = Inf)
 
     # Process stuff
-    building_stock_year,
-    building_stock_statistics,
-    structure_statistics,
-    ventilation_and_fenestration_statistics =
-        create_processed_statistics(num_lids, tcw, ind, vp)
+    create_processed_statistics!(Main, num_lids, tcw, ind, vp)
 
     # Import processed data into the datastore at `url_out`
     import_processed_data(url_out; scramble_data = scramble_data)
