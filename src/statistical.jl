@@ -415,14 +415,14 @@ end
 
 
 """
-    create_structure_statistics(;
+    create_structure_statistics!(
+        mod::Module;
         building_type=anything,
         building_period=anything,
         location_id=anything,
         thermal_conductivity_weight::Float64,
         interior_node_depth::Float64,
         variation_period::Float64,
-        mod::Module = Main,
     )
 
 Create the `structure_statistics` `RelationshipClass` to house the structural data from `mod`.
@@ -447,14 +447,14 @@ The `RelationshipClass` stores the following structural parameters:
 - `external_U_value_to_ground_W_m2K`: U-value portion from inside the structure into the ground.
 - `internal_U_value_to_structure_W_m2K`: U-value portion from the interior air into the structure.
 """
-function create_structure_statistics(;
+function create_structure_statistics!(
+    mod::Module;
     building_type = anything,
     building_period = anything,
     location_id = anything,
     thermal_conductivity_weight::Float64,
     interior_node_depth::Float64,
     variation_period::Float64,
-    mod::Module = Main,
 )
     # Add non-load bearing wall types and a parameter to indicate this.
     is_load_bearing = _add_light_wall_types_and_is_load_bearing!(; mod = mod)
@@ -475,7 +475,7 @@ function create_structure_statistics(;
             _compact = false,
         ) for st in mod.structure_type()
     ]
-    RelationshipClass(
+    structure_statistics = RelationshipClass(
         :structure_statistics,
         obj_clss,
         rels,
@@ -497,6 +497,16 @@ function create_structure_statistics(;
             :internal_U_value_to_structure_W_m2K => parameter_value(nothing),
         ),
     )
+    # Create the associated parameters
+    params = [
+        key => Parameter(key, [structure_statistics]) for
+        key in keys(structure_statistics.parameter_defaults)
+    ]
+    # Eval the RelationshipClass and parameters to the desired `mod`
+    @eval mod structure_statistics = $structure_statistics
+    for (name, param) in params
+        @eval mod $name = $param
+    end
 end
 
 
