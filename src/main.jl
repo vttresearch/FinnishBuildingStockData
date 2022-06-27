@@ -65,14 +65,22 @@ end
 
 
 """
-    import_processed_data(url_out::String; scramble_data = false, mod::Module = Main)
+    import_processed_data(
+        url_out::String;
+        scramble_data = false,
+        mod::Module = @__MODULE__,
+    )
 
 Imports the processed data from module `mod` into the datastore at `url_out`.
 
 The `mod` keyword can be used to tweak which Module the data is accessed from.
 The `scramble_data` keyword can be used to scramble the database if needed.
 """
-function import_processed_data(url_out::String; scramble_data = false, mod::Module = Main)
+function import_processed_data(
+    url_out::String;
+    scramble_data = false,
+    mod::Module = @__MODULE__,
+)
     @info "Importing processed data into output datastore at `$(url_out)`..."
     data = [
         mod.building_period,

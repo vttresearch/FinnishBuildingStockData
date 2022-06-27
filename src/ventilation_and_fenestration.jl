@@ -10,7 +10,7 @@ This file contains functions for calculating ventilation and fenestration proper
         relationship_class::SpineInterface.RelationshipClass;
         lookback_if_empty::Int64 = 10,
         max_lookbacks::Int64 = 20;
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Finds the `source`s matching the provided `building_period` for the desired `relationship_class`.
@@ -24,7 +24,7 @@ function _filter_relevant_sources(
     relationship_class::SpineInterface.RelationshipClass;
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     unique_sources = unique(getfield.(relationship_class(), :source))
     relevant_sources = Array{Object,1}()
@@ -55,7 +55,7 @@ end
         weight::Float64=0.5,
         lookback_if_empty::Int64 = 10,
         max_lookbacks::Int64 = 20,
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Calculate the mean ventilation rate [1/h] for a `(building_period, building_type)` based on relevant raw data.
@@ -79,7 +79,7 @@ function mean_ventilation_rate(
     weight::Float64 = 0.5,
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     0 <= weight <= 1 ? nothing : @error "`weight` must be between 0 and 1!"
     relevant_sources = _filter_relevant_sources(
@@ -110,7 +110,7 @@ end
         factor_weight::Float64=0.5,
         lookback_if_empty::Int64 = 10,
         max_lookbacks::Int64 = 20,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Calculate the mean infiltration rate [1/h] for a `(building_period, building_type)` based on relevant raw data.
@@ -140,7 +140,7 @@ function mean_infiltration_rate(
     factor_weight::Float64 = 0.5,
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     0 <= n50_weight <= 1 ? nothing : @error "`n50_weight` must be between 0 and 1!"
     0 <= factor_weight <= 1 ? nothing : @error "`factor_weight` must be between 0 and 1!"
@@ -178,7 +178,7 @@ end
         weight::Float64=0.5,
         lookback_if_empty::Int64 = 10,
         max_lookbacks::Int64 = 20,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Calculate the mean Heat Recovery Unit (HRU) efficiency for a `(building_period, building_type)` based on relevant raw data.
@@ -202,7 +202,7 @@ function mean_hru_efficiency(
     weight::Float64 = 0.5,
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     0 <= weight <= 1 ? nothing : @error "`weight` must be between 0 and 1!"
     relevant_sources = _filter_relevant_sources(
@@ -231,7 +231,7 @@ end
         building_type::Object;
         lookback_if_empty::Int64 = 10,
         max_lookbacks::Int64 = 20,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Calculate the mean window U-value [W/m2K] for a `(building_period, building_type)` based on relevant raw data.
@@ -252,7 +252,7 @@ function mean_window_U_value(
     building_type::Object;
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     relevant_sources = _filter_relevant_sources(
         building_period,
@@ -277,7 +277,7 @@ end
         building_type::Object;
         lookback_if_empty::Int64 = 10,
         max_lookbacks::Int64 = 20,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Calculate the mean total normal solar energy transmittance for a `(building_period, building_type)` based on raw data.
@@ -300,7 +300,7 @@ function mean_total_normal_solar_energy_transmittance(
     building_type::Object;
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     relevant_sources = _filter_relevant_sources(
         building_period,

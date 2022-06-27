@@ -11,7 +11,7 @@ This file contains functions for processing the statistical data.
         building_period=anything,
         location_id=anything,
         heat_source=anything,
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Create the `average_gross_floor_area_m2_per_building` parameter values
@@ -31,7 +31,7 @@ function _average_gross_floor_area_m2_per_building_values(;
     building_period = anything,
     location_id = anything,
     heat_source = anything,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     average_gross_floor_area_m2_per_building_values = Dict(
         (bsy, bt, bp, lid, hs) => Dict(
@@ -210,17 +210,23 @@ end
 
 
 """
-    _map_structure_types(is_load_bearing::SpineInterface.Parameter; mod::Module = Main)
+    _map_structure_types(
+        is_load_bearing::SpineInterface.Parameter;
+        mod::Module = @__MODULE__,
+    )
 
 Maps `structure_type` to its load-bearing variant. Only `light` structures are affected.
 
-Note that this function operates in Module `mod`, set to `Main` by default!
+Note that this function operates in Module `mod`, set to `@__MODULE__` by default!
 
 Essentially, returns a `Dict` mapping each `structure_type` to itself,
 with the exception of the `light_exterior_wall` and `light_partition_wall`
 being mapped to `exterior_wall` and `partition_wall` repsectively.
 """
-function _map_structure_types(is_load_bearing::SpineInterface.Parameter; mod::Module = Main)
+function _map_structure_types(
+    is_load_bearing::SpineInterface.Parameter;
+    mod::Module = @__MODULE__,
+)
     Dict(
         st =>
             is_load_bearing(structure_type = st) ? st :
@@ -236,7 +242,7 @@ end
         thermal_conductivity_weight::Float64,
         interior_node_depth::Float64,
         variation_period::Float64,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Forms the `BuildingStructure` for each structure in Module `mod`.
@@ -251,7 +257,7 @@ function _form_building_structures(;
     thermal_conductivity_weight::Float64,
     interior_node_depth::Float64,
     variation_period::Float64,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     [
         BuildingStructure(
@@ -276,7 +282,7 @@ end
         st_map::Dict;
         lookback_if_empty::Int64 = 10,
         max_lookbacks::Int64 = 20,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Find the `BuildingStructures` matching the provided criteria from data in `mod`.
@@ -295,7 +301,7 @@ function _filter_relevant_building_structures(
     st_map::Dict;
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     n = 0
     relevant_building_structures = Array{BuildingStructure,1}()
@@ -324,7 +330,7 @@ end
         building_structures::Array{BuildingStructure,1},
         inds::NamedTuple,
         is_load_bearing::SpineInterface.Parameter;
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Aggregate the `building_structures` parameters from `mod` into a parameter value `Dict`.
@@ -351,7 +357,7 @@ function _structure_type_parameter_values(
     building_structures::Array{BuildingStructure,1},
     inds::NamedTuple,
     is_load_bearing::SpineInterface.Parameter;
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     (bt, bp, lid, st) = inds
     st_map = _map_structure_types(is_load_bearing; mod = mod)
