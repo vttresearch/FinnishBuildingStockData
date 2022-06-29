@@ -130,7 +130,7 @@ Essentially, this function performs the following steps:
 2. Calculate the mean infiltration rate [1/h] across the relevant sources as:
 
 ```math
-r_{\\text{inf,mean}} = \\frac{\\sum_{s \\in \\text{relevant sources}} w_{\\text{n50}} r_{\\text{inf,max,s}} + (1-w_{\\text{n50}}) r_{\\text{inf,min,s}}}{\\sum_{s \\in \\text{relevant sources}} w_{\\text{factor}} F_{\\text{max}} + (1-w_{\\text{factor}}) F_{\\text{min}} \\sum_{s \\in \\text{relevant sources}} 1} 
+r_{\\text{inf,mean}} = \\frac{\\sum_{s \\in \\text{relevant sources}} w_{\\text{n50}} r_{\\text{inf,max,s}} + (1-w_{\\text{n50}}) r_{\\text{inf,min,s}}}{\\sum_{s \\in \\text{relevant sources}} \\left[ w_{\\text{factor}} F_{\\text{max}} + (1-w_{\\text{factor}}) F_{\\text{min}} \\right] \\sum_{s \\in \\text{relevant sources}} 1} 
 ```
 """
 function mean_infiltration_rate(
