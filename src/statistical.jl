@@ -11,7 +11,7 @@ This file contains functions for processing the statistical data.
         building_period=anything,
         location_id=anything,
         heat_source=anything,
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Create the `average_gross_floor_area_m2_per_building` parameter values
@@ -31,7 +31,7 @@ function _average_gross_floor_area_m2_per_building_values(;
     building_period = anything,
     location_id = anything,
     heat_source = anything,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     average_gross_floor_area_m2_per_building_values = Dict(
         (bsy, bt, bp, lid, hs) => Dict(
@@ -155,19 +155,19 @@ end
 
 
 """
-    _add_light_wall_types_and_is_load_bearing!(; mod::Module = Main)
+    _add_light_wall_types_and_is_load_bearing!(mod::Module)
 
 Add new `structure_type`s for non-load-bearing exterior and partition walls,
 as well as a new parameter `is_load_bearing` for whether the structure type is load-bearing.
 
-Note that this function operates in Module `mod`, set to `Main` by default!
+Note that this function operates in Module `mod`!
 
 Essentially, all the structure types in the raw data are assumed to be load-bearing.
 This function creates the `light_exterior_wall` and `light_partition_wall`
 `structure_types` assuming identical properties to their load-bearing counterparts,
 except that the `:is_load_bearing` flag is set to `false`.
 """
-function _add_light_wall_types_and_is_load_bearing!(; mod::Module = Main)
+function _add_light_wall_types_and_is_load_bearing!(mod::Module)
     # Create new parameter
     is_load_bearing = Parameter(:is_load_bearing, [mod.structure_type])
     # Add parameter values for existing structure types
@@ -176,11 +176,18 @@ function _add_light_wall_types_and_is_load_bearing!(; mod::Module = Main)
     end
     mod.structure_type.parameter_defaults[:is_load_bearing] = parameter_value(nothing)
     # Add the new structure type objects for light structures and their "parents".
+    # NOTE! Link to pre-existing objects instead of creating new ones if possible.
     objs = [
-        Object(Symbol("light_exterior_wall")) =>
-            mod.structure_type(Symbol("exterior_wall")),
-        Object(Symbol("light_partition_wall")) =>
-            mod.structure_type(Symbol("partition_wall")),
+        (
+            isnothing(mod.structure_type(Symbol("light_exterior_wall"))) ?
+            Object(Symbol("light_exterior_wall")) :
+            mod.structure_type(Symbol("light_exterior_wall"))
+        ) => mod.structure_type(Symbol("exterior_wall")),
+        (
+            isnothing(mod.structure_type(Symbol("light_partition_wall"))) ?
+            Object(Symbol("light_partition_wall")) :
+            mod.structure_type(Symbol("light_partition_wall"))
+        ) => mod.structure_type(Symbol("partition_wall")),
     ]
     add_objects!(mod.structure_type, getfield.(objs, 1))
     # Add parameter values for the new structure types
@@ -197,22 +204,29 @@ function _add_light_wall_types_and_is_load_bearing!(; mod::Module = Main)
         mod.structure_type.parameter_values[obj][:is_internal] =
             mod.structure_type.parameter_values[parent][:is_internal]
     end
-    return is_load_bearing
+    # Eval is_load_bearing to the desired `mod`
+    @eval mod is_load_bearing = $is_load_bearing
 end
 
 
 """
-    _map_structure_types(is_load_bearing::SpineInterface.Parameter; mod::Module = Main)
+    _map_structure_types(
+        is_load_bearing::SpineInterface.Parameter;
+        mod::Module = @__MODULE__,
+    )
 
 Maps `structure_type` to its load-bearing variant. Only `light` structures are affected.
 
-Note that this function operates in Module `mod`, set to `Main` by default!
+Note that this function operates in Module `mod`, set to `@__MODULE__` by default!
 
 Essentially, returns a `Dict` mapping each `structure_type` to itself,
 with the exception of the `light_exterior_wall` and `light_partition_wall`
 being mapped to `exterior_wall` and `partition_wall` repsectively.
 """
-function _map_structure_types(is_load_bearing::SpineInterface.Parameter; mod::Module = Main)
+function _map_structure_types(
+    is_load_bearing::SpineInterface.Parameter;
+    mod::Module = @__MODULE__,
+)
     Dict(
         st =>
             is_load_bearing(structure_type = st) ? st :
@@ -228,7 +242,7 @@ end
         thermal_conductivity_weight::Float64,
         interior_node_depth::Float64,
         variation_period::Float64,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Forms the `BuildingStructure` for each structure in Module `mod`.
@@ -243,7 +257,7 @@ function _form_building_structures(;
     thermal_conductivity_weight::Float64,
     interior_node_depth::Float64,
     variation_period::Float64,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     [
         BuildingStructure(
@@ -268,7 +282,7 @@ end
         st_map::Dict;
         lookback_if_empty::Int64 = 10,
         max_lookbacks::Int64 = 20,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Find the `BuildingStructures` matching the provided criteria from data in `mod`.
@@ -287,7 +301,7 @@ function _filter_relevant_building_structures(
     st_map::Dict;
     lookback_if_empty::Int64 = 10,
     max_lookbacks::Int64 = 20,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     n = 0
     relevant_building_structures = Array{BuildingStructure,1}()
@@ -316,7 +330,7 @@ end
         building_structures::Array{BuildingStructure,1},
         inds::NamedTuple,
         is_load_bearing::SpineInterface.Parameter;
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Aggregate the `building_structures` parameters from `mod` into a parameter value `Dict`.
@@ -343,7 +357,7 @@ function _structure_type_parameter_values(
     building_structures::Array{BuildingStructure,1},
     inds::NamedTuple,
     is_load_bearing::SpineInterface.Parameter;
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     (bt, bp, lid, st) = inds
     st_map = _map_structure_types(is_load_bearing; mod = mod)
@@ -457,7 +471,7 @@ function create_structure_statistics!(
     variation_period::Float64,
 )
     # Add non-load bearing wall types and a parameter to indicate this.
-    is_load_bearing = _add_light_wall_types_and_is_load_bearing!(; mod = mod)
+    _add_light_wall_types_and_is_load_bearing!(mod)
     # Form the building structures.
     building_structures = _form_building_structures(
         thermal_conductivity_weight = thermal_conductivity_weight,
@@ -483,7 +497,7 @@ function create_structure_statistics!(
             tuple(inds...) => _structure_type_parameter_values(
                 building_structures,
                 inds,
-                is_load_bearing;
+                mod.is_load_bearing;
                 mod = mod,
             ) for inds in rels
         ),

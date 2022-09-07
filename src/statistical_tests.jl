@@ -5,11 +5,11 @@ This file contains functions used for testing the statistical inputs in the data
 =#
 
 """
-    test_building_period(;limit::Number=Inf, mod::Module = Main)
+    test_building_period(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Run tests for the `building_period` objects in Module `mod`.
 """
-function test_building_period(; limit::Number = Inf, mod::Module = Main)
+function test_building_period(; limit::Number = Inf, mod::Module = @__MODULE__)
     @testset "Testing `building_period`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :building_period) for
@@ -41,11 +41,11 @@ end
 
 
 """
-    test_building_stock(;limit::Number=Inf, mod::Module = Main)
+    test_building_stock(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Run tests for the `building_stock` objects in Module `mod`.
 """
-function test_building_stock(; limit::Number = Inf, mod::Module = Main)
+function test_building_stock(; limit::Number = Inf, mod::Module = @__MODULE__)
     @testset "Testing `building_stock`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :building_stock) for
@@ -68,11 +68,11 @@ end
 
 
 """
-    test_statistical_building_type(;limit::Number=Inf, mod::Module = Main)
+    test_statistical_building_type(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Runs statistical data tests for the `building_type` objects in Module `mod`.
 """
-function test_statistical_building_type(; limit::Number = Inf, mod::Module = Main)
+function test_statistical_building_type(; limit::Number = Inf, mod::Module = @__MODULE__)
     @testset "Testing statistical `building_type`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :building_type) for
@@ -97,11 +97,11 @@ end
 
 
 """
-    test_frame_material(;limit::Number=Inf, mod::Module = Main)
+    test_frame_material(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Runs tests for the `frame_material` objects in Module `mod`.
 """
-function test_frame_material(; limit::Number = Inf, mod::Module = Main)
+function test_frame_material(; limit::Number = Inf, mod::Module = @__MODULE__)
     @testset "Testing `frame_material`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :frame_material) for
@@ -122,11 +122,11 @@ end
 
 
 """
-    test_heat_source(;limit::Number=Inf, mod::Module = Main)
+    test_heat_source(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Runs tests for the `heat_source` objects in Module `mod`.
 """
-function test_heat_source(; limit::Number = Inf, mod::Module = Main)
+function test_heat_source(; limit::Number = Inf, mod::Module = @__MODULE__)
     @testset "Testing `heat_source`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :heat_source) for
@@ -149,11 +149,11 @@ end
 
 
 """
-    test_location_id(;limit::Number=Inf, mod::Module = Main)
+    test_location_id(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Runs tests for the `location_id` objects in Module `mod`.
 """
-function test_location_id(; limit::Number = Inf, mod::Module = Main)
+function test_location_id(; limit::Number = Inf, mod::Module = @__MODULE__)
     @testset "Testing `location_id`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :location_id) for
@@ -188,14 +188,14 @@ end
 """
     test_building_stock__building_type__building_period__location_id__heat_source(;
         limit::Number=Inf,
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Run tests for the `building_stock__building_type__building_period__location_id__heat_source` relationhip.
 """
 function test_building_stock__building_type__building_period__location_id__heat_source(;
     limit::Number = Inf,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     test_objects = [
         mod.building_stock,
@@ -254,14 +254,14 @@ end
 """
     test_building_type__location_id__building_period(;
         limit::Number=Inf,
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Run tests for the `building_type__location_id__building_period` relationship.
 """
 function test_building_type__location_id__building_period(;
     limit::Number = Inf,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     test_objects = [mod.building_type, mod.location_id, mod.building_period]
     test_relationships = [
@@ -312,14 +312,14 @@ end
 """
     test_building_type__location_id__frame_material(;
         limit::Number=Inf,
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Run tests for the `building_type__location_id__frame_material` relationship.
 """
 function test_building_type__location_id__frame_material(;
     limit::Number = Inf,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     test_objects = [mod.building_type, mod.location_id, mod.frame_material]
     test_relationships = [
@@ -380,13 +380,13 @@ end
 
 
 """
-    run_statistical_tests(;limit::Number=Inf, mod::Module = Main)
+    run_statistical_tests(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Run all statistical data tests for Module `mod`.
 
 Note that you must first open a database via `using_spinedb(db_url, mod)`.
 """
-function run_statistical_tests(; limit::Number = Inf, mod::Module = Main)
+function run_statistical_tests(; limit::Number = Inf, mod::Module = @__MODULE__)
     println("Testing statistical data")
     @testset "Statistical data tests" begin
         println("Testing `building_period`")

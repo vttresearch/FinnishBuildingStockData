@@ -8,6 +8,7 @@ processing raw building stock data into input for the archetype building stock m
 using Pkg
 Pkg.activate(@__DIR__)
 using FinnishBuildingStockData
+m = FinnishBuildingStockData
 
 # Check that necessary input arguments are provided
 if length(ARGS) < 2
@@ -36,14 +37,14 @@ else
 
     # Open input datastore and run tests.
     @info "Opening input datastore at `$(url_in)`..."
-    @time using_spinedb(url_in, Main)
+    @time using_spinedb(url_in, m)
     @info "Running structural input data tests..."
-    @time run_structural_tests(; limit = Inf)
+    @time run_structural_tests(; limit = Inf, mod = m)
     @info "Running statistical input data tests..."
-    @time run_statistical_tests(; limit = Inf)
+    @time run_statistical_tests(; limit = Inf, mod = m)
 
     # Process stuff
-    create_processed_statistics!(Main, num_lids, tcw, ind, vp)
+    create_processed_statistics!(m, num_lids, tcw, ind, vp)
 
     # Import processed data into the datastore at `url_out`
     import_processed_data(url_out; scramble_data = scramble_data)

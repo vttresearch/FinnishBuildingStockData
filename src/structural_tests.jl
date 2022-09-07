@@ -5,11 +5,11 @@ This file contains functions used for testing the structural input in the databa
 =#
 
 """
-    test_structural_building_type(;limit::Number=Inf, mod::Module = Main)
+    test_structural_building_type(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Run structural data tests for the `building_type` objects in Module `mod`.
 """
-function test_structural_building_type(; limit::Number = Inf, mod::Module = Main)
+function test_structural_building_type(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_relationships = [
         _relationship_and_unique_entries(relationship, :building_type) for
         relationship in [mod.source__structure__building_type]
@@ -30,11 +30,11 @@ end
 
 
 """
-     test_structural_frame_material(; limit::Number = Inf, mod::Module = Main)
+     test_structural_frame_material(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run structural data tests for the `frame_material` objects in Module `mod`.
 """
-function test_structural_frame_material(; limit::Number = Inf, mod::Module = Main)
+function test_structural_frame_material(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_relationships = [
         _relationship_and_unique_entries(relationship, :frame_material) for
         relationship in [mod.structure_material__frame_material]
@@ -55,11 +55,11 @@ end
 
 
 """
-    test_layer_id(;limit::Number=Inf, mod::Module = Main)
+    test_layer_id(;limit::Number=Inf, mod::Module = @__MODULE__)
 
 Run tests for the `layer_id` objects in Module `mod`.
 """
-function test_layer_id(; limit::Number = Inf, mod::Module = Main)
+function test_layer_id(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_relationships = [
         _relationship_and_unique_entries(relationship, :layer_id) for
         relationship in [mod.source__structure__layer_id__structure_material]
@@ -80,11 +80,11 @@ end
 
 
 """
-    test_source(; limit::Number=Inf, mod::Module = Main)
+    test_source(; limit::Number=Inf, mod::Module = @__MODULE__)
 
 Run tests for the `source` objects in Module `mod`.
 """
-function test_source(; limit::Number = Inf, mod::Module = Main)
+function test_source(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_relationships = []
     #= Cannot be tested like this after including fenestration and ventilation sources...
     _relationship_and_unique_entries(relationship, :source)
@@ -117,11 +117,11 @@ end
 
 
 """
-    test_structure(; limit::Number = Inf, mod::Module = Main)
+    test_structure(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Tun tests for the `structure` objects in Module `mod`.
 """
-function test_structure(; limit::Number = Inf, mod::Module = Main)
+function test_structure(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_relationships = [
         _relationship_and_unique_entries(relationship, :structure) for relationship in [
             mod.source__structure,
@@ -146,11 +146,11 @@ end
 
 
 """
-    test_structure_material(; limit::Number = Inf, mod::Module = Main)
+    test_structure_material(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests for the `structure_material` objects in Module `mod`.
 """
-function test_structure_material(; limit::Number = Inf, mod::Module = Main)
+function test_structure_material(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_relationships = [
         _relationship_and_unique_entries(relationship, :structure_material) for
         relationship in [
@@ -208,11 +208,11 @@ end
 
 
 """
-    test_structure_type(; limit::Number = Inf, mod::Module = Main)
+    test_structure_type(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests for the `structure_type` objects in Module `mod`.
 """
-function test_structure_type(; limit::Number = Inf, mod::Module = Main)
+function test_structure_type(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_relationships = [
         _relationship_and_unique_entries(relationship, :structure_type) for
         relationship in [
@@ -252,14 +252,14 @@ end
 """
     test_ventilation_space_heat_flow_direction(;
         limit::Number = Inf,
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Run tests for the `ventilation_space_heat_flow_direction` objects in `mod`.
 """
 function test_ventilation_space_heat_flow_direction(;
     limit::Number = Inf,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     test_relationships = [
         _relationship_and_unique_entries(
@@ -292,11 +292,14 @@ end
 
 
 """
-    test_fenestration_source__building_type(; limit::Number = Inf, mod::Module = Main)
+    test_fenestration_source__building_type(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests for the `fenestration_source__building_type` relationships in Module `mod`.
 """
-function test_fenestration_source__building_type(; limit::Number = Inf, mod::Module = Main)
+function test_fenestration_source__building_type(;
+    limit::Number = Inf,
+    mod::Module = @__MODULE__,
+)
     test_objects = [mod.source, mod.building_type]
     test_parameters = [
         mod.U_value_W_m2K => Real,
@@ -331,11 +334,11 @@ end
 
 
 """
-    test_source__structure(; limit::Number = Inf, mod::Module = Main)
+    test_source__structure(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests for the `source__structure` relationships in Module `mod`.
 """
-function test_source__structure(; limit::Number = Inf, mod::Module = Main)
+function test_source__structure(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_objects = [mod.source, mod.structure]
     test_relationships = []
     #= # These cannot be included due to some structures being cold/basement.
@@ -375,11 +378,14 @@ end
 
 
 """
-    test_source__structure__building_type(; limit::Number = Inf, mod::Module = Main)
+    test_source__structure__building_type(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests for the `source__structure__building_type` relationships in Module `mod`.
 """
-function test_source__structure__building_type(; limit::Number = Inf, mod::Module = Main)
+function test_source__structure__building_type(;
+    limit::Number = Inf,
+    mod::Module = @__MODULE__,
+)
     test_objects = [mod.source, mod.structure, mod.building_type]
     test_relationships = [
         _relationship_and_unique_entries(mod.source__structure, (:source, :structure)),
@@ -418,14 +424,14 @@ end
 """
     test_source__structure__layer_id__structure_material(;
         limit::Number = Inf,
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Run tests for the `source__structure__layer_id__structure_material` relationship in Module `mod`.
 """
 function test_source__structure__layer_id__structure_material(;
     limit::Number = Inf,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     test_objects = [mod.source, mod.structure, mod.layer_id, mod.structure_material]
     test_relationships = [
@@ -499,11 +505,11 @@ end
 
 
 """
-    test_structure__structure_type(; limit::Number = Inf, mod::Module = Main)
+    test_structure__structure_type(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests for the `structure__structure_type` relationships in Module `mod`.
 """
-function test_structure__structure_type(; limit::Number = Inf, mod::Module = Main)
+function test_structure__structure_type(; limit::Number = Inf, mod::Module = @__MODULE__)
     test_objects = [mod.structure, mod.structure_type]
     @testset "Testing `structure__structure_type`" begin
         for (index, inds) in enumerate(mod.structure__structure_type())
@@ -525,11 +531,14 @@ end
 
 
 """
-    test_structure_material__frame_material(; limit::Number = Inf, mod::Module = Main)
+    test_structure_material__frame_material(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests for the `structure_material__frame_material` relationships in Module `mod`.
 """
-function test_structure_material__frame_material(; limit::Number = Inf, mod::Module = Main)
+function test_structure_material__frame_material(;
+    limit::Number = Inf,
+    mod::Module = @__MODULE__,
+)
     test_objects = [mod.structure_material, mod.frame_material]
     @testset "Testing `structure_material__frame_material`" begin
         for (index, inds) in enumerate(mod.structure_material__frame_material())
@@ -553,7 +562,7 @@ end
 """
     test_structure_type__ventilation_space_heat_flow_direction(;
         limit::Number = Inf,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Run tests for the `structure_type__ventilation_space_heat_flow_direction`
@@ -561,7 +570,7 @@ relationship in Module `mod`.
 """
 function test_structure_type__ventilation_space_heat_flow_direction(;
     limit::Number = Inf,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     test_objects = [mod.structure_type, mod.ventilation_space_heat_flow_direction]
     @testset "Testing `structure_type__ventilation_space_heat_flow_direction`" begin
@@ -585,11 +594,14 @@ end
 
 
 """
-    test_ventilation_source__building_type(; limit::Number = Inf, mod::Module = Main)
+    test_ventilation_source__building_type(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests for the `ventilation_source__building_type` relationships in Module `mod`.
 """
-function test_ventilation_source__building_type(; limit::Number = Inf, mod::Module = Main)
+function test_ventilation_source__building_type(;
+    limit::Number = Inf,
+    mod::Module = @__MODULE__,
+)
     test_objects = [mod.source, mod.building_type]
     test_parameters = [
         mod.max_HRU_efficiency => Real,
@@ -629,7 +641,7 @@ end
 
 
 """
-    test_structural_layers(; limit::Number = Inf, mod::Module = Main)
+    test_structural_layers(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run tests in Module `mod` to ensure the structural layers are sensible.
 
@@ -637,7 +649,7 @@ Essentially, this means checking that the `layer_number` are continuous, the zer
 `load-bering structure` or `thermal insulation`, and that the `layer_weight`s sum to ≈ 1 for potentially
 overlapping layers (meaning those with identical `layer_number`).
 """
-function test_structural_layers(; limit::Number = Inf, mod::Module = Main)
+function test_structural_layers(; limit::Number = Inf, mod::Module = @__MODULE__)
     zero_tags = [Symbol("load-bearing structure"), Symbol("thermal insulation")]
     inner_tags = [Symbol("interior finish")]
     outer_tags = [Symbol("exterior finish"), Symbol("ground")]
@@ -749,13 +761,13 @@ end
 
 
 """
-    run_structural_tests(; limit::Number = Inf, mod::Module = Main)
+    run_structural_tests(; limit::Number = Inf, mod::Module = @__MODULE__)
 
 Run all structural data tests for Module `mod`.
 
 Note that you must first open a database via `using_spinedb(db_url, mod)`!
 """
-function run_structural_tests(; limit::Number = Inf, mod::Module = Main)
+function run_structural_tests(; limit::Number = Inf, mod::Module = @__MODULE__)
     println("Testing structural data")
     @testset "Structural data tests" begin
         println("Testing structural `building_type`")

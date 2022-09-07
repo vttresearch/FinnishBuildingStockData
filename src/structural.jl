@@ -90,11 +90,15 @@ end
 
 
 """
-    total_building_type_weight(source::Object, structure::Object; mod::Module = Main)
+    total_building_type_weight(source::Object, structure::Object; mod::Module = @__MODULE__)
 
 Return the total `building_type_weight` of the `structure` from `mod`, 0 if not applicable.
 """
-function total_building_type_weight(source::Object, structure::Object; mod::Module = Main)
+function total_building_type_weight(
+    source::Object,
+    structure::Object;
+    mod::Module = @__MODULE__,
+)
     reduce(
         +,
         mod.building_type_weight(
@@ -116,14 +120,14 @@ end
 
 
 """
-    order_layers(source::Object, structure::Object; mod::Module = Main)
+    order_layers(source::Object, structure::Object; mod::Module = @__MODULE__)
 
 Order the structural layers of `(source, structure)` from `mod` according to the `layer_number`s.
 
 Returns an array of [`Layer`](@ref)s, sorted according to the `layer_number` parameter,
 as well as the unique array of `layer_number`s.
 """
-function order_layers(source::Object, structure::Object; mod::Module = Main)
+function order_layers(source::Object, structure::Object; mod::Module = @__MODULE__)
     layers = sort([
         Layer(
             Int(
@@ -155,14 +159,14 @@ end
 
 
 """
-    isloadbearing(source::Object, structure::Object; mod::Module = Main)
+    isloadbearing(source::Object, structure::Object; mod::Module = @__MODULE__)
 
 Check if `structure` from `mod` can be load-bearing and return a `Bool`.
 
 A `structure` is interpreted as potentially load-bearing,
 if any of its layers has a `layer_load_bearing_thickness_mm` value in the raw input data.
 """
-function isloadbearing(source::Object, structure::Object; mod::Module = Main)
+function isloadbearing(source::Object, structure::Object; mod::Module = @__MODULE__)
     loadbearing =
         !all(
             isnothing.(
@@ -190,7 +194,7 @@ end
         thickness::SpineInterface.Parameter,
         R_itp::Interpolations.Extrapolation;
         weight::Float64 = 0.5,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Calculate the thermal resistance [W/m2K] of a single homogeneous structural `layer`.
@@ -211,7 +215,7 @@ function _thermal_resistance(
     thickness::SpineInterface.Parameter,
     R_itp::Interpolations.Extrapolation;
     weight::Float64 = 0.5,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     if layer.material.name == Symbol("ventilation space")
         R = R_itp(
@@ -243,7 +247,7 @@ end
         layers::Array{Layer,1},
         R_itp::Interpolations.Extrapolation;
         weight::Float64 = 0.5
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Calculate the thermal resistance [m2K/W] of a potentially heterogeneous structural layer as:
@@ -263,7 +267,7 @@ function layer_thermal_resistance(
     layers::Array{Layer,1},
     R_itp::Interpolations.Extrapolation;
     weight::Float64 = 0.5,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     thicknesses = [mod.layer_minimum_thickness_mm, mod.layer_load_bearing_thickness_mm]
     R = zeros(length(thicknesses))
@@ -307,7 +311,7 @@ end
         source::Object,
         structure::Object,
         layers::Array{Layer,1};
-        mod::Module = Main
+        mod::Module = @__MODULE__
     )
 
 Calculate the effective heat capacity [J/m2K] of a potentially heterogeneous structural layer as:
@@ -324,7 +328,7 @@ function layer_heat_capacity(
     source::Object,
     structure::Object,
     layers::Array{Layer,1};
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     thicknesses = [mod.layer_minimum_thickness_mm, mod.layer_load_bearing_thickness_mm]
     C = zeros(length(thicknesses))
@@ -370,7 +374,7 @@ end
         structure::Object,
         R_itp::Interpolations.Extrapolation;
         thermal_conductivity_weight::Float64
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Calculate the properties of the structural layers while combining overlapping layers.
@@ -392,7 +396,7 @@ function layers_with_properties(
     structure::Object,
     R_itp::Interpolations.Extrapolation;
     thermal_conductivity_weight::Float64,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     # Order and find important layers and load-bearing material.
     layers, layer_numbers = order_layers(source, structure; mod = mod)
@@ -496,7 +500,7 @@ end
         thermal_conductivity_weight::Float64,
         interior_node_depth::Float64,
         variation_period::Float64,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
 
 Calculate the properties of `(source, structure)` from `mod` based on the raw structural data.
@@ -545,7 +549,7 @@ function calculate_structure_properties(
     thermal_conductivity_weight::Float64,
     interior_node_depth::Float64,
     variation_period::Float64,
-    mod::Module = Main,
+    mod::Module = @__MODULE__,
 )
     # Fetch the structure type
     typ = first(mod.structure__structure_type(structure = structure))
@@ -716,7 +720,7 @@ struct BuildingStructure
         thermal_conductivity_weight::Float64,
         interior_node_depth::Float64,
         variation_period::Float64,
-        mod::Module = Main,
+        mod::Module = @__MODULE__,
     )
         name = Symbol(string(source.name) * ":" * string(structure.name))
         type = first(mod.structure__structure_type(structure = structure))
