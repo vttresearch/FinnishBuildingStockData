@@ -17,9 +17,9 @@ using Statistics
 m = Module()
 number_of_included_municipalities = Inf
 scramble_data = false
-thermal_conductivity_weight = 1 / 2
-interior_node_depth = 1 / 3
-variation_period = 5.0 * 24 * 60 * 60
+thermal_conductivity_weight = 0.5
+interior_node_depth = 0.1
+variation_period = 26.0 * 24 * 60 * 60
 
 
 ## Open database
