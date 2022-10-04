@@ -450,6 +450,8 @@ The calculation is based on the simple method proposed by K.Kissock in:
 where:
 - `Rf` stands for the total thermal resistance of the floor structures.
 - `Rp` stands for the additional ground perimeter insulation thermal resistance (assumed 0 since no data).
+Note that the correction factor `C` can only be taken into account later on,
+when the dimensions of the building are known!
 """
 function calculate_ground_resistance_m2K_W(Rf::Float64, Rp::Float64)
     Float64(1.0 / (0.114 / (0.7044 + Rf + Rp) + 0.8768 / (2.818 + Rf)))

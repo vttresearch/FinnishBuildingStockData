@@ -20,9 +20,9 @@ Furthermore, the following keyword arguments can be used to tweak how the data i
 
 3. `scramble=<false>`: If set to `true`, will scramble all data in the Datastore.
 4. `num_lids=<Inf>`: Can be used to set a maximum number of `location_id`s when processing the data for testing purposes.
-5. `thermal_conductivity_weight=<1/2>`: Can be used to tweak hot the thermal conductivity data is sampled for the `structure_material`s. The default value corresponds to the average of the minimum and maximum values in the input data.
-6. `interior_node_depth=<1/3>`: Assumption regarding how deep the temperature node is located into the structures. The value indicates the depth as a fraction of the total thermal resistance between the interior surface of the structure, and the middle of the primary thermal insulation layer.
-7. `variation_period=<432000>`: *Period of variations* as defined in EN ISO 13786:2017 Annex C. 5 days in second by default, based on EUReCA and IDA ESBO calibrations.
+5. `thermal_conductivity_weight=<0.5>`: Can be used to tweak hot the thermal conductivity data is sampled for the `structure_material`s. The default value corresponds to the average of the minimum and maximum values in the input data.
+6. `interior_node_depth=<0.1>`: Assumption regarding how deep the temperature node is located into the structures. The value indicates the depth as a fraction of the total thermal resistance between the interior surface of the structure, and the middle of the primary thermal insulation layer. The default value is based on the calibrations performed in the [manuscript](https://cris.vtt.fi/en/publications/sensitivity-of-a-simple-lumped-capacitance-building-thermal-model).
+7. `variation_period=<2225140>`: *Period of variations* as defined in EN ISO 13786:2017 Annex C. Default equals to roughly 26 days in seconds, and is based on the calibrations performed in the [manuscript](https://cris.vtt.fi/en/publications/sensitivity-of-a-simple-lumped-capacitance-building-thermal-model).
 
 
 ## Main program workflow
