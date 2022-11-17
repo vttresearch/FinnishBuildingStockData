@@ -1,5 +1,8 @@
 # FinnishBuildingStockData.jl
 
+[![documentation](https://img.shields.io/badge/documentation-latest-blue)](https://vttresearch.github.io/FinnishBuildingStockData/)
+[![license](https://img.shields.io/badge/license-MIT-brightgreen)](https://mit-license.org/)
+
 A Julia module for processing Finnish building stock data.
 Takes building stock structural data in
 [*Finnish building stock default structural data*](http://urn.fi/urn:nbn:fi:att:6c6697fc-c601-40b7-a1c9-ad85b0423d38),
