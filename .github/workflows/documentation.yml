@@ -1,0 +1,11 @@
+name: auto-build-documentation
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-docs:
+    runs-on: windows-latest
+    steps:
+      - run: git switch gh-pages
+      - run: auto_update_documentation.bat
