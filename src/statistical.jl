@@ -260,10 +260,10 @@ end
         mod::Module = @__MODULE__,
     )
 
-Forms the `BuildingStructure` for each structure in Module `mod`.
+Forms the [`BuildingStructure`](@ref) for each structure in Module `mod`.
 
 Essentially, loops over each `(source, structure)` in the raw input data,
-and creates a corresponding `BuildingStructure` using the desired properties.
+and creates a corresponding [`BuildingStructure`](@ref) using the desired properties.
 The keywords can be used to tweak material properties between their min and max values.
 Note that only structures with [`total_building_type_weight`](@ref)
 greater than zero are handled to avoid unnecessary calculations.
@@ -464,7 +464,7 @@ and `variation_period` affects the effective thermal mass accounting for surface
 
 Essentially, this function performs the following steps:
 1. Creates the `is_load_bearing` parameter via [`_add_light_wall_types_and_is_load_bearing!`](@ref)
-2. Forms all `BuildingStructures` using [`_form_building_structures`](@ref)
+2. Forms all [`BuildingStructure`](@ref)s using [`_form_building_structures`](@ref)
 3. Creates and returns the `structure_statistics` `RelationshipClass`, with its parameters calculated using [`_structure_type_parameter_values`](@ref)
 
 The `RelationshipClass` stores the following structural parameters:
