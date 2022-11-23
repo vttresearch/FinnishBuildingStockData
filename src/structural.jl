@@ -163,7 +163,7 @@ end
 
 Check if `structure` from `mod` can be load-bearing and return a `Bool`.
 
-A `structure` is interpreted as potentially load-bearing,
+A `structure` is interpreted as potentially load-bearing
 if any of its layers has a `layer_load_bearing_thickness_mm` value in the raw input data.
 """
 function isloadbearing(source::Object, structure::Object; mod::Module = @__MODULE__)
@@ -418,6 +418,7 @@ function layers_with_properties(
     catch
         -1
     end
+
     # Process layers
     layers_with_properties = Array{PropertyLayer,1}()
     for num in layer_numbers
@@ -444,6 +445,10 @@ end
     calculate_ground_resistance_m2K_W(Rf::Float64, Rp::Float64)
 
 Calculate the effective ground thermal resistance [m2K/W].
+
+```math
+R_g = \\left( \\frac{0.114}{0.7044 + R_f + R_p} + \\frac{0.8768}{2.818 + R_f} \\right)^{-1}
+```
 
 The calculation is based on the simple method proposed by K.Kissock in:
 `Simplified Model for Ground Heat Transfer from Slab-on-Grade Buildings, (c) 2013 ASHRAE`,
@@ -543,7 +548,10 @@ Essentially, this function performs the following steps:
 2. Calculate the properties of the structural layers using [`layers_with_properties`](@ref).
 3. Check if the structure can be load-bearing using [`isloadbearing`](@ref).
 4. Calculate the total effective thermal mass of the structure by summing the effective thermal mass of the interior layers.
-5. Calculate the thermal resistances and U-values both through the structure, as well as within the structure, while accounting for surface resistances in the raw input data.
+5. Call [`account_for_surface_resistance_in_effective_thermal_mass`](@ref) with the assumed `variation_period`.
+6. Call [`calculate_ground_resistance_m2K_W`](@ref) using the method by Kissock et al. 2013.
+7. Calculate the thermal resistances for the different parts of the structure, accounting for surface resistances and the assumed `interior_node_depth`.
+8. Calculate the final U-values for the different parts of the structure based on the above thermal resistances.
 """
 function calculate_structure_properties(
     source::Object,
@@ -555,6 +563,7 @@ function calculate_structure_properties(
 )
     # Fetch the structure type
     typ = first(mod.structure__structure_type(structure = structure))
+
     # Form the linear interpolator for the thermal resistance of potential ventilation spaces in the structure.
     R_map = mod.thermal_resistance_m2K_W(
         ventilation_space_heat_flow_direction = first(
@@ -566,6 +575,7 @@ function calculate_structure_properties(
         map(v -> v.value, R_map.values);
         extrapolation_bc = Flat(),
     )
+
     # Calculate properties of the structural layers and form layer sets of particular interest.
     load_bearing_materials, layers = layers_with_properties(
         source,
@@ -577,8 +587,10 @@ function calculate_structure_properties(
     layer_tiers = [:interior, :exterior, :ground]
     layer_dict =
         Dict(tier => filter(l -> getproperty(l, tier), layers) for tier in layer_tiers)
+
     # Check if the structure can be load-bearing
     loadbearing = isloadbearing(source, structure; mod = mod)
+
     # Calculate the total effective thermal mass of the structure
     C = Property(
         sum(layer_number_weight(l) * l.C.min for l in layer_dict[:interior]),
@@ -589,6 +601,7 @@ function calculate_structure_properties(
         mod.interior_resistance_m2K_W(structure_type = typ),
         variation_period,
     )
+
     # If structure is internal, need to account for the "exterior" layers as well.
     if mod.is_internal(
         structure_type = first(mod.structure__structure_type(structure = structure)),
@@ -604,6 +617,7 @@ function calculate_structure_properties(
         )
         C += C_ext
     end
+
     # Calculate the base thermal resistances [m2K/W] of the different parts of the structure.
     R_dict = Dict{Symbol,Property}(
         tier => Property(
@@ -611,6 +625,7 @@ function calculate_structure_properties(
             sum(layer_number_weight(l) * l.R.loadbearing for l in layer_dict[tier]),
         ) for tier in layer_tiers if !isempty(layer_dict[tier])
     )
+
     # Include surface resistances and tweak the "depth" of the structure node.
     # Exterior resistance with partial interior resistance due to depth of the interior node
     if haskey(R_dict, :exterior)
@@ -618,6 +633,7 @@ function calculate_structure_properties(
             mod.exterior_resistance_m2K_W(structure_type = typ) +
             (1 - interior_node_depth) * R_dict[:interior]
     end
+
     # Calculate the effective ground thermal resistance according to Kissock2013, interior node depth accounted for.
     if haskey(R_dict, :ground)
         R_dict[:ground].min = (
@@ -637,11 +653,13 @@ function calculate_structure_properties(
             ) - interior_node_depth * R_dict[:interior].loadbearing
         )
     end
+
     # Modify the interior node depth and include interior surface resistance.
     if haskey(R_dict, :interior)
         R_dict[:interior] *= interior_node_depth
         R_dict[:interior] += mod.interior_resistance_m2K_W(structure_type = typ)
     end
+
     # Scale the `:exterior` and `:ground` parallel thermal resistances based on their respective U-values.
     inf_tuple = (min = Inf, loadbearing = Inf)
     for tier in [:exterior, :ground]
@@ -660,11 +678,13 @@ function calculate_structure_properties(
             )
         end
     end
+
     # Calculate the U-values [W/m2K] for different parts of the structure.
     U_dict = Dict{Symbol,Property}(
         tier => Property(1.0 / R_dict[tier].min, 1.0 / R_dict[tier].loadbearing) for
         tier in layer_tiers if !isempty(layer_dict[tier])
     )
+
     # Calculate the total U-value [W/m2K] through the entire structure.
     U_dict[:total] = Property(
         1.0 / (
@@ -696,13 +716,18 @@ Contains the following fields:
 2. `type::Object`: The type of the structure, e.g. `exterior_wall`, `roof`, or `light_partition_wall`.
 3. `year::Float64`: Year of the `source` including this structure, after which the structure is assumed to be in use.
 4. `internal::Bool`: A flag indicating whether the structure is an internal structure, as opposed to envelope structures.
-5. `loadbearing::Bool` A flag indicating whether the structure can be load-bearing. Determined via [`calculate_structure_properties`](@ref).
-6. `load_bearing_materials::Array{Object,1}`: An array of the load-bearing materials used in this structure. Determined via [`calculate_structure_properties`](@ref).
+5. `loadbearing::Bool` A flag indicating whether the structure can be load-bearing.
+6. `load_bearing_materials::Array{Object,1}`: An array of the load-bearing materials used in this structure.
 7. `design_U_value::Property`: The original design U-value [W/m2K] of the structure in the raw input data.
-8. `U_value_dict::Dict{Symbol,Property}`: Holds all the different U-values [W/m2K] calcualted by [`calculate_structure_properties`](@ref).
-9. `effective_thermal_mass::Property`: Effective thermal mass of the structure [J/m2K], determined via [`calculate_structure_properties`](@ref).
+8. `U_value_dict::Dict{Symbol,Property}`: Holds all the different U-values [W/m2K] between the ambient, structural, and interior air nodes.
+9. `effective_thermal_mass::Property`: Effective thermal mass of the structure [J/m2K].
 10. `linear_thermal_bridges::Property`: Linear thermal bridges [W/mK] of the structure based on raw input data.
 11. `building_types::Array{Object,1}`: List of `building_type`s employing this structure.
+
+The constructor essentially performs the following steps:
+1. Define the `name`, `type`, `year`, `internal`, `design_U_value`, `linear_thermal_bridges`, and `building_types` based on raw input data.
+2. Determine the `loadbearing`, `load_bearing_materials`, `effective_thermal_mass`, and `U_value_dict` via the [`calculate_structure_properties`](@ref) function.
+3. Create the final `BuildingStructure`.
 """
 struct BuildingStructure
     name::Symbol
@@ -724,23 +749,17 @@ struct BuildingStructure
         variation_period::Float64,
         mod::Module = @__MODULE__,
     )
+        # Determine some base properties of the structure based on raw input data.
         name = Symbol(string(source.name) * ":" * string(structure.name))
         type = first(mod.structure__structure_type(structure = structure))
         year = mod.source_year(source = source)
         internal = mod.is_internal(structure_type = type)
         design_U_value =
             Property(mod.design_U_W_m2K(source = source, structure = structure))
-        loadbearing, load_bearing_materials, effective_thermal_mass, U_value_dict =
-            calculate_structure_properties(
-                source,
-                structure;
-                thermal_conductivity_weight = thermal_conductivity_weight,
-                interior_node_depth = interior_node_depth,
-                variation_period = variation_period,
-                mod = mod,
-            )
         linear_thermal_bridges =
             Property(mod.linear_thermal_bridge_W_mK(structure_type = type))
+
+        # Determine the building types this structure is applicable for.
         building_types = [
             building_type for building_type in mod.source__structure__building_type(
                 source = source,
@@ -758,6 +777,19 @@ struct BuildingStructure
                 building_type = building_type,
             ) > 0
         ]
+
+        # Calculate the technical properties of the structure.
+        loadbearing, load_bearing_materials, effective_thermal_mass, U_value_dict =
+            calculate_structure_properties(
+                source,
+                structure;
+                thermal_conductivity_weight = thermal_conductivity_weight,
+                interior_node_depth = interior_node_depth,
+                variation_period = variation_period,
+                mod = mod,
+            )
+
+        # Create the final `BuildingStructure` struct
         new(
             name,
             type,
