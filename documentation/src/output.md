@@ -60,7 +60,7 @@ Note that there is a lot of overlap between these and the [Input object classes]
 - `linear_thermal_bridges_W_mK`: Mean linear thermal bridges [W/mK] of the seams between structures.
 - `total_U_value_W_m2K`: Mean total effective U-value [W/m2K] of the structure, from the interior air into the ambient air/ground.
 
->`ventilation_and_fenestration_statistics`: The processed averate ventilation and fenestration properties for each `(building_type, building_period, location_id)`.
+>`ventilation_and_fenestration_statistics`: The processed average ventilation and fenestration properties for each `(building_type, building_period, location_id)`.
 - `HRU_efficiency`: Mean heat-recovery efficiency of ventilation heat-recovery units.
 - `infiltration_rate_1_h`: Mean infiltration air change rate [1/h].
 - `total_normal_solar_energy_transmittance`: Mean total normal solar energy transmittance of windows accounting for the effect of the frame-area fraction.
