@@ -57,7 +57,8 @@ end
 
 
 """
-    create_building_stock_statistics!(mod::Module;
+    create_building_stock_statistics!(
+        mod::Module;
         building_stock=anything,
         building_type=anything,
         building_period=anything,
@@ -72,6 +73,16 @@ but with some renaming to make the data more flexible.
 Furthermore, includes the `average_floor_area_m2` data as well.
 Optional keyword arguments can be used to limit the scope of the calculations,
 and the `mod` keyword is used to tweak the Module scope of the calculations.
+
+Essentially, performs the following steps:
+1. Include the filtered `building_stock__building_type__building_period__location_id__heat_source` raw input data relationships.
+2. Merge the [`filtered_parameter_values`](@ref) with the [`_average_gross_floor_area_m2_per_building_values`](@ref) for the relationships.
+3. Set the default value of `average_gross_floor_area_m2_per_building` to `NothingParameterValue`.
+4. Create the SpineInterface `Parameter`s for `number_of_buildings` and `average_gross_floor_area_m2_per_building`.
+5. Evaluate `building_stock_statistics` and the associated parameters into the desired `mod`.
+
+**NOTE!** Due to lacking input data, the average gross floor area per
+building is assumed independent of `building_stock` and `heat_source`.
 """
 function create_building_stock_statistics!(
     mod::Module;
@@ -81,8 +92,10 @@ function create_building_stock_statistics!(
     location_id = anything,
     heat_source = anything,
 )
+    # Define object classes for the relationship class
     object_class_names =
         [:building_stock, :building_type, :building_period, :location_id, :heat_source]
+    # Create the `building_stock_statistics` relationship class based on raw input.
     building_stock_statistics = RelationshipClass(
         :building_stock_statistics,
         object_class_names,
@@ -94,6 +107,7 @@ function create_building_stock_statistics!(
             heat_source = heat_source;
             _compact = false,
         ),
+        # Merge filtered `number_of_buildings` with filtered `average_gross_floor_area_m2_per_building`.
         mergewith(
             merge,
             filtered_parameter_values(
@@ -113,6 +127,7 @@ function create_building_stock_statistics!(
                 mod = mod,
             ),
         ),
+        # Define parameter defaults.
         merge(
             mod.building_stock__building_type__building_period__location_id__heat_source.parameter_defaults,
             Dict(:average_gross_floor_area_m2_per_building => parameter_value(nothing)),
