@@ -548,7 +548,7 @@ Essentially, this function performs the following steps:
 2. Calculate the properties of the structural layers using [`layers_with_properties`](@ref).
 3. Check if the structure can be load-bearing using [`isloadbearing`](@ref).
 4. Calculate the total effective thermal mass of the structure by summing the effective thermal mass of the interior layers.
-5. Call [`account_for_surface_resistance_in_effective_thermal_mass`](@ref) with the assumed `variation_period`.
+5. Call [`account_for_surface_resistance_in_effective_thermal_mass!`](@ref) with the assumed `variation_period`.
 6. Call [`calculate_ground_resistance_m2K_W`](@ref) using the method by Kissock et al. 2013.
 7. Calculate the thermal resistances for the different parts of the structure, accounting for surface resistances and the assumed `interior_node_depth`.
 8. Calculate the final U-values for the different parts of the structure based on the above thermal resistances.
