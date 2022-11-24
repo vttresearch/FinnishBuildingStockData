@@ -766,6 +766,11 @@ end
 Run all structural data tests for Module `mod`.
 
 Note that you must first open a database via `using_spinedb(db_url, mod)`!
+
+Essentially, this function scans through the structural input data and ensures
+that there are no missing values or values of the incorrect type.
+For some parameters, the tests also check whether the given values are *reasonable*,
+in an attempt to avoid blatant input data mistakes.
 """
 function run_structural_tests(; limit::Number = Inf, mod::Module = @__MODULE__)
     println("Testing structural data")

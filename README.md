@@ -1,7 +1,10 @@
 # FinnishBuildingStockData.jl
 
+[![documentation](https://img.shields.io/badge/documentation-latest-blue)](https://vttresearch.github.io/FinnishBuildingStockData/)
+[![license](https://img.shields.io/badge/license-MIT-brightgreen)](https://mit-license.org/)
+
 A Julia module for processing Finnish building stock data.
-Takes building stock structural data in
+Originally designed for the building stock structural data in
 [*Finnish building stock default structural data*](http://urn.fi/urn:nbn:fi:att:6c6697fc-c601-40b7-a1c9-ad85b0423d38),
 as well as the optional detailed data in
 [*Finnish building stock detailed RT-card structural data*](http://urn.fi/urn:nbn:fi:att:61b72dc7-2e51-4598-bd65-95b099fabd0c),
@@ -56,12 +59,8 @@ However, this is only necessary for more advanced usage.
 
 [Online documentation is hosted here](https://vttresearch.github.io/FinnishBuildingStockData/),
 but so far I haven't bothered to set up automatic workflows for keeping it up to date.
-Thus, for accessing the newest documentation, one has to build it locally.
-
-The source for the documentation is included in the repository under the `documentation` folder,
-but is not hosted online at the moment.
-In order to build and read the documentation locally,
-start a Julia REPL from the root folder of this module and perform the following steps:
+Thus, for accessing the newest documentation, one has to build it locally
+by performing the following steps:
 
 1. Activate the `documentation` environment from the Julia Package manager
 ```julia
