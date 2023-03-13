@@ -1,7 +1,7 @@
 name = "FinnishBuildingStockData"
 uuid = "e9c5a5b1-9140-4320-a2af-ba1393a35d40"
 authors = ["Topi Rasku <topi.rasku@vtt.fi>"]
-version = "1.2.0"
+version = "1.2.1"
 
 [deps]
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
