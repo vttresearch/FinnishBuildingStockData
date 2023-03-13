@@ -572,7 +572,7 @@ function calculate_structure_properties(
     )
     R_ventilation_space = LinearInterpolation(
         R_map.indexes,
-        map(v -> v.value, R_map.values);
+        R_map.values;
         extrapolation_bc = Flat(),
     )
 
