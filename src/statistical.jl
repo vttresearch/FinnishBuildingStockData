@@ -77,7 +77,7 @@ and the `mod` keyword is used to tweak the Module scope of the calculations.
 Essentially, performs the following steps:
 1. Include the filtered `building_stock__building_type__building_period__location_id__heat_source` raw input data relationships.
 2. Merge the [`filtered_parameter_values`](@ref) with the [`_average_gross_floor_area_m2_per_building_values`](@ref) for the relationships.
-3. Set the default value of `average_gross_floor_area_m2_per_building` to `NothingParameterValue`.
+3. Set an empty default value for `average_gross_floor_area_m2_per_building`.
 4. Create the SpineInterface `Parameter`s for `number_of_buildings` and `average_gross_floor_area_m2_per_building`.
 5. Evaluate `building_stock_statistics` and the associated parameters into the desired `mod`.
 

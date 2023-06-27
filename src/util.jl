@@ -31,14 +31,12 @@ _scramble_value(val::Array) = _scramble_parameter_value.(val)
 
 
 """
-    _scramble_parameter_value(val::AbstractParameterValue)
+    _scramble_parameter_value(val::SpineInterface.ParameterValue)
 
-Scramble the values of a parameter. Different methods employed for different types of `AbstractParameterValue`.
+Scramble the values of a `ParameterValue`.
 """
-_scramble_parameter_value(val::AbstractParameterValue) =
+_scramble_parameter_value(val::SpineInterface.ParameterValue) =
     parameter_value(_scramble_value(val.value))
-_scramble_parameter_value(val::SpineInterface.NothingParameterValue) =
-    parameter_value(nothing)
 
 
 """
