@@ -54,9 +54,9 @@ Note that there is a lot of overlap between these and the [Input object classes]
 >`structure_statistics`: The processed average structural properties for each `(building_type, building_period, location_id, structure_type)`, created using the [`create_structure_statistics!`](@ref) function.
 - `design_U_W_m2K`: The average design U-value of the aggregated structures in [W/m2K].
 - `effective_thermal_mass_J_m2K`: Mean calculated effective thermal mass [J/m2K] of the structures corresponding to the statistics, per area of the structure.
-- `external_U_value_to_ambient_air_W_m2K`: Mean calculated U-value [W/m2K] from the structure into the ambient air.
+- `external_U_value_to_ambient_air_W_m2K`: Mean calculated U-value [W/m2K] from the structure into the ambient air. Note that for internal structures, this represents heat transfer through one surface.
 - `external_U_value_to_ground_W_m2K`: Mean calculated effective U-value [W/m2K] from the structure into the ground, according to *Kissock, Kelly, Abinesh Selvacanabady, and Narendran Raghavan. "Simplified Model for Ground Heat Transfer from Slab-on-Grade Buildings." ASHRAE Transactions 119.2 (2013)*.
-- `internal_U_value_to_structure_W_m2K`: Mean calculated U-value [W/m2K] from the structure into the interior air.
+- `internal_U_value_to_structure_W_m2K`: Mean calculated U-value [W/m2K] from the structure into the interior air. Note that for internal structures, this only represents heat transfer through the other surface.
 - `linear_thermal_bridges_W_mK`: Mean linear thermal bridges [W/mK] of the seams between structures.
 - `total_U_value_W_m2K`: Mean total effective U-value [W/m2K] of the structure, from the interior air into the ambient air/ground.
 
