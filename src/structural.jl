@@ -97,24 +97,24 @@ Return the total `building_type_weight` of the `structure` from `mod`, 0 if not 
 function total_building_type_weight(
     source::Object,
     structure::Object;
-    mod::Module = @__MODULE__,
+    mod::Module=@__MODULE__
 )
     reduce(
         +,
         mod.building_type_weight(
-            source = source,
-            structure = structure,
-            building_type = bt,
+            source=source,
+            structure=structure,
+            building_type=bt,
         ) for
-        bt in mod.source__structure__building_type(source = source, structure = structure) if
+        bt in mod.source__structure__building_type(source=source, structure=structure) if
         !isnothing(
             mod.building_type_weight(
-                source = source,
-                structure = structure,
-                building_type = bt,
+                source=source,
+                structure=structure,
+                building_type=bt,
             ),
         );
-        init = 0.0,
+        init=0.0
     )::Float64
 end
 
@@ -127,30 +127,30 @@ Order the structural layers of `(source, structure)` from `mod` according to the
 Returns an array of [`Layer`](@ref)s, sorted according to the `layer_number` parameter,
 as well as the unique array of `layer_number`s.
 """
-function order_layers(source::Object, structure::Object; mod::Module = @__MODULE__)
+function order_layers(source::Object, structure::Object; mod::Module=@__MODULE__)
     layers = sort([
         Layer(
             Int(
                 mod.layer_number(
-                    source = src,
-                    structure = str,
-                    layer_id = id,
-                    structure_material = mat,
+                    source=src,
+                    structure=str,
+                    layer_id=id,
+                    structure_material=mat,
                 ),
             ),
             mod.layer_tag(
-                source = src,
-                structure = str,
-                layer_id = id,
-                structure_material = mat,
+                source=src,
+                structure=str,
+                layer_id=id,
+                structure_material=mat,
             ),
             id,
             mat,
         ) for
         (src, str, id, mat) in mod.source__structure__layer_id__structure_material(
-            source = source,
-            structure = structure,
-            _compact = false,
+            source=source,
+            structure=structure,
+            _compact=false,
         )
     ])
     layer_numbers = unique(map(l -> l.number, layers))
@@ -166,20 +166,20 @@ Check if `structure` from `mod` can be load-bearing and return a `Bool`.
 A `structure` is interpreted as potentially load-bearing
 if any of its layers has a `layer_load_bearing_thickness_mm` value in the raw input data.
 """
-function isloadbearing(source::Object, structure::Object; mod::Module = @__MODULE__)
+function isloadbearing(source::Object, structure::Object; mod::Module=@__MODULE__)
     loadbearing =
         !all(
             isnothing.(
                 mod.layer_load_bearing_thickness_mm(
-                    source = src,
-                    structure = str,
-                    layer_id = id,
-                    structure_material = mat,
+                    source=src,
+                    structure=str,
+                    layer_id=id,
+                    structure_material=mat,
                 ) for
                 (src, str, id, mat) in mod.source__structure__layer_id__structure_material(
-                    source = source,
-                    structure = structure,
-                    _compact = false,
+                    source=source,
+                    structure=structure,
+                    _compact=false,
                 )
             ),
         )
@@ -214,26 +214,26 @@ function _thermal_resistance(
     layer::Layer,
     thickness::SpineInterface.Parameter,
     R_itp::Interpolations.Extrapolation;
-    weight::Float64 = 0.5,
-    mod::Module = @__MODULE__,
+    weight::Float64=0.5,
+    mod::Module=@__MODULE__
 )
     if layer.material.name == Symbol("ventilation space")
         R = R_itp(
             thickness(
-                source = source,
-                structure = structure,
-                layer_id = layer.id,
-                structure_material = layer.material,
+                source=source,
+                structure=structure,
+                layer_id=layer.id,
+                structure_material=layer.material,
             ),
         )
     else
         R = (
             thickness(
-                source = source,
-                structure = structure,
-                layer_id = layer.id,
-                structure_material = layer.material,
-            ) * 1e-3 / thermal_conductivity(layer.material; weight = weight, mod = mod)
+                source=source,
+                structure=structure,
+                layer_id=layer.id,
+                structure_material=layer.material,
+            ) * 1e-3 / thermal_conductivity(layer.material; weight=weight, mod=mod)
         )
     end
     return R
@@ -266,8 +266,8 @@ function layer_thermal_resistance(
     structure::Object,
     layers::Array{Layer,1},
     R_itp::Interpolations.Extrapolation;
-    weight::Float64 = 0.5,
-    mod::Module = @__MODULE__,
+    weight::Float64=0.5,
+    mod::Module=@__MODULE__
 )
     thicknesses = [mod.layer_minimum_thickness_mm, mod.layer_load_bearing_thickness_mm]
     R = zeros(length(thicknesses))
@@ -276,27 +276,27 @@ function layer_thermal_resistance(
             1 / reduce(
                 +,
                 mod.layer_weight(
-                    source = source,
-                    structure = structure,
-                    layer_id = l.id,
-                    structure_material = l.material,
+                    source=source,
+                    structure=structure,
+                    layer_id=l.id,
+                    structure_material=l.material,
                 ) / _thermal_resistance(
                     source,
                     structure,
                     l,
                     thickness,
                     R_itp;
-                    weight = weight,
-                    mod = mod,
+                    weight=weight,
+                    mod=mod
                 ) for l in layers if !isnothing(
                     thickness(
-                        source = source,
-                        structure = structure,
-                        layer_id = l.id,
-                        structure_material = l.material,
+                        source=source,
+                        structure=structure,
+                        layer_id=l.id,
+                        structure_material=l.material,
                     ),
                 );
-                init = 0,
+                init=0
             )
         if !isnan(r) && !isinf(r)
             R[i] = r
@@ -328,7 +328,7 @@ function layer_heat_capacity(
     source::Object,
     structure::Object,
     layers::Array{Layer,1};
-    mod::Module = @__MODULE__,
+    mod::Module=@__MODULE__
 )
     thicknesses = [mod.layer_minimum_thickness_mm, mod.layer_load_bearing_thickness_mm]
     C = zeros(length(thicknesses))
@@ -336,29 +336,29 @@ function layer_heat_capacity(
         c = reduce(
             +,
             mod.layer_weight(
-                source = source,
-                structure = structure,
-                layer_id = l.id,
-                structure_material = l.material,
+                source=source,
+                structure=structure,
+                layer_id=l.id,
+                structure_material=l.material,
             ) *
-            specific_heat_capacity(l.material; mod = mod) *
-            density(l.material; mod = mod) *
+            specific_heat_capacity(l.material; mod=mod) *
+            density(l.material; mod=mod) *
             (
                 thickness(
-                    source = source,
-                    structure = structure,
-                    layer_id = l.id,
-                    structure_material = l.material,
+                    source=source,
+                    structure=structure,
+                    layer_id=l.id,
+                    structure_material=l.material,
                 ) * 1e-3
             ) for l in layers if !isnothing(
                 thickness(
-                    source = source,
-                    structure = structure,
-                    layer_id = l.id,
-                    structure_material = l.material,
+                    source=source,
+                    structure=structure,
+                    layer_id=l.id,
+                    structure_material=l.material,
                 ),
             );
-            init = 0,
+            init=0
         )
         if !isnan(c) && !isinf(c)
             C[i] = c
@@ -396,10 +396,10 @@ function layers_with_properties(
     structure::Object,
     R_itp::Interpolations.Extrapolation;
     thermal_conductivity_weight::Float64,
-    mod::Module = @__MODULE__,
+    mod::Module=@__MODULE__
 )
     # Order and find important layers and load-bearing material.
-    layers, layer_numbers = order_layers(source, structure; mod = mod)
+    layers, layer_numbers = order_layers(source, structure; mod=mod)
     load_bearing_materials = unique(
         getfield.(
             filter(l -> l.tag == Symbol("load-bearing structure"), layers),
@@ -420,23 +420,24 @@ function layers_with_properties(
     end
 
     # Process layers
-    layers_with_properties = Array{PropertyLayer,1}()
-    for num in layer_numbers
-        overlap = filter(l -> l.number == num, layers)
-        R = layer_thermal_resistance(
-            source,
-            structure,
-            overlap,
-            R_itp;
-            weight = thermal_conductivity_weight,
-            mod = mod,
+    layers_with_properties = Array{PropertyLayer,1}(
+        PropertyLayer(
+            num,
+            layer_thermal_resistance(
+                source,
+                structure,
+                overlap,
+                R_itp;
+                weight=thermal_conductivity_weight,
+                mod=mod
+            ),
+            layer_heat_capacity(source, structure, overlap; mod=mod),
+            num <= 0,
+            0 <= num <= exterior_number,
+            0 <= num <= ground_number
         )
-        C = layer_heat_capacity(source, structure, overlap; mod = mod)
-        interior = num <= 0
-        exterior = 0 <= num <= exterior_number
-        ground = 0 <= num <= ground_number
-        push!(layers_with_properties, PropertyLayer(num, R, C, interior, exterior, ground))
-    end
+        for num in layer_numbers
+    )
     return load_bearing_materials, layers_with_properties
 end
 
@@ -559,21 +560,21 @@ function calculate_structure_properties(
     thermal_conductivity_weight::Float64,
     interior_node_depth::Float64,
     variation_period::Float64,
-    mod::Module = @__MODULE__,
+    mod::Module=@__MODULE__
 )
     # Fetch the structure type
-    typ = first(mod.structure__structure_type(structure = structure))
+    typ = first(mod.structure__structure_type(structure=structure))
 
     # Form the linear interpolator for the thermal resistance of potential ventilation spaces in the structure.
     R_map = mod.thermal_resistance_m2K_W(
-        ventilation_space_heat_flow_direction = first(
-            mod.structure_type__ventilation_space_heat_flow_direction(structure_type = typ),
+        ventilation_space_heat_flow_direction=first(
+            mod.structure_type__ventilation_space_heat_flow_direction(structure_type=typ),
         ),
     )
     R_ventilation_space = LinearInterpolation(
         R_map.indexes,
         R_map.values;
-        extrapolation_bc = Flat(),
+        extrapolation_bc=Flat()
     )
 
     # Calculate properties of the structural layers and form layer sets of particular interest.
@@ -581,15 +582,15 @@ function calculate_structure_properties(
         source,
         structure,
         R_ventilation_space;
-        thermal_conductivity_weight = thermal_conductivity_weight,
-        mod = mod,
+        thermal_conductivity_weight=thermal_conductivity_weight,
+        mod=mod
     )
     layer_tiers = [:interior, :exterior, :ground]
     layer_dict =
         Dict(tier => filter(l -> getproperty(l, tier), layers) for tier in layer_tiers)
 
     # Check if the structure can be load-bearing
-    loadbearing = isloadbearing(source, structure; mod = mod)
+    loadbearing = isloadbearing(source, structure; mod=mod)
 
     # Calculate the total effective thermal mass of the structure
     C = Property(
@@ -598,13 +599,13 @@ function calculate_structure_properties(
     )
     account_for_surface_resistance_in_effective_thermal_mass!(
         C,
-        mod.interior_resistance_m2K_W(structure_type = typ),
+        mod.interior_resistance_m2K_W(structure_type=typ),
         variation_period,
     )
 
     # If structure is internal, need to account for the "exterior" layers as well.
     if mod.is_internal(
-        structure_type = first(mod.structure__structure_type(structure = structure)),
+        structure_type=first(mod.structure__structure_type(structure=structure)),
     )
         C_ext = Property(
             sum(layer_number_weight(l) * l.C.min for l in layer_dict[:exterior]),
@@ -612,7 +613,7 @@ function calculate_structure_properties(
         )
         account_for_surface_resistance_in_effective_thermal_mass!(
             C_ext,
-            mod.exterior_resistance_m2K_W(structure_type = typ),
+            mod.exterior_resistance_m2K_W(structure_type=typ),
             variation_period,
         )
         C += C_ext
@@ -630,7 +631,7 @@ function calculate_structure_properties(
     # Exterior resistance with partial interior resistance due to depth of the interior node
     if haskey(R_dict, :exterior)
         R_dict[:exterior] +=
-            mod.exterior_resistance_m2K_W(structure_type = typ) +
+            mod.exterior_resistance_m2K_W(structure_type=typ) +
             (1 - interior_node_depth) * R_dict[:interior]
     end
 
@@ -640,7 +641,7 @@ function calculate_structure_properties(
             calculate_ground_resistance_m2K_W(
                 R_dict[:ground].min +
                 R_dict[:interior].min +
-                mod.interior_resistance_m2K_W(structure_type = typ),
+                mod.interior_resistance_m2K_W(structure_type=typ),
                 0.0,
             ) - interior_node_depth * R_dict[:interior].min
         )
@@ -648,7 +649,7 @@ function calculate_structure_properties(
             calculate_ground_resistance_m2K_W(
                 R_dict[:ground].loadbearing +
                 R_dict[:interior].loadbearing +
-                mod.interior_resistance_m2K_W(structure_type = typ),
+                mod.interior_resistance_m2K_W(structure_type=typ),
                 0.0,
             ) - interior_node_depth * R_dict[:interior].loadbearing
         )
@@ -657,11 +658,11 @@ function calculate_structure_properties(
     # Modify the interior node depth and include interior surface resistance.
     if haskey(R_dict, :interior)
         R_dict[:interior] *= interior_node_depth
-        R_dict[:interior] += mod.interior_resistance_m2K_W(structure_type = typ)
+        R_dict[:interior] += mod.interior_resistance_m2K_W(structure_type=typ)
     end
 
     # Scale the `:exterior` and `:ground` parallel thermal resistances based on their respective U-values.
-    inf_tuple = (min = Inf, loadbearing = Inf)
+    inf_tuple = (min=Inf, loadbearing=Inf)
     for tier in [:exterior, :ground]
         if !isnothing(get(R_dict, tier, nothing))
             R_dict[tier].min /= (
@@ -747,34 +748,34 @@ struct BuildingStructure
         thermal_conductivity_weight::Float64,
         interior_node_depth::Float64,
         variation_period::Float64,
-        mod::Module = @__MODULE__,
+        mod::Module=@__MODULE__
     )
         # Determine some base properties of the structure based on raw input data.
         name = Symbol(string(source.name) * ":" * string(structure.name))
-        type = first(mod.structure__structure_type(structure = structure))
-        year = mod.source_year(source = source)
-        internal = mod.is_internal(structure_type = type)
+        type = first(mod.structure__structure_type(structure=structure))
+        year = mod.source_year(source=source)
+        internal = mod.is_internal(structure_type=type)
         design_U_value =
-            Property(mod.design_U_W_m2K(source = source, structure = structure))
+            Property(mod.design_U_W_m2K(source=source, structure=structure))
         linear_thermal_bridges =
-            Property(mod.linear_thermal_bridge_W_mK(structure_type = type))
+            Property(mod.linear_thermal_bridge_W_mK(structure_type=type))
 
         # Determine the building types this structure is applicable for.
         building_types = [
             building_type for building_type in mod.source__structure__building_type(
-                source = source,
-                structure = structure,
+                source=source,
+                structure=structure,
             ) if !isnothing(
                 mod.building_type_weight(
-                    source = source,
-                    structure = structure,
-                    building_type = building_type,
+                    source=source,
+                    structure=structure,
+                    building_type=building_type,
                 ),
             ) &&
             mod.building_type_weight(
-                source = source,
-                structure = structure,
-                building_type = building_type,
+                source=source,
+                structure=structure,
+                building_type=building_type,
             ) > 0
         ]
 
@@ -783,10 +784,10 @@ struct BuildingStructure
             calculate_structure_properties(
                 source,
                 structure;
-                thermal_conductivity_weight = thermal_conductivity_weight,
-                interior_node_depth = interior_node_depth,
-                variation_period = variation_period,
-                mod = mod,
+                thermal_conductivity_weight=thermal_conductivity_weight,
+                interior_node_depth=interior_node_depth,
+                variation_period=variation_period,
+                mod=mod
             )
 
         # Create the final `BuildingStructure` struct
