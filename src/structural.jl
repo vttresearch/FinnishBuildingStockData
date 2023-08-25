@@ -420,24 +420,24 @@ function layers_with_properties(
     end
 
     # Process layers
-    layers_with_properties = Array{PropertyLayer,1}(
+    layers_with_properties = [
         PropertyLayer(
             num,
             layer_thermal_resistance(
                 source,
                 structure,
-                overlap,
+                filter(l -> l.number == num, layers),
                 R_itp;
                 weight=thermal_conductivity_weight,
                 mod=mod
             ),
-            layer_heat_capacity(source, structure, overlap; mod=mod),
+            layer_heat_capacity(source, structure, filter(l -> l.number == num, layers); mod=mod),
             num <= 0,
             0 <= num <= exterior_number,
             0 <= num <= ground_number
         )
         for num in layer_numbers
-    )
+    ]
     return load_bearing_materials, layers_with_properties
 end
 
