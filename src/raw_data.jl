@@ -360,6 +360,25 @@ end
 
 
 """
+    import_ventilation_space_heat_flow_direction!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `ventilation_space_heat_flow_direction` ObjectClass from `dp`.
+"""
+function import_ventilation_space_heat_flow_direction!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["types"],
+        :ventilation_space_heat_flow_direction
+    )
+end
+
+
+"""
     _import_oc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
