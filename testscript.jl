@@ -32,18 +32,18 @@ rbsd = fbsd.RawBuildingStockData()
 
 ## Test importing statistical data into the raw data container
 
-#@time fbsd.import_building_period!(rbsd, stat_data)
-#@time fbsd.import_building_stock!(rbsd, stat_data)
+@time fbsd.import_building_period!(rbsd, stat_data)
+@time fbsd.import_building_stock!(rbsd, stat_data)
 @time fbsd.import_building_type!(rbsd, stat_data)
 @time fbsd.import_frame_material!(rbsd, stat_data)
-#@time fbsd.import_heat_source!(rbsd, stat_data)
-#@time fbsd.import_location_id!(rbsd, stat_data)
-#@time fbsd.import_building_stock__building_type__building_period__location_id__heat_source!(rbsd, stat_data)
-#@time fbsd.import_building_type__location_id__building_period!(rbsd, stat_data)
-#@time fbsd.import_building_type__location_id__frame_material!(rbsd, stat_data)
+@time fbsd.import_heat_source!(rbsd, stat_data)
+@time fbsd.import_location_id!(rbsd, stat_data)
+@time fbsd.import_building_stock__building_type__building_period__location_id__heat_source!(rbsd, stat_data)
+@time fbsd.import_building_type__location_id__building_period!(rbsd, stat_data)
+@time fbsd.import_building_type__location_id__frame_material!(rbsd, stat_data)
 
 # Test importing the whole statistical data package at once
-#@time fbsd.import_statistical_datapackage!(rbsd, stat_data)
+@time fbsd.import_statistical_datapackage!(rbsd, stat_data)
 
 
 ## Test importing structural data into the raw data container
@@ -64,4 +64,4 @@ rbsd = fbsd.RawBuildingStockData()
 @time fbsd.import_ventilation_source__building_type!(rbsd, def_data)
 
 # Test importing the whole structural data package at once
-#@time fbsd.import_structural_datapackage(rbsd, def_data)
+@time fbsd.import_structural_datapackage!(rbsd, def_data)

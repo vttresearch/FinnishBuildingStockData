@@ -125,14 +125,14 @@ function import_structural_datapackage!(
     import_structure_type!(rbsd, dp)
     import_ventilation_space_heat_flow_direction!(rbsd, dp)
     # Next, we can import the actual more complicated data.
-    import_fenestration_source__building_type(rbsd, dp)
-    import_source__structure(rbsd, dp)
-    import_source__structure__building_type(rbsd, dp)
-    import_source__structure__layer_id__structure_material(rbsd, dp)
-    import_structure__structure_type(rbsd, dp)
-    import_structure_material__frame_material(rbsd, dp)
-    import_structure_type__ventilation_space_heat_flow_direction(rbsd, dp)
-    import_ventilation_source__building_type(rbsd, dp)
+    import_source__structure!(rbsd, dp)
+    import_source__structure__building_type!(rbsd, dp)
+    import_source__structure__layer_id__structure_material!(rbsd, dp)
+    import_structure__structure_type!(rbsd, dp)
+    import_structure_material__frame_material!(rbsd, dp)
+    import_structure_type__ventilation_space_heat_flow_direction!(rbsd, dp)
+    import_fenestration_source__building_type!(rbsd, dp)
+    import_ventilation_source__building_type!(rbsd, dp)
 end
 
 
