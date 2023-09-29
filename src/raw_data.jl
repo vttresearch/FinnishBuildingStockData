@@ -571,6 +571,29 @@ end
 
 
 """
+    import_source__structure__building_type!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_source__structure__building_type!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["structure_descriptions"],
+        :source__structure__building_type,
+        :building_type,
+        5:10,
+        :building_type_weight,
+        [:building_type_weight]
+    )
+end
+
+
+"""
     _import_rc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
