@@ -10,7 +10,11 @@ using SpineInterface
 using Interpolations
 using Test
 using Random
+using JSON
+using CSV
+using DataFrames
 
+include("read_raw_data.jl")
 include("util.jl")
 include("materials.jl")
 include("structural.jl")

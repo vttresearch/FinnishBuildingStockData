@@ -1,0 +1,25 @@
+#=
+    testscript.jl
+
+A testing script for direct raw data input and processing.
+=#
+
+## Necessary packages and definitions
+
+using FinnishBuildingStockData
+import FinnishBuildingStockData as fbsd
+#using JSON
+#using CSV
+#using DataFrames
+
+# Define paths to the datasets to be processed
+statistical_path = "data/finnish_building_stock_forecasts/"
+RT_structural_path = "data/finnish_RT_structural_data/"
+def_structural_path = "data/Finnish-building-stock-default-structural-data/"
+
+
+## Test reading data into dataframes
+
+stat_data = fbsd.read_datapackage(statistical_path)
+RT_data = fbsd.read_datapackage(RT_structural_path)
+def_structural_path = fbsd.read_datapackage(def_structural_path)
