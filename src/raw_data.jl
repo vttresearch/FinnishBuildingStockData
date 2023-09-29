@@ -71,7 +71,7 @@ function read_datapackage(datpack_path::String)
     )
 end
 
-#=
+
 """
     import_statistical_datapackage!(
         rbsd::RawBuildingStockData,
@@ -92,8 +92,11 @@ function import_statistical_datapackage!(
     import_heat_source!(rbsd, dp)
     import_location_id!(rbsd, dp)
     # Next, we can import the actual more complicated data.
+    import_building_stock__building_type__building_period__location_id__heat_source!(rbsd, dp)
+    import_building_type__location_id__building_period!(rbsd, dp)
+    import_building_type__location_id__frame_material!(rbsd, dp)
 end
-=#
+
 
 
 """

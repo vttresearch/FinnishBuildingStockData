@@ -41,3 +41,7 @@ rbsd = fbsd.RawBuildingStockData()
 @time fbsd.import_building_stock__building_type__building_period__location_id__heat_source!(rbsd, stat_data)
 @time fbsd.import_building_type__location_id__building_period!(rbsd, stat_data)
 @time fbsd.import_building_type__location_id__frame_material!(rbsd, stat_data)
+
+# Test importing the whole statistical data package at once
+
+@time fbsd.import_statistical_datapackage!(rbsd, stat_data)
