@@ -470,7 +470,6 @@ function import_building_stock__building_type__building_period__location_id__hea
         :heat_source,
         6:15,
         :number_of_buildings,
-        [:location_name],
         [:number_of_buildings],
     )
 end
@@ -494,7 +493,6 @@ function import_building_type__location_id__building_period!(
         :building_period,
         4:15,
         :average_floor_area_m2,
-        [:location_name],
         [:average_floor_area_m2],
     )
 end
@@ -518,7 +516,6 @@ function import_building_type__location_id__frame_material!(
         :frame_material,
         4:8,
         :share,
-        [:location_name],
         [:share],
     )
 end
@@ -557,12 +554,11 @@ end
         stackname::Symbol,
         stackrange::UnitRange{Int64},
         rename_value::Symbol,
-        drops::Vector{Symbol},
         params::Vector{Symbol}
     )
 Helper function for generic RelationshipClass imports.
 
-`stackname`, `stackrange`, `rename_value`, and `drops` can be used to manipulate
+`stackname`, `stackrange`, and `rename_value` can be used to manipulate
 the DataFrame shape prior to extracting the relationship class,
 while `params` is used to read parameter values if any.
 These can be omitted if not needed.
@@ -574,23 +570,11 @@ function _import_rc!(
     stackname::Symbol,
     stackrange::UnitRange{Int64},
     rename_value::Symbol,
-    drops::Vector{Symbol},
     params::Vector{Symbol}
 )
     # Reshape dataframe prior to extracting relationships.
     df = rename(stack(df, stackrange), [:variable => stackname, :value => rename_value])
     # Fetch and add the relevant relationships
-    _import_rc!(rbsd, df, rc, drops, params)
-end
-function _import_rc!(
-    rbsd::RawBuildingStockData,
-    df::DataFrame,
-    rc::Symbol,
-    drops::Vector{Symbol},
-    params::Vector{Symbol}
-)
-    # Drop desired column prior to extracting relationships.
-    df = select(df, Not(drops))
     _import_rc!(rbsd, df, rc, params)
 end
 function _import_rc!(
