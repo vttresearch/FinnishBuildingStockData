@@ -34,13 +34,13 @@ struct RawBuildingStockData
     structure__structure_type::RelationshipClass
     structure_material__frame_material::RelationshipClass
     structure_type__ventilation_space_heat_flow_direction::RelationshipClass
-    ventilation_source__building_type::RelationshipClass
     fenestration_source__building_type::RelationshipClass
+    ventilation_source__building_type::RelationshipClass
     function RawBuildingStockData()
         # Define the last fieldnames index with an ObjectClass
         last_oc_ind = 12
         oc_fieldnames = collect(fieldnames(RawBuildingStockData)[1:last_oc_ind])
-        rc_fieldnames = collect(fieldnames(RawBuildingStockData)[last_oc_ind+1:end-1])
+        rc_fieldnames = collect(fieldnames(RawBuildingStockData)[last_oc_ind+1:end])
         # Last index is omitted since `fenestration_source` requires special attention
         # Initialize the Datastore structure.
         new(
@@ -50,13 +50,12 @@ struct RawBuildingStockData
             ]...,
             [
                 RelationshipClass(rc, Symbol.(split(string(rc), "__")), Array{RelationshipLike,1}())
-                for rc in rc_fieldnames
+                for rc in rc_fieldnames[1:end-2]
             ]...,
-            RelationshipClass(
-                :fenestration_source__building_type,
-                [:source, :building_type],
-                Array{RelationshipLike,1}()
-            )
+            [
+                RelationshipClass(rc, [:source, :building_type], Array{RelationshipLike,1}())
+                for rc in rc_fieldnames[end-1:end]
+            ]...
         )
     end
 end
@@ -522,31 +521,6 @@ end
 
 
 """
-    import_fenestration_source__building_type!(
-        rbsd::RawBuildingStockData,
-        dp::Dict{String,DataFrame}
-    )
-Import the desired relationship class.
-"""
-function import_fenestration_source__building_type!(
-    rbsd::RawBuildingStockData,
-    dp::Dict{String,DataFrame}
-)
-    _import_rc!(
-        rbsd,
-        dp["fenestration"],
-        :fenestration_source__building_type,
-        [
-            :U_value_W_m2K,
-            :solar_energy_transmittance,
-            :frame_area_fraction,
-            :notes
-        ]
-    )
-end
-
-
-"""
     import_source__structure!(
         rbsd::RawBuildingStockData,
         dp::Dict{String,DataFrame}
@@ -673,6 +647,61 @@ function import_structure_type__ventilation_space_heat_flow_direction!(
         rbsd,
         dp["types"],
         :structure_type__ventilation_space_heat_flow_direction
+    )
+end
+
+
+"""
+    import_fenestration_source__building_type!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_fenestration_source__building_type!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["fenestration"],
+        :fenestration_source__building_type,
+        [
+            :U_value_W_m2K,
+            :solar_energy_transmittance,
+            :frame_area_fraction,
+            :notes
+        ]
+    )
+end
+
+
+"""
+    import_ventilation_source__building_type!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_ventilation_source__building_type!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["ventilation"],
+        :ventilation_source__building_type,
+        [
+            :min_ventilation_rate_1_h,
+            :max_ventilation_rate_1_h,
+            :min_n50_infiltration_rate_1_h,
+            :max_n50_infiltration_rate_1_h,
+            :min_infiltration_factor,
+            :max_infiltration_factor,
+            :min_HRU_efficiency,
+            :max_HRU_efficiency,
+            :notes
+        ]
     )
 end
 
