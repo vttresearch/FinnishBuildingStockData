@@ -195,6 +195,26 @@ end
 
 
 """
+    import_location_id!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `location_id` ObjectClass from `dp`.
+"""
+function import_location_id!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["municipalities"],
+        :location_id,
+        [:location_name],
+    )
+end
+
+
+"""
     _import_oc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
@@ -238,9 +258,11 @@ function _import_oc!(
     oc::Symbol,
     params::Vector{Symbol}
 )
-    # Add objects with parameter values
+    # Form parameter value Dict
+    objcls = getfield(rbsd, oc)
+    # Add objects with parameter values and defaults
     add_object_parameter_values!(
-        getfield(rbsd, oc),
+        objcls,
         Dict(
             Object(Symbol(r[oc]), oc) => Dict(
                 param => parameter_value(r[param])
@@ -248,5 +270,9 @@ function _import_oc!(
             )
             for r in eachrow(df)
         )
+    )
+    add_object_parameter_defaults!(
+        objcls,
+        Dict(param => parameter_value(nothing) for param in params)
     )
 end

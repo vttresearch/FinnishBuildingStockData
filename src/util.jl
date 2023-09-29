@@ -141,3 +141,11 @@ function filter_entity_class!(rc::SpineInterface.RelationshipClass; kwargs...)
     filter!(rel -> all(rel[i] in kw[2] for (kw, i) in kw_index_map), rc.relationships)
     filter!(pair -> pair[1] in rc.relationships, rc.parameter_values)
 end
+
+
+"""
+    parameter_value(x::String31)
+
+Extension to SpineInterface.parameter_value handling weird Strings.
+"""
+SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
