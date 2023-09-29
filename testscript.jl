@@ -57,6 +57,7 @@ rbsd = fbsd.RawBuildingStockData()
 @time fbsd.import_fenestration_source__building_type!(rbsd, def_data)
 @time fbsd.import_source__structure!(rbsd, def_data)
 @time fbsd.import_source__structure__building_type!(rbsd, def_data)
+@time fbsd.import_source__structure__layer_id__structure_material!(rbsd, def_data)
 
 # Test importing the whole structural data package at once
 #@time fbsd.import_structural_datapackage(rbsd, def_data)

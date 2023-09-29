@@ -594,6 +594,33 @@ end
 
 
 """
+    import_source__structure__layer_id__structure_material!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_source__structure__layer_id__structure_material!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["structure_layers"],
+        :source__structure__layer_id__structure_material,
+        [
+            :layer_weight,
+            :layer_number,
+            :layer_minimum_thickness_mm,
+            :layer_load_bearing_thickness_mm,
+            :layer_tag,
+            :layer_notes
+        ]
+    )
+end
+
+
+"""
     _import_rc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
