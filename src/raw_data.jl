@@ -267,6 +267,26 @@ end
 
 
 """
+    import_source!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `source` ObjectClass from `dp`.
+"""
+function import_source!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["sources"],
+        :source,
+        [:source_year, :source_description],
+    )
+end
+
+
+"""
     _import_oc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,

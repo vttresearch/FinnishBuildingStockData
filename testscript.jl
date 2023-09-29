@@ -49,6 +49,7 @@ rbsd = fbsd.RawBuildingStockData()
 ## Test importing structural data into the raw data container
 
 @time fbsd.import_layer_id!(rbsd, def_data)
+@time fbsd.import_source!(rbsd, def_data)
 
 # Test importing the whole structural data package at once
 #@time fbsd.import_structural_datapackage(rbsd, def_data)
