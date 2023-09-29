@@ -306,6 +306,34 @@ end
 
 
 """
+    import_structure_material!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `structure_material` ObjectClass from `dp`.
+"""
+function import_structure_material!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["materials"],
+        :structure_material,
+        [
+            :minimum_density_kg_m3,
+            :maximum_density_kg_m3,
+            :minimum_specific_heat_capacity_J_kgK,
+            :maximum_specific_heat_capacity_J_kgK,
+            :minimum_thermal_conductivity_W_mK,
+            :maximum_thermal_conductivity_W_mK,
+            :material_notes
+        ]
+    )
+end
+
+
+"""
     _import_oc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
