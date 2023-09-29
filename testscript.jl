@@ -23,3 +23,8 @@ def_structural_path = "data/Finnish-building-stock-default-structural-data/"
 stat_data = fbsd.read_datapackage(statistical_path)
 RT_data = fbsd.read_datapackage(RT_structural_path)
 def_structural_path = fbsd.read_datapackage(def_structural_path)
+
+
+## Test initializing a `RawBuildingStockData` container
+
+rbsd = fbsd.RawBuildingStockData()
