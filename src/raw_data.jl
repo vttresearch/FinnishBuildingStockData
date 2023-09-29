@@ -107,18 +107,11 @@ function import_building_period!(
     rbsd::RawBuildingStockData,
     dp::Dict{String,DataFrame}
 )
-    # Fetch the relevant dataframe
-    df = dp["building_periods"]
-    # Add objects with parameter values
-    add_object_parameter_values!(
-        rbsd.building_period,
-        Dict(
-            Object(Symbol(r[:building_period]), :building_period) => Dict(
-                :period_start => parameter_value(r[:period_start]),
-                :period_end => parameter_value(r[:period_end])
-            )
-            for r in eachrow(df)
-        )
+    _import_oc!(
+        rbsd,
+        dp["building_periods"],
+        :building_period,
+        [:period_start, :period_end]
     )
 end
 
@@ -182,17 +175,39 @@ end
 
 
 """
+    import_heat_source!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `heat_source` ObjectClass from `dp`.
+"""
+function import_heat_source!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["numbers_of_buildings"],
+        :heat_source,
+        6:15,
+    )
+end
+
+
+"""
     _import_oc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
         oc::Symbol,
         stackrange::UnitRange{Int64},
+        params::Vector{Symbol}
     )
 Helper function for generic ObjectClass imports.
 
 The `stackrange` can be used to manipulate
 the DataFrame shape prior to extracting the object class,
-and can be omitted if not necessary.
+while `params` is used to read parameter values if any.
+Both can be omitted if not needed.
 """
 function _import_oc!(
     rbsd::RawBuildingStockData,
@@ -217,21 +232,21 @@ function _import_oc!(
         Object.(Symbol.(objs), oc)
     )
 end
-
-
-#=
-"""
-    import_average_floor_areas_m2!(
-        rbsd::RawBuildingStockData,
-        df::DataFrame
-    )
-"""
-function import_average_floor_areas_m2!(
+function _import_oc!(
     rbsd::RawBuildingStockData,
-    df::DataFrame
+    df::DataFrame,
+    oc::Symbol,
+    params::Vector{Symbol}
 )
-    # Flatten and rename the dataframe for convenience.
-    df = rename(stack(df, 4:15), :variable => :building_period)
-
+    # Add objects with parameter values
+    add_object_parameter_values!(
+        getfield(rbsd, oc),
+        Dict(
+            Object(Symbol(r[oc]), oc) => Dict(
+                param => parameter_value(r[param])
+                for param in params
+            )
+            for r in eachrow(df)
+        )
+    )
 end
-=#
