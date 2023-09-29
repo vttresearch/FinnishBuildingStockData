@@ -287,6 +287,25 @@ end
 
 
 """
+    import_structure!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `structure` ObjectClass from `dp`.
+"""
+function import_structure!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["structure_descriptions"],
+        :structure,
+    )
+end
+
+
+"""
     _import_oc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
