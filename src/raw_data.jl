@@ -547,6 +547,30 @@ end
 
 
 """
+    import_source__structure!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_source__structure!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["structure_descriptions"],
+        :source__structure,
+        [
+            :design_U_W_m2K,
+            :structure_description,
+            :structure_notes
+        ]
+    )
+end
+
+
+"""
     _import_rc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
@@ -595,6 +619,7 @@ function _import_rc!(
             ) => Dict(
                 param => parameter_value(r[param])
                 for param in params
+                if !ismissing(r[param])
             )
             for r in eachrow(df)
         )
