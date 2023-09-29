@@ -98,6 +98,36 @@ function import_statistical_datapackage!(
 end
 
 
+"""
+    import_structural_datapackage!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+
+Imports a structural datapackage into a `RawBuildingStockData` struct.
+"""
+function import_structural_datapackage!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    # We'll first have to import the object classes to ensure consistency.
+    import_layer_id!(rbsd, dp)
+    import_source!(rbsd, dp)
+    import_structure!(rbsd, dp)
+    import_structure_material!(rbsd, dp)
+    import_structure_type!(rbsd, dp)
+    import_ventilation_space_heat_flow_direction!(rbsd, dp)
+    # Next, we can import the actual more complicated data.
+    import_fenestration_source__building_type(rbsd, dp)
+    import_source__structure(rbsd, dp)
+    import_source__structure__building_type(rbsd, dp)
+    import_source__structure__layer_id__structure_material(rbsd, dp)
+    import_structure__structure_type(rbsd, dp)
+    import_structure_material__frame_material(rbsd, dp)
+    import_structure_type__ventilation_space_heat_flow_direction(rbsd, dp)
+    import_ventilation_source__building_type(rbsd, dp)
+end
+
 
 """
     import_building_period!(
@@ -193,6 +223,25 @@ function import_heat_source!(
         dp["numbers_of_buildings"],
         :heat_source,
         6:15,
+    )
+end
+
+
+"""
+    import_layer_id!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `layer_id` ObjectClass from `dp`.
+"""
+function import_layer_id!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["structure_layers"],
+        :layer_id,
     )
 end
 

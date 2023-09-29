@@ -22,7 +22,7 @@ def_structural_path = "data/Finnish-building-stock-default-structural-data/"
 
 stat_data = fbsd.read_datapackage(statistical_path)
 RT_data = fbsd.read_datapackage(RT_structural_path)
-def_structural_path = fbsd.read_datapackage(def_structural_path)
+def_data = fbsd.read_datapackage(def_structural_path)
 
 
 ## Test initializing a `RawBuildingStockData` container
@@ -30,8 +30,8 @@ def_structural_path = fbsd.read_datapackage(def_structural_path)
 rbsd = fbsd.RawBuildingStockData()
 
 
-## Test importing stuff into the raw data container
-
+## Test importing statistical data into the raw data container
+#=
 @time fbsd.import_building_period!(rbsd, stat_data)
 @time fbsd.import_building_stock!(rbsd, stat_data)
 @time fbsd.import_building_type!(rbsd, stat_data)
@@ -43,5 +43,12 @@ rbsd = fbsd.RawBuildingStockData()
 @time fbsd.import_building_type__location_id__frame_material!(rbsd, stat_data)
 
 # Test importing the whole statistical data package at once
-
 @time fbsd.import_statistical_datapackage!(rbsd, stat_data)
+=#
+
+## Test importing structural data into the raw data container
+
+@time fbsd.import_layer_id!(rbsd, def_data)
+
+# Test importing the whole structural data package at once
+#@time fbsd.import_structural_datapackage(rbsd, def_data)
