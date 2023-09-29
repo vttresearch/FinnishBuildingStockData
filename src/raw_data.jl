@@ -334,6 +334,32 @@ end
 
 
 """
+    import_structure_type!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `structure_type` ObjectClass from `dp`.
+"""
+function import_structure_type!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["types"],
+        :structure_type,
+        [
+            :interior_resistance_m2K_W,
+            :exterior_resistance_m2K_W,
+            :linear_thermal_bridge_W_mK,
+            :is_internal,
+            :structure_type_notes
+        ]
+    )
+end
+
+
+"""
     _import_oc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
