@@ -259,7 +259,7 @@ function _import_oc!(
     oc::Symbol,
     params::Vector{Symbol}
 )
-    # Form parameter value Dict
+    # Fetch the desired object class.
     objcls = getfield(rbsd, oc)
     # Add objects with parameter values and defaults
     add_object_parameter_values!(
@@ -274,6 +274,103 @@ function _import_oc!(
     )
     add_object_parameter_defaults!(
         objcls,
+        Dict(param => parameter_value(nothing) for param in params)
+    )
+end
+
+
+"""
+    import_building_stock__building_type__building_period__location_id__heat_source!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_building_stock__building_type__building_period__location_id__heat_source!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["numbers_of_buildings"],
+        :building_stock__building_type__building_period__location_id__heat_source,
+        :heat_source,
+        6:15,
+        :number_of_buildings,
+        [:location_name],
+        [:number_of_buildings],
+    )
+end
+
+
+"""
+    _import_rc!(
+        rbsd::RawBuildingStockData,
+        df::DataFrame,
+        rc::Symbol,
+        stackname::Symbol,
+        stackrange::UnitRange{Int64},
+        rename_value::Symbol,
+        drops::Vector{Symbol},
+        params::Vector{Symbol}
+    )
+Helper function for generic RelationshipClass imports.
+
+`stackname`, `stackrange`, `rename_value`, and `drops` can be used to manipulate
+the DataFrame shape prior to extracting the relationship class,
+while `params` is used to read parameter values if any.
+These can be omitted if not needed.
+"""
+function _import_rc!(
+    rbsd::RawBuildingStockData,
+    df::DataFrame,
+    rc::Symbol,
+    stackname::Symbol,
+    stackrange::UnitRange{Int64},
+    rename_value::Symbol,
+    drops::Vector{Symbol},
+    params::Vector{Symbol}
+)
+    # Reshape dataframe prior to extracting relationships.
+    df = rename(stack(df, stackrange), [:variable => stackname, :value => rename_value])
+    # Fetch and add the relevant relationships
+    _import_rc!(rbsd, df, rc, drops, params)
+end
+function _import_rc!(
+    rbsd::RawBuildingStockData,
+    df::DataFrame,
+    rc::Symbol,
+    drops::Vector{Symbol},
+    params::Vector{Symbol}
+)
+    # Drop desired column prior to extracting relationships.
+    df = select(df, Not(drops))
+    _import_rc!(rbsd, df, rc, params)
+end
+function _import_rc!(
+    rbsd::RawBuildingStockData,
+    df::DataFrame,
+    rc::Symbol,
+    params::Vector{Symbol}
+)
+    # Fetch the desired relationshipclass
+    relcls = getfield(rbsd, rc)
+    # Add relationships with parameter values and defaults
+    add_relationship_parameter_values!(
+        relcls,
+        Dict(
+            Tuple(
+                getfield(rbsd, oc)(Symbol(r[oc]))
+                for oc in relcls.intact_object_class_names
+            ) => Dict(
+                param => parameter_value(r[param])
+                for param in params
+            )
+            for r in eachrow(df)
+        )
+    )
+    add_relationship_parameter_defaults!(
+        relcls,
         Dict(param => parameter_value(nothing) for param in params)
     )
 end
