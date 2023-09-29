@@ -621,6 +621,25 @@ end
 
 
 """
+    import_structure__structure_type!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_structure__structure_type!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["structure_layers"],
+        :structure__structure_type
+    )
+end
+
+
+"""
     _import_rc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
@@ -677,5 +696,24 @@ function _import_rc!(
     add_relationship_parameter_defaults!(
         relcls,
         Dict(param => parameter_value(nothing) for param in params)
+    )
+end
+function _import_rc!(
+    rbsd::RawBuildingStockData,
+    df::DataFrame,
+    rc::Symbol,
+)
+    # Fetch the desired relationshipclass
+    relcls = getfield(rbsd, rc)
+    # Add relationships
+    add_relationships!(
+        relcls,
+        [
+            NamedTuple{Tuple(relcls.intact_object_class_names)}(
+                getfield(rbsd, oc)(Symbol(r[oc]))
+                for oc in relcls.intact_object_class_names
+            )
+            for r in eachrow(unique(df[!, relcls.intact_object_class_names]))
+        ]
     )
 end
