@@ -328,6 +328,30 @@ end
 
 
 """
+    import_building_type__location_id__frame_material!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_building_type__location_id__frame_material!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["frame_material_shares"],
+        :building_type__location_id__frame_material,
+        :frame_material,
+        4:8,
+        :share,
+        [:location_name],
+        [:share],
+    )
+end
+
+
+"""
     _import_rc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
