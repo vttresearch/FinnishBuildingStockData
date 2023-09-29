@@ -304,6 +304,30 @@ end
 
 
 """
+    import_building_type__location_id__building_period!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_building_type__location_id__building_period!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["average_floor_areas_m2"],
+        :building_type__location_id__building_period,
+        :building_period,
+        4:15,
+        :average_floor_area_m2,
+        [:location_name],
+        [:average_floor_area_m2],
+    )
+end
+
+
+"""
     _import_rc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
