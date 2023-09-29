@@ -8,9 +8,9 @@ A testing script for direct raw data input and processing.
 
 using FinnishBuildingStockData
 import FinnishBuildingStockData as fbsd
-#using JSON
-#using CSV
-#using DataFrames
+using JSON
+using CSV
+using DataFrames
 
 # Define paths to the datasets to be processed
 statistical_path = "data/finnish_building_stock_forecasts/"
@@ -28,3 +28,8 @@ def_structural_path = fbsd.read_datapackage(def_structural_path)
 ## Test initializing a `RawBuildingStockData` container
 
 rbsd = fbsd.RawBuildingStockData()
+
+
+## Test importing stuff into the raw data container
+
+fbsd.import_building_period!(rbsd, stat_data)

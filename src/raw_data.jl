@@ -37,7 +37,9 @@ struct RawBuildingStockData
     structure_type__ventilation_space_heat_flow_direction::RelationshipClass
     ventilation_source__building_type::RelationshipClass
     function RawBuildingStockData()
+        # Define the last fieldnames index with an ObjectClass
         last_oc_ind = 12
+        # Initialize the Datastore structure.
         new(
             [
                 ObjectClass(oc, Array{ObjectLike,1}())
@@ -58,11 +60,64 @@ end
 Read the resources of a Data Package into a dictionary of DataFrames.
 """
 function read_datapackage(datpack_path::String)
+    # Read `datapackage.json` and extract resource filepaths and filenames.
     dp = JSON.parsefile(datpack_path * "datapackage.json")
     files = get.(dp["resources"], "path", nothing)
     names = first.(split.(getindex.(split.(files, '\\'), 2), '.'))
+    # Return a dictionary mapping filename to its path.
     return Dict(
-        name => DataFrame(CSV.File(datpack_path * file))
+        string(name) => DataFrame(CSV.File(datpack_path * file))
         for (name, file) in zip(names, files)
+    )
+end
+
+#=
+"""
+    import_statistical_datapackage!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+
+Imports a statistical datapackage into a `RawBuildingStockData` struct.
+"""
+function import_statistical_datapackage!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    # We'll first have to import the object classes to ensure consistency.
+    import_building_period!(rbsd, dp)
+    import_building_stock!(rbsd, dp)
+    import_building_type!(rbsd, dp)
+    import_frame_material!(rbsd, dp)
+    import_heat_source!(rbsd, dp)
+    import_location_id!(rbsd, dp)
+    # Next, we can import the actual more complicated data.
+end
+=#
+
+
+"""
+    import_building_period!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the `building_period` object class from `dp`.
+"""
+function import_building_period!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    # Fetch the relevant dataframe
+    df = dp["building_periods"]
+    # Add objects with parameter values
+    add_object_parameter_values!(
+        rbsd.building_period,
+        Dict(
+            Object(Symbol(r[:building_period]), :building_period) => Dict(
+                :period_start => parameter_value(r[:period_start]),
+                :period_end => parameter_value(r[:period_end])
+            )
+            for r in eachrow(df)
+        )
     )
 end
