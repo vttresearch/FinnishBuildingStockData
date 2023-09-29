@@ -640,6 +640,25 @@ end
 
 
 """
+    import_structure_material__frame_material!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_structure_material__frame_material!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["materials"],
+        :structure_material__frame_material
+    )
+end
+
+
+"""
     _import_rc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
