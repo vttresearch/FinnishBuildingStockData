@@ -34,3 +34,5 @@ rbsd = fbsd.RawBuildingStockData()
 
 @time fbsd.import_building_period!(rbsd, stat_data)
 @time fbsd.import_building_stock!(rbsd, stat_data)
+@time fbsd.import_building_type!(rbsd, stat_data)
+@time fbsd.import_frame_material!(rbsd, stat_data)

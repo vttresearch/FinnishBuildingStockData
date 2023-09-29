@@ -134,13 +134,90 @@ function import_building_stock!(
     rbsd::RawBuildingStockData,
     dp::Dict{String,DataFrame}
 )
-    # Fetch and add the relevant objects
-    bs = unique(dp["numbers_of_buildings"][!, :building_stock])
-    add_objects!(
-        rbsd.building_stock,
-        Object.(Symbol.(bs), :building_stock)
+    _import_oc!(
+        rbsd,
+        dp["numbers_of_buildings"],
+        :building_stock
     )
 end
+
+
+"""
+    import_building_type!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `building_type` ObjectClass from `dp`.
+"""
+function import_building_type!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["average_floor_areas_m2"],
+        :building_type
+    )
+end
+
+
+"""
+    import_frame_material!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `frame_material` ObjectClass from `dp`.
+"""
+function import_frame_material!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_oc!(
+        rbsd,
+        dp["frame_material_shares"],
+        :frame_material,
+        4:8,
+    )
+end
+
+
+"""
+    _import_oc!(
+        rbsd::RawBuildingStockData,
+        df::DataFrame,
+        oc::Symbol,
+        stackrange::UnitRange{Int64},
+    )
+Helper function for generic ObjectClass imports.
+
+The `stackrange` can be used to manipulate
+the DataFrame shape prior to extracting the object class,
+and can be omitted if not necessary.
+"""
+function _import_oc!(
+    rbsd::RawBuildingStockData,
+    df::DataFrame,
+    oc::Symbol,
+    stackrange::UnitRange{Int64},
+)
+    # Reshape dataframe prior to extracting objects.
+    df = rename(stack(df, stackrange), :variable => oc)
+    # Fetch and add the relevant objects
+    _import_oc!(rbsd, df, oc)
+end
+function _import_oc!(
+    rbsd::RawBuildingStockData,
+    df::DataFrame,
+    oc::Symbol
+)
+    # Fetch and add the relevant objects
+    objs = unique(df[!, oc])
+    add_objects!(
+        getfield(rbsd, oc),
+        Object.(Symbol.(objs), oc)
+    )
+end
+
 
 #=
 """
