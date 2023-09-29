@@ -234,11 +234,12 @@ function _import_oc!(
     df::DataFrame,
     oc::Symbol,
     stackrange::UnitRange{Int64},
+    args...
 )
     # Reshape dataframe prior to extracting objects.
     df = rename(stack(df, stackrange), :variable => oc)
     # Fetch and add the relevant objects
-    _import_oc!(rbsd, df, oc)
+    _import_oc!(rbsd, df, oc, args...)
 end
 function _import_oc!(
     rbsd::RawBuildingStockData,
