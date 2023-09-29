@@ -1,5 +1,5 @@
 #=
-    read_raw_data.jl
+    raw_data.jl
 
 This file contains functions for reading the raw building stock
 data directly from the Data Packages without the need to

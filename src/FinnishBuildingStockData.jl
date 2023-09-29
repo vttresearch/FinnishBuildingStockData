@@ -14,7 +14,7 @@ using JSON
 using CSV
 using DataFrames
 
-include("read_raw_data.jl")
+include("raw_data.jl")
 include("util.jl")
 include("materials.jl")
 include("structural.jl")
