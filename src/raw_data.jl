@@ -28,7 +28,6 @@ struct RawBuildingStockData
     building_stock__building_type__building_period__location_id__heat_source::RelationshipClass
     building_type__location_id__building_period::RelationshipClass
     building_type__location_id__frame_material::RelationshipClass
-    fenestration_source__building_type::RelationshipClass
     source__structure::RelationshipClass
     source__structure__building_type::RelationshipClass
     source__structure__layer_id__structure_material::RelationshipClass
@@ -36,19 +35,28 @@ struct RawBuildingStockData
     structure_material__frame_material::RelationshipClass
     structure_type__ventilation_space_heat_flow_direction::RelationshipClass
     ventilation_source__building_type::RelationshipClass
+    fenestration_source__building_type::RelationshipClass
     function RawBuildingStockData()
         # Define the last fieldnames index with an ObjectClass
         last_oc_ind = 12
+        oc_fieldnames = collect(fieldnames(RawBuildingStockData)[1:last_oc_ind])
+        rc_fieldnames = collect(fieldnames(RawBuildingStockData)[last_oc_ind+1:end-1])
+        # Last index is omitted since `fenestration_source` requires special attention
         # Initialize the Datastore structure.
         new(
             [
                 ObjectClass(oc, Array{ObjectLike,1}())
-                for oc in collect(fieldnames(RawBuildingStockData)[1:last_oc_ind])
+                for oc in oc_fieldnames
             ]...,
             [
                 RelationshipClass(rc, Symbol.(split(string(rc), "__")), Array{RelationshipLike,1}())
-                for rc in collect(fieldnames(RawBuildingStockData)[last_oc_ind+1:end])
-            ]...
+                for rc in rc_fieldnames
+            ]...,
+            RelationshipClass(
+                :fenestration_source__building_type,
+                [:source, :building_type],
+                Array{RelationshipLike,1}()
+            )
         )
     end
 end
@@ -512,6 +520,31 @@ function import_building_type__location_id__frame_material!(
         :share,
         [:location_name],
         [:share],
+    )
+end
+
+
+"""
+    import_fenestration_source__building_type!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_fenestration_source__building_type!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["fenestration"],
+        :fenestration_source__building_type,
+        [
+            :U_value_W_m2K,
+            :solar_energy_transmittance,
+            :frame_area_fraction,
+            :notes
+        ]
     )
 end
 
