@@ -149,3 +149,16 @@ end
 Extension to SpineInterface.parameter_value handling weird Strings.
 """
 SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
+
+
+"""
+    _get(oc::ObjectClass, name::Symbol)
+
+Helper function to fetch existing object of class `oc` and create it if missing.
+"""
+function _get(oc::ObjectClass, name::Symbol)
+    !isnothing(oc(name)) ? oc(name) : Object(name, oc.name)
+end
+function _get(oc::ObjectClass, names::Vector{Symbol})
+    [_get(oc, name) for name in names]
+end

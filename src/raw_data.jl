@@ -251,9 +251,10 @@ function _import_oc!(
 )
     # Fetch and add the relevant objects
     objs = unique(df[!, oc])
+    objcls = getfield(rbsd, oc)
     add_objects!(
-        getfield(rbsd, oc),
-        Object.(Symbol.(objs), oc)
+        objcls,
+        _get(objcls, Symbol.(objs))
     )
 end
 function _import_oc!(
@@ -268,7 +269,7 @@ function _import_oc!(
     add_object_parameter_values!(
         objcls,
         Dict(
-            Object(Symbol(r[oc]), oc) => Dict(
+            _get(objcls, Symbol(r[oc])) => Dict(
                 param => parameter_value(r[param])
                 for param in params
             )
