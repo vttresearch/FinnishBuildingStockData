@@ -60,6 +60,7 @@ rbsd = fbsd.RawBuildingStockData()
 @time fbsd.import_source__structure__layer_id__structure_material!(rbsd, def_data)
 @time fbsd.import_structure__structure_type!(rbsd, def_data)
 @time fbsd.import_structure_material__frame_material!(rbsd, def_data)
+@time fbsd.import_structure_type__ventilation_space_heat_flow_direction!(rbsd, def_data)
 
 # Test importing the whole structural data package at once
 #@time fbsd.import_structural_datapackage(rbsd, def_data)

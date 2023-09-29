@@ -659,6 +659,25 @@ end
 
 
 """
+    import_structure_type__ventilation_space_heat_flow_direction!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import the desired relationship class.
+"""
+function import_structure_type__ventilation_space_heat_flow_direction!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    _import_rc!(
+        rbsd,
+        dp["types"],
+        :structure_type__ventilation_space_heat_flow_direction
+    )
+end
+
+
+"""
     _import_rc!(
         rbsd::RawBuildingStockData,
         df::DataFrame,
