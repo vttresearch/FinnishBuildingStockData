@@ -121,3 +121,40 @@ function import_building_period!(
         )
     )
 end
+
+
+"""
+    import_building_stock!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+Import `building_stock` ObjectClass from `dp`.
+"""
+function import_building_stock!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    # Fetch and add the relevant objects
+    bs = unique(dp["numbers_of_buildings"][!, :building_stock])
+    add_objects!(
+        rbsd.building_stock,
+        Object.(Symbol.(bs), :building_stock)
+    )
+end
+
+#=
+"""
+    import_average_floor_areas_m2!(
+        rbsd::RawBuildingStockData,
+        df::DataFrame
+    )
+"""
+function import_average_floor_areas_m2!(
+    rbsd::RawBuildingStockData,
+    df::DataFrame
+)
+    # Flatten and rename the dataframe for convenience.
+    df = rename(stack(df, 4:15), :variable => :building_period)
+
+end
+=#

@@ -32,4 +32,5 @@ rbsd = fbsd.RawBuildingStockData()
 
 ## Test importing stuff into the raw data container
 
-fbsd.import_building_period!(rbsd, stat_data)
+@time fbsd.import_building_period!(rbsd, stat_data)
+@time fbsd.import_building_stock!(rbsd, stat_data)
