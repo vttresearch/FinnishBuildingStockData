@@ -384,9 +384,8 @@ function _import_oc!(
     oc::Symbol
 )
     # Fetch and add the relevant objects
-    objs = unique(df[!, oc])
     push!(rbsd.object_classes, string(oc))
-    append!(rbsd.objects, objs)
+    append!(rbsd.objects, unique(df[!, oc]))
 end
 function _import_oc!(
     rbsd::RawBuildingStockData,
@@ -636,7 +635,8 @@ function import_fenestration_source__building_type!(
             :solar_energy_transmittance,
             :frame_area_fraction,
             :notes
-        ]
+        ];
+        object_classes=[:source, :building_type]
     )
 end
 
@@ -666,7 +666,8 @@ function import_ventilation_source__building_type!(
             :min_HRU_efficiency,
             :max_HRU_efficiency,
             :notes
-        ]
+        ];
+        object_classes=[:source, :building_type]
     )
 end
 
@@ -679,13 +680,15 @@ end
         stackname::Symbol,
         stackrange::UnitRange{Int64},
         rename_value::Symbol,
-        params::Vector{Symbol}
+        params::Vector{Symbol};
+        object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
     )
 Helper function for generic RelationshipClass imports.
 
 `stackname`, `stackrange`, and `rename_value` can be used to manipulate
 the DataFrame shape prior to extracting the relationship class,
 while `params` is used to read parameter values if any.
+`object_classes` can be used to set RelationshipClass dimensions manually.
 These can be omitted if not needed.
 """
 function _import_rc!(
@@ -695,57 +698,50 @@ function _import_rc!(
     stackname::Symbol,
     stackrange::UnitRange{Int64},
     rename_value::Symbol,
-    params::Vector{Symbol}
+    params::Vector{Symbol};
+    object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
 )
     # Reshape dataframe prior to extracting relationships.
     df = rename(stack(df, stackrange), [:variable => stackname, :value => rename_value])
     # Fetch and add the relevant relationships
-    _import_rc!(rbsd, df, rc, params)
+    _import_rc!(rbsd, df, rc, params; object_classes=object_classes)
 end
 function _import_rc!(
     rbsd::RawBuildingStockData,
     df::DataFrame,
     rc::Symbol,
-    params::Vector{Symbol}
+    params::Vector{Symbol};
+    object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
 )
-    # Fetch the desired relationshipclass
-    relcls = getfield(rbsd, rc)
-    # Add relationships with parameter values and defaults
-    add_relationship_parameter_values!(
-        relcls,
-        Dict(
-            Tuple(
-                getfield(rbsd, oc)(Symbol(r[oc]))
-                for oc in relcls.intact_object_class_names
-            ) => Dict(
-                param => parameter_value(r[param])
-                for param in params
-                if !ismissing(r[param])
-            )
+    # Import the relationship class in question.
+    _import_rc!(rbsd, df, rc; object_classes=object_classes)
+    # Import relationship parameter defaults.
+    append!(
+        rbsd.relationship_parameters,
+        [string(rc), string(param), nothing]
+        for param in params
+    )
+    # Import relationship parameter values.
+    append!(
+        rbsd.relationship_parameter_values,
+        [string(rc), [r[oc] for oc in object_classes], string(param), r[param]]
+        for r in eachrow(df)
+        for param in params
+    )
+end
+function _import_rc!(
+    rbsd::RawBuildingStockData,
+    df::DataFrame,
+    rc::Symbol;
+    object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
+)
+    # Add relationships
+    push!(rbsd.relationship_classes, string(rc))
+    append!(
+        rbsd.relationships,
+        unique(
+            [string(rc), [r[oc] for oc in object_classes]]
             for r in eachrow(df)
         )
-    )
-    add_relationship_parameter_defaults!(
-        relcls,
-        Dict(param => parameter_value(nothing) for param in params)
-    )
-end
-function _import_rc!(
-    rbsd::RawBuildingStockData,
-    df::DataFrame,
-    rc::Symbol,
-)
-    # Fetch the desired relationshipclass
-    relcls = getfield(rbsd, rc)
-    # Add relationships
-    add_relationships!(
-        relcls,
-        [
-            NamedTuple{Tuple(relcls.intact_object_class_names)}(
-                getfield(rbsd, oc)(Symbol(r[oc]))
-                for oc in relcls.intact_object_class_names
-            )
-            for r in eachrow(unique(df[!, relcls.intact_object_class_names]))
-        ]
     )
 end
