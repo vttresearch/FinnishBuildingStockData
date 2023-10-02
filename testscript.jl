@@ -74,3 +74,11 @@ rbsd = fbsd.RawBuildingStockData()
 
 @time "Generating convenience functions..."
 @time using_spinedb(rbsd)
+
+
+## Run input data tests to see if they pass
+
+@info "Running structural input data tests..."
+@time run_structural_tests(; limit=Inf)
+@info "Running statistical input data tests..."
+@time run_statistical_tests(; limit=Inf)
