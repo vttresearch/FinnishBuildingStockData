@@ -343,10 +343,32 @@ function import_ventilation_space_heat_flow_direction!(
     rbsd::RawBuildingStockData,
     dp::Dict{String,DataFrame}
 )
-    _import_oc!(
-        rbsd,
-        dp["types"],
-        :ventilation_space_heat_flow_direction
+    # Define and fetch ventilation space data.
+    oc = "ventilation_space_heat_flow_direction"
+    param = "thermal_resistance_m2K_W"
+    df = dp["ventilation_spaces"][!, 1:4]
+    dirs = Symbol.(names(df[!, 2:end]))
+    # Import object class and objects
+    push!(rbsd.object_classes, [string(oc)])
+    append!(rbsd.objects, [[oc, string(dir)] for dir in dirs])
+    # Import parameter defaults.
+    push!(rbsd.object_parameters, [string(oc), string(param), nothing])
+    # Import map parameter value.
+    append!(
+        rbsd.object_parameter_values,
+        [
+            [
+                string(oc),
+                string(dir),
+                string(param),
+                Dict(
+                    "type" => "map",
+                    "index_type" => "float",
+                    "data" => Dict(zip(df[!, :thickness_mm], df[!, dir]))
+                )
+            ]
+            for dir in dirs
+        ]
     )
 end
 
