@@ -39,7 +39,7 @@ function read_datapackage(datpack_path::String)
     names = first.(split.(getindex.(split.(files, '\\'), 2), '.'))
     # Return a dictionary mapping filename to its path.
     return Dict(
-        string(name) => DataFrame(CSV.File(datpack_path * file))
+        String(name) => DataFrame(CSV.File(datpack_path * file))
         for (name, file) in zip(names, files)
     )
 end
@@ -349,18 +349,18 @@ function import_ventilation_space_heat_flow_direction!(
     df = dp["ventilation_spaces"][!, 1:4]
     dirs = Symbol.(names(df[!, 2:end]))
     # Import object class and objects
-    push!(rbsd.object_classes, [string(oc)])
-    append!(rbsd.objects, [[oc, string(dir)] for dir in dirs])
+    push!(rbsd.object_classes, [String(oc)])
+    append!(rbsd.objects, [[oc, String(dir)] for dir in dirs])
     # Import parameter defaults.
-    push!(rbsd.object_parameters, [string(oc), string(param), nothing])
+    push!(rbsd.object_parameters, [String(oc), String(param), nothing])
     # Import map parameter value.
     append!(
         rbsd.object_parameter_values,
         [
             [
-                string(oc),
-                string(dir),
-                string(param),
+                String(oc),
+                String(dir),
+                String(param),
                 Dict(
                     "type" => "map",
                     "index_type" => "float",
@@ -406,10 +406,10 @@ function _import_oc!(
     oc::Symbol
 )
     # Fetch and add the relevant objects
-    push!(rbsd.object_classes, [string(oc)])
+    push!(rbsd.object_classes, [String(oc)])
     append!(
         rbsd.objects,
-        [[string(oc), obj] for obj in unique(df[!, oc])]
+        [[String(oc), obj] for obj in unique(df[!, oc])]
     )
 end
 function _import_oc!(
@@ -424,7 +424,7 @@ function _import_oc!(
     append!(
         rbsd.object_parameters,
         [
-            [string(oc), string(param), nothing]
+            [String(oc), String(param), nothing]
             for param in params
         ]
     )
@@ -432,7 +432,7 @@ function _import_oc!(
     append!(
         rbsd.object_parameter_values,
         [
-            [string(oc), r[oc], string(param), r[param]]
+            [String(oc), r[oc], String(param), r[param]]
             for r in eachrow(df)
             for param in params
         ]
@@ -706,7 +706,7 @@ end
         stackrange::UnitRange{Int64},
         rename_value::Symbol,
         params::Vector{Symbol};
-        object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
+        object_classes::Vector{Symbol}=Symbol.(split(String(rc), "__"))
     )
 Helper function for generic RelationshipClass imports.
 
@@ -724,7 +724,7 @@ function _import_rc!(
     stackrange::UnitRange{Int64},
     rename_value::Symbol,
     params::Vector{Symbol};
-    object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
+    object_classes::Vector{Symbol}=Symbol.(split(String(rc), "__"))
 )
     # Reshape dataframe prior to extracting relationships.
     df = rename(stack(df, stackrange), [:variable => stackname, :value => rename_value])
@@ -736,7 +736,7 @@ function _import_rc!(
     df::DataFrame,
     rc::Symbol,
     params::Vector{Symbol};
-    object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
+    object_classes::Vector{Symbol}=Symbol.(split(String(rc), "__"))
 )
     # Import the relationship class in question.
     _import_rc!(rbsd, df, rc; object_classes=object_classes)
@@ -744,7 +744,7 @@ function _import_rc!(
     append!(
         rbsd.relationship_parameters,
         [
-            [string(rc), string(param), nothing]
+            [String(rc), String(param), nothing]
             for param in params
         ]
     )
@@ -752,7 +752,7 @@ function _import_rc!(
     append!(
         rbsd.relationship_parameter_values,
         [
-            [string(rc), [r[oc] for oc in object_classes], string(param), r[param]]
+            [String(rc), [r[oc] for oc in object_classes], String(param), r[param]]
             for r in eachrow(df)
             for param in params
         ]
@@ -762,17 +762,17 @@ function _import_rc!(
     rbsd::RawBuildingStockData,
     df::DataFrame,
     rc::Symbol;
-    object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
+    object_classes::Vector{Symbol}=Symbol.(split(String(rc), "__"))
 )
     # Add relationships
     push!(
         rbsd.relationship_classes,
-        [string(rc), string.(object_classes)]
+        [String(rc), String.(object_classes)]
     )
     append!(
         rbsd.relationships,
         unique(
-            [string(rc), [r[oc] for oc in object_classes]]
+            [String(rc), [r[oc] for oc in object_classes]]
             for r in eachrow(df)
         )
     )
