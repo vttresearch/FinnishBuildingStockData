@@ -143,12 +143,20 @@ function filter_entity_class!(rc::SpineInterface.RelationshipClass; kwargs...)
 end
 
 
-"""
-    parameter_value(x::String31)
-
-Extension to SpineInterface.parameter_value handling weird Strings.
-"""
+# Extend SpineInterface where necessary
 SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
+SpineInterface.parameter_value(x::Missing) = parameter_value(nothing)
+function SpineInterface.using_spinedb(rbsd::RawBuildingStockData, mod=@__MODULE__; filters=nothing)
+    using_spinedb(
+        Dict(
+            string(field) => getfield(rbsd, field)
+            for field in fieldnames(RawBuildingStockData)
+        ),
+        mod;
+        filters=filters
+    )
+end
+SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), class_name)
 
 
 """
