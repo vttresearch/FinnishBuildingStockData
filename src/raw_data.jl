@@ -384,7 +384,7 @@ function _import_oc!(
     oc::Symbol
 )
     # Fetch and add the relevant objects
-    push!(rbsd.object_classes, string(oc))
+    push!(rbsd.object_classes, [string(oc)])
     append!(
         rbsd.objects,
         [[string(oc), obj] for obj in unique(df[!, oc])]
