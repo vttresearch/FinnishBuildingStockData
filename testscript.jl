@@ -67,6 +67,7 @@ rbsd = fbsd.RawBuildingStockData()
 # Test importing the whole structural data package at once
 @info "Importing structural data..."
 @time fbsd.import_structural_datapackage!(rbsd, def_data)
+@time fbsd.import_structural_datapackage!(rbsd, RT_data)
 
 
 ## Test using_spinedb
