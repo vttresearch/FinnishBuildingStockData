@@ -13,50 +13,16 @@ become prohibitively slow to read and write to at full-Finland-scales.
 A `struct` for holding the raw Spine Datastore contents.
 """
 struct RawBuildingStockData
-    building_period::ObjectClass
-    building_stock::ObjectClass
-    building_type::ObjectClass
-    frame_material::ObjectClass
-    heat_source::ObjectClass
-    layer_id::ObjectClass
-    location_id::ObjectClass
-    source::ObjectClass
-    structure::ObjectClass
-    structure_material::ObjectClass
-    structure_type::ObjectClass
-    ventilation_space_heat_flow_direction::ObjectClass
-    building_stock__building_type__building_period__location_id__heat_source::RelationshipClass
-    building_type__location_id__building_period::RelationshipClass
-    building_type__location_id__frame_material::RelationshipClass
-    source__structure::RelationshipClass
-    source__structure__building_type::RelationshipClass
-    source__structure__layer_id__structure_material::RelationshipClass
-    structure__structure_type::RelationshipClass
-    structure_material__frame_material::RelationshipClass
-    structure_type__ventilation_space_heat_flow_direction::RelationshipClass
-    fenestration_source__building_type::RelationshipClass
-    ventilation_source__building_type::RelationshipClass
+    object_classes::Vector
+    relationship_classes::Vector
+    objects::Vector
+    relationships::Vector
+    object_parameters::Vector
+    relationship_parameters::Vector
+    object_parameter_values::Vector
+    relationship_parameter_values::Vector
     function RawBuildingStockData()
-        # Define the last fieldnames index with an ObjectClass
-        last_oc_ind = 12
-        oc_fieldnames = collect(fieldnames(RawBuildingStockData)[1:last_oc_ind])
-        rc_fieldnames = collect(fieldnames(RawBuildingStockData)[last_oc_ind+1:end])
-        # Last index is omitted since `fenestration_source` requires special attention
-        # Initialize the Datastore structure.
-        new(
-            [
-                ObjectClass(oc, Array{ObjectLike,1}())
-                for oc in oc_fieldnames
-            ]...,
-            [
-                RelationshipClass(rc, Symbol.(split(string(rc), "__")), Array{RelationshipLike,1}())
-                for rc in rc_fieldnames[1:end-2]
-            ]...,
-            [
-                RelationshipClass(rc, [:source, :building_type], Array{RelationshipLike,1}())
-                for rc in rc_fieldnames[end-1:end]
-            ]...
-        )
+        new([Vector{Any}() for fn in fieldnames(RawBuildingStockData)]...)
     end
 end
 
@@ -419,11 +385,8 @@ function _import_oc!(
 )
     # Fetch and add the relevant objects
     objs = unique(df[!, oc])
-    objcls = getfield(rbsd, oc)
-    add_objects!(
-        objcls,
-        _get(objcls, Symbol.(objs))
-    )
+    push!(rbsd.object_classes, string(oc))
+    append!(rbsd.objects, objs)
 end
 function _import_oc!(
     rbsd::RawBuildingStockData,
@@ -431,22 +394,24 @@ function _import_oc!(
     oc::Symbol,
     params::Vector{Symbol}
 )
-    # Fetch the desired object class.
-    objcls = getfield(rbsd, oc)
-    # Add objects with parameter values and defaults
-    add_object_parameter_values!(
-        objcls,
-        Dict(
-            _get(objcls, Symbol(r[oc])) => Dict(
-                param => parameter_value(r[param])
-                for param in params
-            )
-            for r in eachrow(df)
-        )
+    # Import the object class and objects
+    _import_oc!(rbsd, df, oc)
+    # Import the desired parameter defaults.
+    append!(
+        rbsd.object_parameters,
+        [
+            [string(oc), string(param), nothing]
+            for param in params
+        ]
     )
-    add_object_parameter_defaults!(
-        objcls,
-        Dict(param => parameter_value(nothing) for param in params)
+    # Import the parameter values.
+    append!(
+        rbsd.object_parameter_values,
+        [
+            [string(oc), r[oc], string(param), r[param]]
+            for r in eachrow(df)
+            for param in params
+        ]
     )
 end
 

@@ -31,13 +31,13 @@ rbsd = fbsd.RawBuildingStockData()
 
 
 ## Test importing statistical data into the raw data container
-#=
 @time fbsd.import_building_period!(rbsd, stat_data)
 @time fbsd.import_building_stock!(rbsd, stat_data)
 @time fbsd.import_building_type!(rbsd, stat_data)
 @time fbsd.import_frame_material!(rbsd, stat_data)
 @time fbsd.import_heat_source!(rbsd, stat_data)
 @time fbsd.import_location_id!(rbsd, stat_data)
+#=
 @time fbsd.import_building_stock__building_type__building_period__location_id__heat_source!(rbsd, stat_data)
 @time fbsd.import_building_type__location_id__building_period!(rbsd, stat_data)
 @time fbsd.import_building_type__location_id__frame_material!(rbsd, stat_data)
