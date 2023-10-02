@@ -31,6 +31,7 @@ rbsd = fbsd.RawBuildingStockData()
 
 
 ## Test importing statistical data into the raw data container
+
 @time fbsd.import_building_period!(rbsd, stat_data)
 @time fbsd.import_building_stock!(rbsd, stat_data)
 @time fbsd.import_building_type!(rbsd, stat_data)
@@ -45,6 +46,7 @@ rbsd = fbsd.RawBuildingStockData()
 
 
 ## Test importing structural data into the raw data container
+
 @time fbsd.import_layer_id!(rbsd, def_data)
 @time fbsd.import_source!(rbsd, def_data)
 @time fbsd.import_structure!(rbsd, def_data)

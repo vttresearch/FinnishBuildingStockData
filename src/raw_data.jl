@@ -385,7 +385,10 @@ function _import_oc!(
 )
     # Fetch and add the relevant objects
     push!(rbsd.object_classes, string(oc))
-    append!(rbsd.objects, unique(df[!, oc]))
+    append!(
+        rbsd.objects,
+        [[string(oc), obj] for obj in unique(df[!, oc])]
+    )
 end
 function _import_oc!(
     rbsd::RawBuildingStockData,
@@ -718,15 +721,19 @@ function _import_rc!(
     # Import relationship parameter defaults.
     append!(
         rbsd.relationship_parameters,
-        [string(rc), string(param), nothing]
-        for param in params
+        [
+            [string(rc), string(param), nothing]
+            for param in params
+        ]
     )
     # Import relationship parameter values.
     append!(
         rbsd.relationship_parameter_values,
-        [string(rc), [r[oc] for oc in object_classes], string(param), r[param]]
-        for r in eachrow(df)
-        for param in params
+        [
+            [string(rc), [r[oc] for oc in object_classes], string(param), r[param]]
+            for r in eachrow(df)
+            for param in params
+        ]
     )
 end
 function _import_rc!(
@@ -736,7 +743,10 @@ function _import_rc!(
     object_classes::Vector{Symbol}=Symbol.(split(string(rc), "__"))
 )
     # Add relationships
-    push!(rbsd.relationship_classes, string(rc))
+    push!(
+        rbsd.relationship_classes,
+        [string(rc), string.(object_classes)]
+    )
     append!(
         rbsd.relationships,
         unique(
