@@ -349,18 +349,18 @@ function import_ventilation_space_heat_flow_direction!(
     df = dp["ventilation_spaces"][!, 1:4]
     dirs = Symbol.(names(df[!, 2:end]))
     # Import object class and objects
-    push!(rbsd.object_classes, [String(oc)])
+    push!(rbsd.object_classes, [oc])
     append!(rbsd.objects, [[oc, String(dir)] for dir in dirs])
     # Import parameter defaults.
-    push!(rbsd.object_parameters, [String(oc), String(param), nothing])
+    push!(rbsd.object_parameters, [oc, param, nothing])
     # Import map parameter value.
     append!(
         rbsd.object_parameter_values,
         [
             [
-                String(oc),
+                oc,
                 String(dir),
-                String(param),
+                param,
                 Dict(
                     "type" => "map",
                     "index_type" => "float",
@@ -409,7 +409,7 @@ function _import_oc!(
     push!(rbsd.object_classes, [String(oc)])
     append!(
         rbsd.objects,
-        [[String(oc), obj] for obj in unique(df[!, oc])]
+        [[String(oc), String(obj)] for obj in unique(df[!, oc])]
     )
 end
 function _import_oc!(
@@ -432,7 +432,7 @@ function _import_oc!(
     append!(
         rbsd.object_parameter_values,
         [
-            [String(oc), r[oc], String(param), r[param]]
+            [String(oc), String(r[oc]), String(param), r[param]]
             for r in eachrow(df)
             for param in params
         ]
@@ -752,7 +752,7 @@ function _import_rc!(
     append!(
         rbsd.relationship_parameter_values,
         [
-            [String(rc), [r[oc] for oc in object_classes], String(param), r[param]]
+            [String(rc), [String(r[oc]) for oc in object_classes], String(param), r[param]]
             for r in eachrow(df)
             for param in params
         ]
@@ -772,7 +772,7 @@ function _import_rc!(
     append!(
         rbsd.relationships,
         unique(
-            [String(rc), [r[oc] for oc in object_classes]]
+            [String(rc), [String(r[oc]) for oc in object_classes]]
             for r in eachrow(df)
         )
     )

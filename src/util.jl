@@ -1,8 +1,32 @@
 #=
     util.jl
 
-Contains miscellaneous utility functions.
+Contains miscellaneous utility functions and extensions to other modules.
 =#
+
+## Extend Base where necessary
+
+Base.String(x::Int64) = String(string(x))
+
+
+## Extend SpineInterface where necessary
+
+SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
+SpineInterface.parameter_value(x::Missing) = parameter_value(nothing)
+function SpineInterface.using_spinedb(rbsd::RawBuildingStockData, mod=@__MODULE__; filters=nothing)
+    using_spinedb(
+        Dict(
+            string(field) => getfield(rbsd, field)
+            for field in fieldnames(RawBuildingStockData)
+        ),
+        mod;
+        filters=filters
+    )
+end
+SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), class_name)
+
+
+## Miscellaneous functions
 
 """
     _check(cond::Bool, msg::String)
@@ -141,22 +165,6 @@ function filter_entity_class!(rc::SpineInterface.RelationshipClass; kwargs...)
     filter!(rel -> all(rel[i] in kw[2] for (kw, i) in kw_index_map), rc.relationships)
     filter!(pair -> pair[1] in rc.relationships, rc.parameter_values)
 end
-
-
-# Extend SpineInterface where necessary
-SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
-SpineInterface.parameter_value(x::Missing) = parameter_value(nothing)
-function SpineInterface.using_spinedb(rbsd::RawBuildingStockData, mod=@__MODULE__; filters=nothing)
-    using_spinedb(
-        Dict(
-            string(field) => getfield(rbsd, field)
-            for field in fieldnames(RawBuildingStockData)
-        ),
-        mod;
-        filters=filters
-    )
-end
-SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), class_name)
 
 
 """
