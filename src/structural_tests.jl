@@ -282,6 +282,10 @@ function test_ventilation_space_heat_flow_direction(;
                         param(ventilation_space_heat_flow_direction=dir) isa type,
                         "Invalid `$(string(param))` for `$(dir)`! `$(string(type))` required.",
                     )
+                    @test _check(
+                        !isempty(param(ventilation_space_heat_flow_direction=dir)),
+                        "Empty `$(string(param))` for `$(dir)` not permitted!"
+                    )
                 end
             else
                 break
