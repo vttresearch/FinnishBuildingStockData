@@ -39,13 +39,13 @@ function create_processed_statistics!(
     num_lids = Int64(min(length(mod.location_id()), num_lids))
     lids = mod.location_id()[1:num_lids]
     @info "Including `location_id`s up to `$(num_lids)`..."
-    @time filter_entity_class!(mod.location_id; location_id = lids)
+    @time filter_entity_class!(mod.location_id; location_id=lids)
 
     # Process data
     @info "Add `building_stock_year` parameter..."
     @time add_building_stock_year!(mod)
     @info "Creating final building stock statistics..."
-    @time create_building_stock_statistics!(mod; location_id = lids)
+    @time create_building_stock_statistics!(mod; location_id=lids)
     @info """
     Creating structural statistics in module `$(mod)` using the following parameters:
     - `thermal_conductivity_weight` = $(thermal_conductivity_weight)
@@ -54,13 +54,13 @@ function create_processed_statistics!(
     """
     @time create_structure_statistics!(
         mod;
-        location_id = lids,
-        thermal_conductivity_weight = thermal_conductivity_weight,
-        interior_node_depth = interior_node_depth,
-        variation_period = variation_period,
+        location_id=lids,
+        thermal_conductivity_weight=thermal_conductivity_weight,
+        interior_node_depth=interior_node_depth,
+        variation_period=variation_period
     )
     @info "Creating ventilation and fenestration statistics..."
-    @time create_ventilation_and_fenestration_statistics!(mod; location_id = lids)
+    @time create_ventilation_and_fenestration_statistics!(mod; location_id=lids)
 end
 
 
@@ -78,8 +78,8 @@ The `scramble_data` keyword can be used to scramble the database if needed.
 """
 function import_processed_data(
     url_out::String;
-    scramble_data = false,
-    mod::Module = @__MODULE__,
+    scramble_data=false,
+    mod::Module=@__MODULE__
 )
     @info "Importing processed data into output datastore at `$(url_out)`..."
     data = [

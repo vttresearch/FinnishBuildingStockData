@@ -17,10 +17,10 @@ Calculated as a simple average based on the `minimum_density_kg_m3` and
 ```
 The `mod` keyword is used to tweak the Module from which the parameters are read.
 """
-function density(material::Object; mod::Module = @__MODULE__)
+function density(material::Object; mod::Module=@__MODULE__)
     Float64(
-        mod.maximum_density_kg_m3(structure_material = material) +
-        mod.minimum_density_kg_m3(structure_material = material),
+        mod.maximum_density_kg_m3(structure_material=material) +
+        mod.minimum_density_kg_m3(structure_material=material),
     ) / 2.0
 end
 
@@ -37,10 +37,10 @@ c_{\\text{mean}} = \\frac{c_{\\text{min}} + c_{\\text{max}}}{2}
 ```
 The `mod` keyword is used to tweak the Module from which the parameters are read.
 """
-function specific_heat_capacity(material::Object; mod::Module = @__MODULE__)
+function specific_heat_capacity(material::Object; mod::Module=@__MODULE__)
     Float64(
-        mod.maximum_specific_heat_capacity_J_kgK(structure_material = material) +
-        mod.minimum_specific_heat_capacity_J_kgK(structure_material = material),
+        mod.maximum_specific_heat_capacity_J_kgK(structure_material=material) +
+        mod.minimum_specific_heat_capacity_J_kgK(structure_material=material),
     ) / 2.0
 end
 
@@ -64,12 +64,12 @@ The `mod` keyword is used to tweak the Module from which the parameters are read
 """
 function thermal_conductivity(
     material::Object;
-    weight::Float64 = 0.5,
-    mod::Module = @__MODULE__,
+    weight::Float64=0.5,
+    mod::Module=@__MODULE__
 )
     0 <= weight <= 1 ? nothing : @error "`weight` must be between 0 and 1!"
     Float64(
-        weight * mod.maximum_thermal_conductivity_W_mK(structure_material = material) +
-        (1 - weight) * mod.minimum_thermal_conductivity_W_mK(structure_material = material),
+        weight * mod.maximum_thermal_conductivity_W_mK(structure_material=material) +
+        (1 - weight) * mod.minimum_thermal_conductivity_W_mK(structure_material=material),
     )
 end
