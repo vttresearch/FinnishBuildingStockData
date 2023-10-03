@@ -17,6 +17,12 @@ statistical_path = "data/finnish_building_stock_forecasts/"
 RT_structural_path = "data/finnish_RT_structural_data/"
 def_structural_path = "data/Finnish-building-stock-default-structural-data/"
 
+# Define parameter values and modules for processing.
+m = Module()
+num_lids = Inf
+tcw = 0.5
+ind = 0.1
+vp = 2225140.0
 
 ## Test reading data into dataframes
 
@@ -73,12 +79,17 @@ rbsd = fbsd.RawBuildingStockData()
 ## Test using_spinedb
 
 @time "Generating convenience functions..."
-@time using_spinedb(rbsd)
+@time using_spinedb(rbsd, m)
 
 
 ## Run input data tests to see if they pass
 
 @info "Running structural input data tests..."
-@time run_structural_tests(; limit=Inf)
+@time run_structural_tests(; limit=Inf, mod=m)
 @info "Running statistical input data tests..."
-@time run_statistical_tests(; limit=Inf)
+@time run_statistical_tests(; limit=Inf, mod=m)
+
+
+## Test processing the data
+
+@time create_processed_statistics!(m, num_lids, tcw, ind, vp)
