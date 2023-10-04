@@ -343,10 +343,12 @@ function import_ventilation_space_heat_flow_direction!(
     rbsd::RawBuildingStockData,
     dp::Dict{String,DataFrame}
 )
-    # Define and fetch ventilation space data.
+    # Abort import if df is empty
+    df = dp["ventilation_spaces"][!, 1:4]
+    isempty(df) && return nothing
+    # Define ventilation space data.
     oc = "ventilation_space_heat_flow_direction"
     param = "thermal_resistance_m2K_W"
-    df = dp["ventilation_spaces"][!, 1:4]
     dirs = Symbol.(names(df[!, 2:end]))
     # Import object class and objects
     push!(rbsd.object_classes, [oc])
@@ -395,6 +397,8 @@ function _import_oc!(
     stackrange::UnitRange{Int64},
     args...
 )
+    # Abort import if df is empty
+    isempty(df) && return nothing
     # Reshape dataframe prior to extracting objects.
     df = rename(stack(df, stackrange), :variable => oc)
     # Fetch and add the relevant objects
@@ -405,6 +409,8 @@ function _import_oc!(
     df::DataFrame,
     oc::Symbol
 )
+    # Abort import if df is empty
+    isempty(df) && return nothing
     # Fetch and add the relevant objects
     push!(rbsd.object_classes, [String(oc)])
     append!(
@@ -418,6 +424,8 @@ function _import_oc!(
     oc::Symbol,
     params::Vector{Symbol}
 )
+    # Abort import if df is empty
+    isempty(df) && return nothing
     # Import the object class and objects
     _import_oc!(rbsd, df, oc)
     # Import the desired parameter defaults.
@@ -726,6 +734,8 @@ function _import_rc!(
     params::Vector{Symbol};
     object_classes::Vector{Symbol}=Symbol.(split(String(rc), "__"))
 )
+    # Abort import if df is empty
+    isempty(df) && return nothing
     # Reshape dataframe prior to extracting relationships.
     df = rename(stack(df, stackrange), [:variable => stackname, :value => rename_value])
     # Fetch and add the relevant relationships
@@ -738,6 +748,8 @@ function _import_rc!(
     params::Vector{Symbol};
     object_classes::Vector{Symbol}=Symbol.(split(String(rc), "__"))
 )
+    # Abort import if df is empty
+    isempty(df) && return nothing
     # Import the relationship class in question.
     _import_rc!(rbsd, df, rc; object_classes=object_classes)
     # Import relationship parameter defaults.
@@ -764,6 +776,8 @@ function _import_rc!(
     rc::Symbol;
     object_classes::Vector{Symbol}=Symbol.(split(String(rc), "__"))
 )
+    # Abort import if df is empty
+    isempty(df) && return nothing
     # Add relationships
     push!(
         rbsd.relationship_classes,
