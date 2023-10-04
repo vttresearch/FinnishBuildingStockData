@@ -17,6 +17,9 @@ statistical_path = "data/finnish_building_stock_forecasts/"
 RT_structural_path = "data/finnish_RT_structural_data/"
 def_structural_path = "data/Finnish-building-stock-default-structural-data/"
 
+# Define url for archetype building definitions
+url = "sqlite:///C:\\Users\\trtopi\\OneDrive - Teknologian Tutkimuskeskus VTT\\_PROJEKTIT\\FlexiB\\_SPINEPROJECTS\\full_finland_model\\.spinetoolbox\\items\\archetype_definitions\\archetype_definitions.sqlite"
+
 # Define parameter values and modules for processing.
 m = Module()
 num_lids = Inf
@@ -109,4 +112,15 @@ rbsd = fbsd.RawBuildingStockData()
 
 ## Test importing processed data. NOTE! This can take a long while with large datasets.
 
-@time import_processed_data("sqlite://"; mod=m)
+@time import_processed_data(
+    "sqlite://";
+    mod=m,
+    fields=[
+        :building_period,
+        :building_stock,
+        :building_type,
+        :heat_source,
+        :location_id,
+        :structure_type,
+    ]
+)
