@@ -105,3 +105,8 @@ rbsd = fbsd.RawBuildingStockData()
 ## Test processing the data
 
 @time create_processed_statistics!(m, num_lids, tcw, ind, vp)
+
+
+## Test importing processed data. NOTE! This can take a long while with large datasets.
+
+@time import_processed_data("sqlite://"; mod=m)

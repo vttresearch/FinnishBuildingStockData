@@ -69,30 +69,44 @@ end
         url_out::String;
         scramble_data = false,
         mod::Module = @__MODULE__,
+        fields::Vector{Symbol}=[
+            :building_period,
+            :building_stock,
+            :building_type,
+            :heat_source,
+            :location_id,
+            :structure_type,
+            :building_stock_statistics,
+            :structure_statistics,
+            :ventilation_and_fenestration_statistics
+        ]
     )
 
 Imports the processed data from module `mod` into the datastore at `url_out`.
 
 The `mod` keyword can be used to tweak which Module the data is accessed from.
 The `scramble_data` keyword can be used to scramble the database if needed.
+The `fields` keyword can be used to control which object and relationship
+classes are imported into the desired url.
 """
 function import_processed_data(
     url_out::String;
     scramble_data=false,
-    mod::Module=@__MODULE__
+    mod::Module=@__MODULE__,
+    fields::Vector{Symbol}=[
+        :building_period,
+        :building_stock,
+        :building_type,
+        :heat_source,
+        :location_id,
+        :structure_type,
+        :building_stock_statistics,
+        :structure_statistics,
+        :ventilation_and_fenestration_statistics
+    ]
 )
     @info "Importing processed data into output datastore at `$(url_out)`..."
-    data = [
-        mod.building_period,
-        mod.building_stock,
-        mod.building_type,
-        mod.heat_source,
-        mod.location_id,
-        mod.structure_type,
-        mod.building_stock_statistics,
-        mod.structure_statistics,
-        mod.ventilation_and_fenestration_statistics,
-    ]
+    data = [getfield(mod, f) for f in fields]
     if scramble_data
         for d in data
             @info "Scrambling `$(d)`..."
