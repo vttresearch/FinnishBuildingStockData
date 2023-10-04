@@ -32,7 +32,7 @@ def_data = fbsd.read_datapackage(def_structural_path)
 
 
 ## Test initializing a `RawBuildingStockData` container
-
+#=
 rbsd = fbsd.RawBuildingStockData()
 
 
@@ -80,6 +80,18 @@ rbsd = fbsd.RawBuildingStockData()
 
 @time "Generating convenience functions..."
 @time using_spinedb(rbsd, m)
+=#
+
+## Test importing data from Data Packages.
+
+@time using_datapackages(
+    [
+        statistical_path,
+        RT_structural_path,
+        def_structural_path
+    ],
+    m
+)
 
 
 ## Run input data tests to see if they pass

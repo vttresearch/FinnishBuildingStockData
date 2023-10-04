@@ -46,6 +46,26 @@ end
 
 
 """
+    import_datapackage!(
+        rbsd::RawBuildingStockData,
+        dp::Dict{String,DataFrame}
+    )
+"""
+function import_datapackage!(
+    rbsd::RawBuildingStockData,
+    dp::Dict{String,DataFrame}
+)
+    if length(dp) == 5
+        import_statistical_datapackage!(rbsd, dp)
+    elseif length(dp) == 8
+        import_structural_datapackage!(rbsd, dp)
+    else
+        error("Datapackage length $(length(dp)) not recognized!")
+    end
+end
+
+
+"""
     import_statistical_datapackage!(
         rbsd::RawBuildingStockData,
         dp::Dict{String,DataFrame}

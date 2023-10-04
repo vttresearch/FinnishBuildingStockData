@@ -101,3 +101,29 @@ function import_processed_data(
     end
     @time import_data(url_out, data, "Import processed FinnishBuildingStockData.")
 end
+
+
+"""
+    using_datapackages(
+        files::Vector{String},
+        m::Module=@__MODULE__
+    )
+
+Read data directly from data packages through `using_spinedb`.
+"""
+function using_datapackages(
+    files::Vector{String},
+    m::Module=@__MODULE__
+)
+    @info "Initialize data and read Data Packages..."
+    @time begin
+        rbsd = RawBuildingStockData()
+        dps = read_datapackage.(files)
+    end
+    @info "Reading Data Packages..."
+    for dp in dps
+        @time import_datapackage!(rbsd, dp)
+    end
+    @info "Generating convenience functions..."
+    @time using_spinedb(rbsd, m)
+end

@@ -26,6 +26,7 @@ include("main.jl")
 
 # Exports required for main program
 export using_spinedb,
+    using_datapackages,
     calculate_structure_properties,
     layers_with_properties,
     filter_entity_class!,
