@@ -23,17 +23,18 @@ defs_url = "sqlite:///C:\\Users\\trtopi\\OneDrive - Teknologian Tutkimuskeskus V
 
 # Define parameter values and modules for processing.
 m = Module()
+m2 = Module()
 num_lids = 3.0 # Limit number of location ids to save time on test processing.
 tcw = 0.5
 ind = 0.1
 vp = 2225140.0
 
 ## Test reading data into dataframes
-
+#=
 stat_data = fbsd.read_datapackage(statistical_path)
 RT_data = fbsd.read_datapackage(RT_structural_path)
 def_data = fbsd.read_datapackage(def_structural_path)
-
+=#
 
 ## Test initializing a `RawSpineData` container
 #=
@@ -97,6 +98,7 @@ rsd = fbsd.RawSpineData()
 
 ## Test generating convenience functions for raw data
 
+@info "Generating convenience functions..."
 @time using_spinedb(data, m)
 
 
@@ -110,20 +112,22 @@ rsd = fbsd.RawSpineData()
 
 ## Test importing definitions from URL
 
+@info "Import definitions from URL..."
 @time defs = fbsd.data_from_url(defs_url)
 
 
 ## Test merging data and definitions
 
+@info "Merge definitions and generate convenience functions..."
 @time data_and_defs = merge(data, defs)
-@time using_spinedb(data_and_defs, m)
+@time using_spinedb(data_and_defs, m2)
 
 
 ## Test processing the data
 
-@time create_processed_statistics!(m, num_lids, tcw, ind, vp)
+@time create_processed_statistics!(m2, num_lids, tcw, ind, vp)
 
 
 ## Test importing processed data. NOTE! This can take a long while with large datasets.
 
-@time import_processed_data("sqlite://"; mod=m)
+@time import_processed_data("sqlite://"; mod=m2)
