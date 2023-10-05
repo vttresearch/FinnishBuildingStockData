@@ -56,6 +56,14 @@ julia> using FinnishBuildingStockData
 However, this is only necessary for more advanced usage.
 
 
+### Working outside Spine Toolbox
+
+In v2.0.0, functionality was added to read and process data outside Spine Toolbox in order to
+save processing time when dealing with large datasets. At the time of writing,
+Spine DB API can be a bit slow when reading and manipulating large databases.
+See `scripts/raw_data_testscript.jl` for at least some guidance how this functionality works.
+
+
 ## Documentation
 
 [Online documentation is hosted here](https://vttresearch.github.io/FinnishBuildingStockData/),
