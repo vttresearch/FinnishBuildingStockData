@@ -1,8 +1,4 @@
 Manifest.toml
 .vscode/
 scripts/figs/
-<<<<<<< HEAD
-data/
-=======
 data/*
->>>>>>> main
