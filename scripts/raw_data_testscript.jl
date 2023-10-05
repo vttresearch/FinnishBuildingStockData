@@ -127,3 +127,23 @@ rsd = fbsd.RawSpineData()
 ## Test importing processed data. NOTE! This can take a long while with large datasets.
 
 @time import_processed_data("sqlite://"; mod=m2)
+
+
+## Test post-process filtering
+
+@time filter_module!(
+    m;
+    obj_classes=[
+        :building_period,
+        :building_stock,
+        :building_type,
+        :heat_source,
+        :location_id,
+        :structure_type
+    ],
+    rel_classes=[
+        :building_stock_statistics,
+        :structure_statistics,
+        :ventilation_and_fenestration_statistics
+    ]
+)

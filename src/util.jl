@@ -199,3 +199,42 @@ end
 function _get(oc::ObjectClass, names::Vector{Symbol})
     [_get(oc, name) for name in names]
 end
+
+
+"""
+    _clear_spine_parameters!(
+        m::Module,
+        ps_to_clear::Vector,
+        to_clear::Pair{Symbol,Vector{Symbol}},
+        msg::String,
+    )
+
+Clear loaded spine parameters to remove reference to classes.
+"""
+function _clear_spine_parameters!(
+    m::Module,
+    to_clear::Pair{Symbol,Vector{T}},
+    msg::String,
+) where {T}
+    ps_to_clear = []
+    for (p, v) in m._spine_parameters
+        setdiff!(v.classes, [getfield(m, to_clear[1])[c] for c in to_clear[2]])
+        isempty(v.classes) && push!(ps_to_clear, p)
+    end
+    _clear_symbols!(m, ps_to_clear, msg)
+end
+
+
+"""
+    _clear_symbols!(m::Module, syms_to_clear::Vector, msg::String)
+
+Replace symbols in `m` with a `msg` string.
+"""
+function _clear_symbols!(m::Module, syms_to_clear::Vector, msg::String)
+    for s in syms_to_clear
+        @eval m begin
+            $s = $msg
+            export $s
+        end
+    end
+end
