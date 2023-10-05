@@ -11,6 +11,19 @@ become prohibitively slow to read and write to at full-Finland-scales.
     RawSpineData
 
 A `struct` for holding the raw Spine Datastore contents.
+
+Follows the raw JSON formatting of Spine Datastores, with the following fields:
+- `object_classes::Vector`
+- `object_classes::Vector`
+- `objects::Vector`
+- `object_parameters::Vector`
+- `object_parameter_values::Vector`
+- `relationship_classes::Vector`
+- `relationships::Vector`
+- `relationship_parameters::Vector`
+- `relationship_parameter_values::Vector`
+- `alternatives::Vector`
+- `parameter_value_lists::Vector`
 """
 struct RawSpineData
     object_classes::Vector
@@ -76,7 +89,7 @@ end
         dp::Dict{String,DataFrame}
     )
 
-Imports a statistical datapackage into a `RawSpineData` struct.
+Imports a statistical datapackage into a [`FinnishBuildingStockData.RawSpineData`](@ref).
 """
 function import_statistical_datapackage!(
     rsd::RawSpineData,
@@ -102,7 +115,7 @@ end
         dp::Dict{String,DataFrame}
     )
 
-Imports a structural datapackage into a `RawSpineData` struct.
+Imports a structural datapackage into a [`FinnishBuildingStockData.RawSpineData`](@ref) struct.
 """
 function import_structural_datapackage!(
     rsd::RawSpineData,

@@ -37,7 +37,7 @@ SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), cl
 """
     _merge_data!(rsd1::RawSpineData, rsds::RawSpineData ...)
 
-Helper function for merging `RawSpineData`.
+Helper function for merging [`FinnishBuildingStockData.RawSpineData`](@ref).
 """
 function _merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
     for rsd in rsds
