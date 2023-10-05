@@ -118,26 +118,40 @@ end
 
 
 """
-    using_datapackages(
-        files::Vector{String},
-        m::Module=@__MODULE__
-    )
+    data_from_package(filepaths::String...)
 
-Read data directly from data packages through `using_spinedb`.
+Read and form `RawSpineData` from Data Packages at `filepaths`.
 """
-function using_datapackages(
-    files::Vector{String},
-    m::Module=@__MODULE__
-)
-    @info "Initialize data and read Data Packages..."
+function data_from_package(filepaths::String...)
+    @info "Importing Data Packages..."
     @time begin
         rsd = RawSpineData()
-        dps = read_datapackage.(files)
+        dps = read_datapackage.(filepaths)
     end
-    @info "Reading Data Packages..."
     for dp in dps
         @time import_datapackage!(rsd, dp)
     end
-    @info "Generating convenience functions..."
-    @time using_spinedb(rsd, m)
+    return rsd
+end
+
+
+"""
+    data_from_url(urls::String...; upgrade=false, filters=Dict())
+
+Read and form `RawSpineData` from Spine Datastores at `urls`.
+"""
+function data_from_url(urls::String...; upgrade=false, filters=Dict())
+    @info "Importing from URLs..."
+    rsd = RawSpineData()
+    for url in urls
+        @time merge!(
+            rsd,
+            RawSpineData(
+                SpineInterface._db(url; upgrade=upgrade) do db
+                    SpineInterface._export_data(db; filters=filters)
+                end
+            )
+        )
+    end
+    return rsd
 end

@@ -7,6 +7,12 @@ Contains miscellaneous utility functions and extensions to other modules.
 ## Extend Base where necessary
 
 Base.String(x::Int64) = String(string(x))
+Base.merge!(rsd1::RawSpineData, rsds::RawSpineData...) = _merge_data!(rsd1, rsds...)
+function Base.merge(rsds::RawSpineData...)
+    args = collect(rsds)
+    data = deepcopy(popfirst!(args))
+    return _merge_data!(data, args...)
+end
 
 
 ## Extend SpineInterface where necessary
@@ -27,6 +33,21 @@ SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), cl
 
 
 ## Miscellaneous functions
+
+"""
+    _merge_data!(rsd1::RawSpineData, rsds::RawSpineData ...)
+
+Helper function for merging `RawSpineData`.
+"""
+function _merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
+    for rsd in rsds
+        for fn in fieldnames(RawSpineData)
+            unique!(append!(getfield(rsd1, fn), getfield(rsd, fn)))
+        end
+    end
+    return rsd1
+end
+
 
 """
     _check(cond::Bool, msg::String)

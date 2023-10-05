@@ -88,14 +88,16 @@ rsd = fbsd.RawSpineData()
 
 ## Test importing data from Data Packages.
 
-@time using_datapackages(
-    [
-        statistical_path,
-        RT_structural_path,
-        def_structural_path
-    ],
-    m
+@time data = fbsd.data_from_package(
+    statistical_path,
+    RT_structural_path,
+    def_structural_path
 )
+
+
+## Test generating convenience functions for raw data
+
+@time using_spinedb(data, m)
 
 
 ## Run input data tests to see if they pass
@@ -106,6 +108,17 @@ rsd = fbsd.RawSpineData()
 @time run_statistical_tests(; limit=Inf, mod=m)
 
 
+## Test importing definitions from URL
+
+@time defs = fbsd.data_from_url(defs_url)
+
+
+## Test merging data and definitions
+
+@time data_and_defs = merge(data, defs)
+@time using_spinedb(data_and_defs, m)
+
+
 ## Test processing the data
 
 @time create_processed_statistics!(m, num_lids, tcw, ind, vp)
@@ -113,24 +126,4 @@ rsd = fbsd.RawSpineData()
 
 ## Test importing processed data. NOTE! This can take a long while with large datasets.
 
-@time import_processed_data(
-    "sqlite://";
-    mod=m,
-    fields=[
-        :building_period,
-        :building_stock,
-        :building_type,
-        :heat_source,
-        :location_id,
-        :structure_type,
-    ]
-)
-
-
-## Test loading definitions into `RawSpineData`
-
-defs = fbsd.RawSpineData(
-    SpineInterface._db(defs_url; upgrade=false) do db
-        SpineInterface._export_data(db)
-    end
-)
+@time import_processed_data("sqlite://"; mod=m)
