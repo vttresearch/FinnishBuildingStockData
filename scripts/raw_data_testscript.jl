@@ -1,5 +1,5 @@
 #=
-    testscript.jl
+    raw_data_testscript.jl
 
 A testing script for direct raw data input and processing.
 =#
@@ -8,10 +8,6 @@ A testing script for direct raw data input and processing.
 
 using FinnishBuildingStockData
 fbsd = FinnishBuildingStockData
-using JSON
-using CSV
-using DataFrames
-using SpineInterface
 
 # Define paths to the datasets to be processed
 statistical_path = "data/finnish_building_stock_forecasts/"
