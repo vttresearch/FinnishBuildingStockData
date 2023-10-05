@@ -1,8 +1,53 @@
 #=
     util.jl
 
-Contains miscellaneous utility functions.
+Contains miscellaneous utility functions and extensions to other modules.
 =#
+
+## Extend Base where necessary
+
+Base.String(x::Int64) = String(string(x))
+Base.merge!(rsd1::RawSpineData, rsds::RawSpineData...) = _merge_data!(rsd1, rsds...)
+function Base.merge(rsds::RawSpineData...)
+    args = collect(rsds)
+    data = deepcopy(popfirst!(args))
+    return _merge_data!(data, args...)
+end
+
+
+## Extend SpineInterface where necessary
+
+SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
+SpineInterface.parameter_value(x::Missing) = parameter_value(nothing)
+function SpineInterface.using_spinedb(rsd::RawSpineData, mod=@__MODULE__; filters=nothing)
+    using_spinedb(
+        Dict(
+            string(field) => getfield(rsd, field)
+            for field in fieldnames(RawSpineData)
+        ),
+        mod;
+        filters=filters
+    )
+end
+SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), class_name)
+
+
+## Miscellaneous functions
+
+"""
+    _merge_data!(rsd1::RawSpineData, rsds::RawSpineData ...)
+
+Helper function for merging `RawSpineData`.
+"""
+function _merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
+    for rsd in rsds
+        for fn in fieldnames(RawSpineData)
+            unique!(append!(getfield(rsd1, fn), getfield(rsd, fn)))
+        end
+    end
+    return rsd1
+end
+
 
 """
     _check(cond::Bool, msg::String)
@@ -140,4 +185,17 @@ function filter_entity_class!(rc::SpineInterface.RelationshipClass; kwargs...)
     kw_index_map = Dict(kw => findfirst(kw[1] .== rc.object_class_names) for kw in kwargs)
     filter!(rel -> all(rel[i] in kw[2] for (kw, i) in kw_index_map), rc.relationships)
     filter!(pair -> pair[1] in rc.relationships, rc.parameter_values)
+end
+
+
+"""
+    _get(oc::ObjectClass, name::Symbol)
+
+Helper function to fetch existing object of class `oc` and create it if missing.
+"""
+function _get(oc::ObjectClass, name::Symbol)
+    !isnothing(oc(name)) ? oc(name) : Object(name, oc.name)
+end
+function _get(oc::ObjectClass, names::Vector{Symbol})
+    [_get(oc, name) for name in names]
 end

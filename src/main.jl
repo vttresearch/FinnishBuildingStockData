@@ -39,13 +39,13 @@ function create_processed_statistics!(
     num_lids = Int64(min(length(mod.location_id()), num_lids))
     lids = mod.location_id()[1:num_lids]
     @info "Including `location_id`s up to `$(num_lids)`..."
-    @time filter_entity_class!(mod.location_id; location_id = lids)
+    @time filter_entity_class!(mod.location_id; location_id=lids)
 
     # Process data
     @info "Add `building_stock_year` parameter..."
     @time add_building_stock_year!(mod)
     @info "Creating final building stock statistics..."
-    @time create_building_stock_statistics!(mod; location_id = lids)
+    @time create_building_stock_statistics!(mod; location_id=lids)
     @info """
     Creating structural statistics in module `$(mod)` using the following parameters:
     - `thermal_conductivity_weight` = $(thermal_conductivity_weight)
@@ -54,13 +54,13 @@ function create_processed_statistics!(
     """
     @time create_structure_statistics!(
         mod;
-        location_id = lids,
-        thermal_conductivity_weight = thermal_conductivity_weight,
-        interior_node_depth = interior_node_depth,
-        variation_period = variation_period,
+        location_id=lids,
+        thermal_conductivity_weight=thermal_conductivity_weight,
+        interior_node_depth=interior_node_depth,
+        variation_period=variation_period
     )
     @info "Creating ventilation and fenestration statistics..."
-    @time create_ventilation_and_fenestration_statistics!(mod; location_id = lids)
+    @time create_ventilation_and_fenestration_statistics!(mod; location_id=lids)
 end
 
 
@@ -69,30 +69,44 @@ end
         url_out::String;
         scramble_data = false,
         mod::Module = @__MODULE__,
+        fields::Vector{Symbol}=[
+            :building_period,
+            :building_stock,
+            :building_type,
+            :heat_source,
+            :location_id,
+            :structure_type,
+            :building_stock_statistics,
+            :structure_statistics,
+            :ventilation_and_fenestration_statistics
+        ]
     )
 
 Imports the processed data from module `mod` into the datastore at `url_out`.
 
 The `mod` keyword can be used to tweak which Module the data is accessed from.
 The `scramble_data` keyword can be used to scramble the database if needed.
+The `fields` keyword can be used to control which object and relationship
+classes are imported into the desired url.
 """
 function import_processed_data(
     url_out::String;
-    scramble_data = false,
-    mod::Module = @__MODULE__,
+    scramble_data=false,
+    mod::Module=@__MODULE__,
+    fields::Vector{Symbol}=[
+        :building_period,
+        :building_stock,
+        :building_type,
+        :heat_source,
+        :location_id,
+        :structure_type,
+        :building_stock_statistics,
+        :structure_statistics,
+        :ventilation_and_fenestration_statistics
+    ]
 )
     @info "Importing processed data into output datastore at `$(url_out)`..."
-    data = [
-        mod.building_period,
-        mod.building_stock,
-        mod.building_type,
-        mod.heat_source,
-        mod.location_id,
-        mod.structure_type,
-        mod.building_stock_statistics,
-        mod.structure_statistics,
-        mod.ventilation_and_fenestration_statistics,
-    ]
+    data = [getfield(mod, f) for f in fields]
     if scramble_data
         for d in data
             @info "Scrambling `$(d)`..."
@@ -100,4 +114,44 @@ function import_processed_data(
         end
     end
     @time import_data(url_out, data, "Import processed FinnishBuildingStockData.")
+end
+
+
+"""
+    data_from_package(filepaths::String...)
+
+Read and form `RawSpineData` from Data Packages at `filepaths`.
+"""
+function data_from_package(filepaths::String...)
+    @info "Importing Data Packages..."
+    @time begin
+        rsd = RawSpineData()
+        dps = read_datapackage.(filepaths)
+    end
+    for dp in dps
+        @time import_datapackage!(rsd, dp)
+    end
+    return rsd
+end
+
+
+"""
+    data_from_url(urls::String...; upgrade=false, filters=Dict())
+
+Read and form `RawSpineData` from Spine Datastores at `urls`.
+"""
+function data_from_url(urls::String...; upgrade=false, filters=Dict())
+    @info "Importing from URLs..."
+    rsd = RawSpineData()
+    for url in urls
+        @time merge!(
+            rsd,
+            RawSpineData(
+                SpineInterface._db(url; upgrade=upgrade) do db
+                    SpineInterface._export_data(db; filters=filters)
+                end
+            )
+        )
+    end
+    return rsd
 end
