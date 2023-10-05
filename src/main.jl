@@ -120,7 +120,7 @@ end
 """
     data_from_package(filepaths::String...)
 
-Read and form `RawSpineData` from Data Packages at `filepaths`.
+Read and form [`FinnishBuildingStockData.RawSpineData`](@ref) from Data Packages at `filepaths`.
 """
 function data_from_package(filepaths::String...)
     @info "Importing Data Packages..."
@@ -138,7 +138,7 @@ end
 """
     data_from_url(urls::String...; upgrade=false, filters=Dict())
 
-Read and form `RawSpineData` from Spine Datastores at `urls`.
+Read and form [`FinnishBuildingStockData.RawSpineData`](@ref) from Spine Datastores at `urls`.
 """
 function data_from_url(urls::String...; upgrade=false, filters=Dict())
     @info "Importing from URLs..."
