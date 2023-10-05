@@ -89,7 +89,7 @@ rsd = fbsd.RawSpineData()
 
 ## Test importing data from Data Packages.
 
-@time data = fbsd.data_from_package(
+@time data = data_from_package(
     statistical_path,
     RT_structural_path,
     def_structural_path
@@ -113,7 +113,7 @@ rsd = fbsd.RawSpineData()
 ## Test importing definitions from URL
 
 @info "Import definitions from URL..."
-@time defs = fbsd.data_from_url(defs_url)
+@time defs = data_from_url(defs_url)
 
 
 ## Test merging data and definitions
