@@ -8,21 +8,23 @@ become prohibitively slow to read and write to at full-Finland-scales.
 =#
 
 """
-    RawBuildingStockData
+    RawSpineData
 
 A `struct` for holding the raw Spine Datastore contents.
 """
-struct RawBuildingStockData
+struct RawSpineData
     object_classes::Vector
-    relationship_classes::Vector
     objects::Vector
-    relationships::Vector
     object_parameters::Vector
-    relationship_parameters::Vector
     object_parameter_values::Vector
+    relationship_classes::Vector
+    relationships::Vector
+    relationship_parameters::Vector
     relationship_parameter_values::Vector
-    function RawBuildingStockData()
-        new([Vector{Any}() for fn in fieldnames(RawBuildingStockData)]...)
+    alternatives::Vector
+    prameter_value_lists::Vector
+    function RawSpineData()
+        new([Vector{Any}() for fn in fieldnames(RawSpineData)]...)
     end
 end
 
@@ -47,18 +49,18 @@ end
 
 """
     import_datapackage!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 """
 function import_datapackage!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     if length(dp) == 5
-        import_statistical_datapackage!(rbsd, dp)
+        import_statistical_datapackage!(rsd, dp)
     elseif length(dp) == 8
-        import_structural_datapackage!(rbsd, dp)
+        import_structural_datapackage!(rsd, dp)
     else
         error("Datapackage length $(length(dp)) not recognized!")
     end
@@ -67,74 +69,74 @@ end
 
 """
     import_statistical_datapackage!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 
-Imports a statistical datapackage into a `RawBuildingStockData` struct.
+Imports a statistical datapackage into a `RawSpineData` struct.
 """
 function import_statistical_datapackage!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     # We'll first have to import the object classes to ensure consistency.
-    import_building_period!(rbsd, dp)
-    import_building_stock!(rbsd, dp)
-    import_building_type!(rbsd, dp)
-    import_frame_material!(rbsd, dp)
-    import_heat_source!(rbsd, dp)
-    import_location_id!(rbsd, dp)
+    import_building_period!(rsd, dp)
+    import_building_stock!(rsd, dp)
+    import_building_type!(rsd, dp)
+    import_frame_material!(rsd, dp)
+    import_heat_source!(rsd, dp)
+    import_location_id!(rsd, dp)
     # Next, we can import the actual more complicated data.
-    import_building_stock__building_type__building_period__location_id__heat_source!(rbsd, dp)
-    import_building_type__location_id__building_period!(rbsd, dp)
-    import_building_type__location_id__frame_material!(rbsd, dp)
+    import_building_stock__building_type__building_period__location_id__heat_source!(rsd, dp)
+    import_building_type__location_id__building_period!(rsd, dp)
+    import_building_type__location_id__frame_material!(rsd, dp)
 end
 
 
 """
     import_structural_datapackage!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 
-Imports a structural datapackage into a `RawBuildingStockData` struct.
+Imports a structural datapackage into a `RawSpineData` struct.
 """
 function import_structural_datapackage!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     # We'll first have to import the object classes to ensure consistency.
-    import_layer_id!(rbsd, dp)
-    import_source!(rbsd, dp)
-    import_structure!(rbsd, dp)
-    import_structure_material!(rbsd, dp)
-    import_structure_type!(rbsd, dp)
-    import_ventilation_space_heat_flow_direction!(rbsd, dp)
+    import_layer_id!(rsd, dp)
+    import_source!(rsd, dp)
+    import_structure!(rsd, dp)
+    import_structure_material!(rsd, dp)
+    import_structure_type!(rsd, dp)
+    import_ventilation_space_heat_flow_direction!(rsd, dp)
     # Next, we can import the actual more complicated data.
-    import_source__structure!(rbsd, dp)
-    import_source__structure__building_type!(rbsd, dp)
-    import_source__structure__layer_id__structure_material!(rbsd, dp)
-    import_structure__structure_type!(rbsd, dp)
-    import_structure_material__frame_material!(rbsd, dp)
-    import_structure_type__ventilation_space_heat_flow_direction!(rbsd, dp)
-    import_fenestration_source__building_type!(rbsd, dp)
-    import_ventilation_source__building_type!(rbsd, dp)
+    import_source__structure!(rsd, dp)
+    import_source__structure__building_type!(rsd, dp)
+    import_source__structure__layer_id__structure_material!(rsd, dp)
+    import_structure__structure_type!(rsd, dp)
+    import_structure_material__frame_material!(rsd, dp)
+    import_structure_type__ventilation_space_heat_flow_direction!(rsd, dp)
+    import_fenestration_source__building_type!(rsd, dp)
+    import_ventilation_source__building_type!(rsd, dp)
 end
 
 
 """
     import_building_period!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the `building_period` object class from `dp`.
 """
 function import_building_period!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["building_periods"],
         :building_period,
         [:period_start, :period_end]
@@ -144,17 +146,17 @@ end
 
 """
     import_building_stock!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `building_stock` ObjectClass from `dp`.
 """
 function import_building_stock!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["numbers_of_buildings"],
         :building_stock
     )
@@ -163,17 +165,17 @@ end
 
 """
     import_building_type!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `building_type` ObjectClass from `dp`.
 """
 function import_building_type!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["average_floor_areas_m2"],
         :building_type
     )
@@ -182,17 +184,17 @@ end
 
 """
     import_frame_material!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `frame_material` ObjectClass from `dp`.
 """
 function import_frame_material!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["frame_material_shares"],
         :frame_material,
         4:8,
@@ -202,17 +204,17 @@ end
 
 """
     import_heat_source!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `heat_source` ObjectClass from `dp`.
 """
 function import_heat_source!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["numbers_of_buildings"],
         :heat_source,
         6:15,
@@ -222,17 +224,17 @@ end
 
 """
     import_layer_id!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `layer_id` ObjectClass from `dp`.
 """
 function import_layer_id!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["structure_layers"],
         :layer_id,
     )
@@ -241,17 +243,17 @@ end
 
 """
     import_location_id!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `location_id` ObjectClass from `dp`.
 """
 function import_location_id!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["municipalities"],
         :location_id,
         [:location_name],
@@ -261,17 +263,17 @@ end
 
 """
     import_source!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `source` ObjectClass from `dp`.
 """
 function import_source!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["sources"],
         :source,
         [:source_year, :source_description],
@@ -281,17 +283,17 @@ end
 
 """
     import_structure!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `structure` ObjectClass from `dp`.
 """
 function import_structure!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["structure_descriptions"],
         :structure,
     )
@@ -300,17 +302,17 @@ end
 
 """
     import_structure_material!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `structure_material` ObjectClass from `dp`.
 """
 function import_structure_material!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["materials"],
         :structure_material,
         [
@@ -328,17 +330,17 @@ end
 
 """
     import_structure_type!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `structure_type` ObjectClass from `dp`.
 """
 function import_structure_type!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_oc!(
-        rbsd,
+        rsd,
         dp["types"],
         :structure_type,
         [
@@ -354,13 +356,13 @@ end
 
 """
     import_ventilation_space_heat_flow_direction!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import `ventilation_space_heat_flow_direction` ObjectClass from `dp`.
 """
 function import_ventilation_space_heat_flow_direction!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     # Abort import if df is empty
@@ -371,13 +373,13 @@ function import_ventilation_space_heat_flow_direction!(
     param = "thermal_resistance_m2K_W"
     dirs = Symbol.(names(df[!, 2:end]))
     # Import object class and objects
-    push!(rbsd.object_classes, [oc])
-    append!(rbsd.objects, [[oc, String(dir)] for dir in dirs])
+    push!(rsd.object_classes, [oc])
+    append!(rsd.objects, [[oc, String(dir)] for dir in dirs])
     # Import parameter defaults.
-    push!(rbsd.object_parameters, [oc, param, nothing])
+    push!(rsd.object_parameters, [oc, param, nothing])
     # Import map parameter value.
     append!(
-        rbsd.object_parameter_values,
+        rsd.object_parameter_values,
         [
             [
                 oc,
@@ -397,7 +399,7 @@ end
 
 """
     _import_oc!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         df::DataFrame,
         oc::Symbol,
         stackrange::UnitRange{Int64},
@@ -411,7 +413,7 @@ while `params` is used to read parameter values if any.
 Both can be omitted if not needed.
 """
 function _import_oc!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     df::DataFrame,
     oc::Symbol,
     stackrange::UnitRange{Int64},
@@ -422,24 +424,24 @@ function _import_oc!(
     # Reshape dataframe prior to extracting objects.
     df = rename(stack(df, stackrange), :variable => oc)
     # Fetch and add the relevant objects
-    _import_oc!(rbsd, df, oc, args...)
+    _import_oc!(rsd, df, oc, args...)
 end
 function _import_oc!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     df::DataFrame,
     oc::Symbol
 )
     # Abort import if df is empty
     isempty(df) && return nothing
     # Fetch and add the relevant objects
-    push!(rbsd.object_classes, [String(oc)])
+    push!(rsd.object_classes, [String(oc)])
     append!(
-        rbsd.objects,
+        rsd.objects,
         [[String(oc), String(obj)] for obj in unique(df[!, oc])]
     )
 end
 function _import_oc!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     df::DataFrame,
     oc::Symbol,
     params::Vector{Symbol}
@@ -447,10 +449,10 @@ function _import_oc!(
     # Abort import if df is empty
     isempty(df) && return nothing
     # Import the object class and objects
-    _import_oc!(rbsd, df, oc)
+    _import_oc!(rsd, df, oc)
     # Import the desired parameter defaults.
     append!(
-        rbsd.object_parameters,
+        rsd.object_parameters,
         [
             [String(oc), String(param), nothing]
             for param in params
@@ -458,7 +460,7 @@ function _import_oc!(
     )
     # Import the parameter values.
     append!(
-        rbsd.object_parameter_values,
+        rsd.object_parameter_values,
         [
             [String(oc), String(r[oc]), String(param), r[param]]
             for r in eachrow(df)
@@ -470,17 +472,17 @@ end
 
 """
     import_building_stock__building_type__building_period__location_id__heat_source!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_building_stock__building_type__building_period__location_id__heat_source!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["numbers_of_buildings"],
         :building_stock__building_type__building_period__location_id__heat_source,
         :heat_source,
@@ -493,17 +495,17 @@ end
 
 """
     import_building_type__location_id__building_period!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_building_type__location_id__building_period!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["average_floor_areas_m2"],
         :building_type__location_id__building_period,
         :building_period,
@@ -516,17 +518,17 @@ end
 
 """
     import_building_type__location_id__frame_material!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_building_type__location_id__frame_material!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["frame_material_shares"],
         :building_type__location_id__frame_material,
         :frame_material,
@@ -539,17 +541,17 @@ end
 
 """
     import_source__structure!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_source__structure!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["structure_descriptions"],
         :source__structure,
         [
@@ -563,17 +565,17 @@ end
 
 """
     import_source__structure__building_type!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_source__structure__building_type!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["structure_descriptions"],
         :source__structure__building_type,
         :building_type,
@@ -586,17 +588,17 @@ end
 
 """
     import_source__structure__layer_id__structure_material!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_source__structure__layer_id__structure_material!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["structure_layers"],
         :source__structure__layer_id__structure_material,
         [
@@ -613,17 +615,17 @@ end
 
 """
     import_structure__structure_type!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_structure__structure_type!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["structure_layers"],
         :structure__structure_type
     )
@@ -632,17 +634,17 @@ end
 
 """
     import_structure_material__frame_material!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_structure_material__frame_material!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["materials"],
         :structure_material__frame_material
     )
@@ -651,17 +653,17 @@ end
 
 """
     import_structure_type__ventilation_space_heat_flow_direction!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_structure_type__ventilation_space_heat_flow_direction!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["types"],
         :structure_type__ventilation_space_heat_flow_direction
     )
@@ -670,17 +672,17 @@ end
 
 """
     import_fenestration_source__building_type!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_fenestration_source__building_type!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["fenestration"],
         :fenestration_source__building_type,
         [
@@ -696,17 +698,17 @@ end
 
 """
     import_ventilation_source__building_type!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         dp::Dict{String,DataFrame}
     )
 Import the desired relationship class.
 """
 function import_ventilation_source__building_type!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     dp::Dict{String,DataFrame}
 )
     _import_rc!(
-        rbsd,
+        rsd,
         dp["ventilation"],
         :ventilation_source__building_type,
         [
@@ -727,7 +729,7 @@ end
 
 """
     _import_rc!(
-        rbsd::RawBuildingStockData,
+        rsd::RawSpineData,
         df::DataFrame,
         rc::Symbol,
         stackname::Symbol,
@@ -745,7 +747,7 @@ while `params` is used to read parameter values if any.
 These can be omitted if not needed.
 """
 function _import_rc!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     df::DataFrame,
     rc::Symbol,
     stackname::Symbol,
@@ -759,10 +761,10 @@ function _import_rc!(
     # Reshape dataframe prior to extracting relationships.
     df = rename(stack(df, stackrange), [:variable => stackname, :value => rename_value])
     # Fetch and add the relevant relationships
-    _import_rc!(rbsd, df, rc, params; object_classes=object_classes)
+    _import_rc!(rsd, df, rc, params; object_classes=object_classes)
 end
 function _import_rc!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     df::DataFrame,
     rc::Symbol,
     params::Vector{Symbol};
@@ -771,10 +773,10 @@ function _import_rc!(
     # Abort import if df is empty
     isempty(df) && return nothing
     # Import the relationship class in question.
-    _import_rc!(rbsd, df, rc; object_classes=object_classes)
+    _import_rc!(rsd, df, rc; object_classes=object_classes)
     # Import relationship parameter defaults.
     append!(
-        rbsd.relationship_parameters,
+        rsd.relationship_parameters,
         [
             [String(rc), String(param), nothing]
             for param in params
@@ -782,7 +784,7 @@ function _import_rc!(
     )
     # Import relationship parameter values.
     append!(
-        rbsd.relationship_parameter_values,
+        rsd.relationship_parameter_values,
         [
             [String(rc), [String(r[oc]) for oc in object_classes], String(param), r[param]]
             for r in eachrow(df)
@@ -791,7 +793,7 @@ function _import_rc!(
     )
 end
 function _import_rc!(
-    rbsd::RawBuildingStockData,
+    rsd::RawSpineData,
     df::DataFrame,
     rc::Symbol;
     object_classes::Vector{Symbol}=Symbol.(split(String(rc), "__"))
@@ -800,11 +802,11 @@ function _import_rc!(
     isempty(df) && return nothing
     # Add relationships
     push!(
-        rbsd.relationship_classes,
+        rsd.relationship_classes,
         [String(rc), String.(object_classes)]
     )
     append!(
-        rbsd.relationships,
+        rsd.relationships,
         unique(
             [String(rc), [String(r[oc]) for oc in object_classes]]
             for r in eachrow(df)

@@ -131,13 +131,13 @@ function using_datapackages(
 )
     @info "Initialize data and read Data Packages..."
     @time begin
-        rbsd = RawBuildingStockData()
+        rsd = RawSpineData()
         dps = read_datapackage.(files)
     end
     @info "Reading Data Packages..."
     for dp in dps
-        @time import_datapackage!(rbsd, dp)
+        @time import_datapackage!(rsd, dp)
     end
     @info "Generating convenience functions..."
-    @time using_spinedb(rbsd, m)
+    @time using_spinedb(rsd, m)
 end

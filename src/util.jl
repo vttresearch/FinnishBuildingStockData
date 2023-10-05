@@ -13,11 +13,11 @@ Base.String(x::Int64) = String(string(x))
 
 SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
 SpineInterface.parameter_value(x::Missing) = parameter_value(nothing)
-function SpineInterface.using_spinedb(rbsd::RawBuildingStockData, mod=@__MODULE__; filters=nothing)
+function SpineInterface.using_spinedb(rsd::RawSpineData, mod=@__MODULE__; filters=nothing)
     using_spinedb(
         Dict(
-            string(field) => getfield(rbsd, field)
-            for field in fieldnames(RawBuildingStockData)
+            string(field) => getfield(rsd, field)
+            for field in fieldnames(RawSpineData)
         ),
         mod;
         filters=filters
