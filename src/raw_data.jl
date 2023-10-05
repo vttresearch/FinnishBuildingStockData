@@ -22,9 +22,12 @@ struct RawSpineData
     relationship_parameters::Vector
     relationship_parameter_values::Vector
     alternatives::Vector
-    prameter_value_lists::Vector
+    parameter_value_lists::Vector
     function RawSpineData()
         new([Vector{Any}() for fn in fieldnames(RawSpineData)]...)
+    end
+    function RawSpineData(d::Dict)
+        new([d[String(fn)] for fn in fieldnames(RawSpineData)]...)
     end
 end
 

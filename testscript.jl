@@ -127,8 +127,10 @@ rsd = fbsd.RawSpineData()
 )
 
 
-## Test loading definitions
+## Test loading definitions into `RawSpineData`
 
-defs = SpineInterface._db(defs_url; upgrade=false) do db
-    SpineInterface._export_data(db)
-end
+defs = fbsd.RawSpineData(
+    SpineInterface._db(defs_url; upgrade=false) do db
+        SpineInterface._export_data(db)
+    end
+)
