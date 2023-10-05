@@ -15,7 +15,7 @@ RT_structural_path = "data/finnish_RT_structural_data/"
 def_structural_path = "data/Finnish-building-stock-default-structural-data/"
 
 # Define url for archetype building definitions
-defs_url = "sqlite:///C:\\Users\\trtopi\\OneDrive - Teknologian Tutkimuskeskus VTT\\_PROJEKTIT\\FlexiB\\_SPINEPROJECTS\\full_finland_model\\.spinetoolbox\\items\\archetype_definitions\\archetype_definitions.sqlite"
+defs_url = "sqlite:///C:\\_SYMLINKS\\archetype_definitions.sqlite"
 
 # Define parameter values and modules for processing.
 m = Module()
