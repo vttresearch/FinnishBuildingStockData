@@ -9,7 +9,7 @@ This file contains functions used for testing the statistical inputs in the data
 
 Run tests for the `building_period` objects in Module `mod`.
 """
-function test_building_period(; limit::Number = Inf, mod::Module = @__MODULE__)
+function test_building_period(; limit::Number=Inf, mod::Module=@__MODULE__)
     @testset "Testing `building_period`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :building_period) for
@@ -28,7 +28,7 @@ function test_building_period(; limit::Number = Inf, mod::Module = @__MODULE__)
                 # Test parameters
                 for (param, type) in test_parameters
                     @test _check(
-                        param(building_period = bp) isa type,
+                        param(building_period=bp) isa type,
                         "Invalid `$(string(param))` for `$(bp)`! `$(string(type))` required.",
                     )
                 end
@@ -45,7 +45,7 @@ end
 
 Run tests for the `building_stock` objects in Module `mod`.
 """
-function test_building_stock(; limit::Number = Inf, mod::Module = @__MODULE__)
+function test_building_stock(; limit::Number=Inf, mod::Module=@__MODULE__)
     @testset "Testing `building_stock`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :building_stock) for
@@ -72,7 +72,7 @@ end
 
 Runs statistical data tests for the `building_type` objects in Module `mod`.
 """
-function test_statistical_building_type(; limit::Number = Inf, mod::Module = @__MODULE__)
+function test_statistical_building_type(; limit::Number=Inf, mod::Module=@__MODULE__)
     @testset "Testing statistical `building_type`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :building_type) for
@@ -101,7 +101,7 @@ end
 
 Runs tests for the `frame_material` objects in Module `mod`.
 """
-function test_frame_material(; limit::Number = Inf, mod::Module = @__MODULE__)
+function test_frame_material(; limit::Number=Inf, mod::Module=@__MODULE__)
     @testset "Testing `frame_material`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :frame_material) for
@@ -126,7 +126,7 @@ end
 
 Runs tests for the `heat_source` objects in Module `mod`.
 """
-function test_heat_source(; limit::Number = Inf, mod::Module = @__MODULE__)
+function test_heat_source(; limit::Number=Inf, mod::Module=@__MODULE__)
     @testset "Testing `heat_source`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :heat_source) for
@@ -153,7 +153,7 @@ end
 
 Runs tests for the `location_id` objects in Module `mod`.
 """
-function test_location_id(; limit::Number = Inf, mod::Module = @__MODULE__)
+function test_location_id(; limit::Number=Inf, mod::Module=@__MODULE__)
     @testset "Testing `location_id`" begin
         test_relationships = [
             _relationship_and_unique_entries(relationship, :location_id) for
@@ -173,7 +173,7 @@ function test_location_id(; limit::Number = Inf, mod::Module = @__MODULE__)
                 # Test parameters
                 for (param, type) in test_parameters
                     @test _check(
-                        param(location_id = mid) isa type,
+                        param(location_id=mid) isa type,
                         "Invalid `$(string(param))` for `$(mid)`! `$(string(type))` required.",
                     )
                 end
@@ -194,8 +194,8 @@ end
 Run tests for the `building_stock__building_type__building_period__location_id__heat_source` relationhip.
 """
 function test_building_stock__building_type__building_period__location_id__heat_source(;
-    limit::Number = Inf,
-    mod::Module = @__MODULE__,
+    limit::Number=Inf,
+    mod::Module=@__MODULE__
 )
     test_objects = [
         mod.building_stock,
@@ -260,8 +260,8 @@ end
 Run tests for the `building_type__location_id__building_period` relationship.
 """
 function test_building_type__location_id__building_period(;
-    limit::Number = Inf,
-    mod::Module = @__MODULE__,
+    limit::Number=Inf,
+    mod::Module=@__MODULE__
 )
     test_objects = [mod.building_type, mod.location_id, mod.building_period]
     test_relationships = [
@@ -318,8 +318,8 @@ end
 Run tests for the `building_type__location_id__frame_material` relationship.
 """
 function test_building_type__location_id__frame_material(;
-    limit::Number = Inf,
-    mod::Module = @__MODULE__,
+    limit::Number=Inf,
+    mod::Module=@__MODULE__
 )
     test_objects = [mod.building_type, mod.location_id, mod.frame_material]
     test_relationships = [
@@ -362,9 +362,9 @@ function test_building_type__location_id__frame_material(;
                     isapprox(
                         sum(
                             mod.share(
-                                building_type = bt,
-                                location_id = lid,
-                                frame_material = mat,
+                                building_type=bt,
+                                location_id=lid,
+                                frame_material=mat,
                             ) for mat in mod.frame_material()
                         ),
                         1,
@@ -391,31 +391,31 @@ that there are no missing values or values of the incorrect type.
 For some parameters, the tests also check whether the given values are *reasonable*,
 in an attempt to avoid blatant input data mistakes.
 """
-function run_statistical_tests(; limit::Number = Inf, mod::Module = @__MODULE__)
+function run_statistical_tests(; limit::Number=Inf, mod::Module=@__MODULE__)
     println("Testing statistical data")
     @testset "Statistical data tests" begin
         println("Testing `building_period`")
-        @time test_building_period(; limit = limit, mod = mod)
+        @time test_building_period(; limit=limit, mod=mod)
         println("Testing `building_stock`")
-        @time test_building_stock(; limit = limit, mod = mod)
+        @time test_building_stock(; limit=limit, mod=mod)
         println("Testing statistical `building_type`")
-        @time test_statistical_building_type(; limit = limit, mod = mod)
+        @time test_statistical_building_type(; limit=limit, mod=mod)
         println("Testing `frame_material`")
-        @time test_frame_material(; limit = limit, mod = mod)
+        @time test_frame_material(; limit=limit, mod=mod)
         println("Testing `heat_source`")
-        @time test_heat_source(; limit = limit, mod = mod)
+        @time test_heat_source(; limit=limit, mod=mod)
         println("Testing `location_id`")
-        @time test_location_id(; limit = limit, mod = mod)
+        @time test_location_id(; limit=limit, mod=mod)
         println(
             "Testing `building_stock__building_type__building_period__location_id__heat_source`",
         )
         @time test_building_stock__building_type__building_period__location_id__heat_source(;
-            limit = limit,
-            mod = mod,
+            limit=limit,
+            mod=mod
         )
         println("Testing `building_type__location_id__building_period`")
-        @time test_building_type__location_id__building_period(; limit = limit, mod = mod)
+        @time test_building_type__location_id__building_period(; limit=limit, mod=mod)
         println("Testing `building_type__location_id__frame_material`")
-        @time test_building_type__location_id__frame_material(; limit = limit, mod = mod)
+        @time test_building_type__location_id__frame_material(; limit=limit, mod=mod)
     end
 end

@@ -22,9 +22,9 @@ The `mod` keyword defines the Module from which the data is accessed.
 function _filter_relevant_sources(
     building_period::Object,
     relationship_class::SpineInterface.RelationshipClass;
-    lookback_if_empty::Int64 = 10,
-    max_lookbacks::Int64 = 20,
-    mod::Module = @__MODULE__,
+    lookback_if_empty::Int64=10,
+    max_lookbacks::Int64=20,
+    mod::Module=@__MODULE__
 )
     unique_sources = unique(getfield.(relationship_class(), :source))
     relevant_sources = Array{Object,1}()
@@ -32,10 +32,10 @@ function _filter_relevant_sources(
     while isempty(relevant_sources) && n < max_lookbacks
         relevant_sources = filter(
             src ->
-                mod.period_start(building_period = building_period) -
-                n * lookback_if_empty <= mod.source_year(source = src) &&
-                    mod.source_year(source = src) <=
-                    mod.period_end(building_period = building_period),
+                mod.period_start(building_period=building_period) -
+                n * lookback_if_empty <= mod.source_year(source=src) &&
+                    mod.source_year(source=src) <=
+                    mod.period_end(building_period=building_period),
             unique_sources,
         )
         n += 1
@@ -76,27 +76,27 @@ r_{\\text{ven,mean}} = \\frac{\\sum_{s \\in \\text{relevant sources}} w r_{\\tex
 function mean_ventilation_rate(
     building_period::Object,
     building_type::Object;
-    weight::Float64 = 0.5,
-    lookback_if_empty::Int64 = 10,
-    max_lookbacks::Int64 = 20,
-    mod::Module = @__MODULE__,
+    weight::Float64=0.5,
+    lookback_if_empty::Int64=10,
+    max_lookbacks::Int64=20,
+    mod::Module=@__MODULE__
 )
     0 <= weight <= 1 ? nothing : @error "`weight` must be between 0 and 1!"
     relevant_sources = _filter_relevant_sources(
         building_period,
         mod.ventilation_source__building_type;
-        lookback_if_empty = lookback_if_empty,
-        max_lookbacks = max_lookbacks,
-        mod = mod,
+        lookback_if_empty=lookback_if_empty,
+        max_lookbacks=max_lookbacks,
+        mod=mod
     )
     rels = mod.ventilation_source__building_type(
-        source = relevant_sources,
-        building_type = building_type;
-        _compact = false,
+        source=relevant_sources,
+        building_type=building_type;
+        _compact=false
     )
     return sum(
-        weight * mod.max_ventilation_rate_1_h(source = src, building_type = bt) +
-        (1 - weight) * mod.min_ventilation_rate_1_h(source = src, building_type = bt) for
+        weight * mod.max_ventilation_rate_1_h(source=src, building_type=bt) +
+        (1 - weight) * mod.min_ventilation_rate_1_h(source=src, building_type=bt) for
         (src, bt) in rels
     ) / length(rels)
 end
@@ -136,36 +136,36 @@ r_{\\text{inf,mean}} = \\frac{\\sum_{s \\in \\text{relevant sources}} w_{\\text{
 function mean_infiltration_rate(
     building_period::Object,
     building_type::Object;
-    n50_weight::Float64 = 0.5,
-    factor_weight::Float64 = 0.5,
-    lookback_if_empty::Int64 = 10,
-    max_lookbacks::Int64 = 20,
-    mod::Module = @__MODULE__,
+    n50_weight::Float64=0.5,
+    factor_weight::Float64=0.5,
+    lookback_if_empty::Int64=10,
+    max_lookbacks::Int64=20,
+    mod::Module=@__MODULE__
 )
     0 <= n50_weight <= 1 ? nothing : @error "`n50_weight` must be between 0 and 1!"
     0 <= factor_weight <= 1 ? nothing : @error "`factor_weight` must be between 0 and 1!"
     relevant_sources = _filter_relevant_sources(
         building_period,
         mod.ventilation_source__building_type;
-        lookback_if_empty = lookback_if_empty,
-        max_lookbacks = max_lookbacks,
-        mod = mod,
+        lookback_if_empty=lookback_if_empty,
+        max_lookbacks=max_lookbacks,
+        mod=mod
     )
     rels = mod.ventilation_source__building_type(
-        source = relevant_sources,
-        building_type = building_type;
-        _compact = false,
+        source=relevant_sources,
+        building_type=building_type;
+        _compact=false
     )
     return sum(
         (
             n50_weight *
-            mod.max_n50_infiltration_rate_1_h(source = src, building_type = bt) +
+            mod.max_n50_infiltration_rate_1_h(source=src, building_type=bt) +
             (1 - n50_weight) *
-            mod.min_n50_infiltration_rate_1_h(source = src, building_type = bt)
+            mod.min_n50_infiltration_rate_1_h(source=src, building_type=bt)
         ) / (
-            factor_weight * mod.max_infiltration_factor(source = src, building_type = bt) +
+            factor_weight * mod.max_infiltration_factor(source=src, building_type=bt) +
             (1 - factor_weight) *
-            mod.min_infiltration_factor(source = src, building_type = bt)
+            mod.min_infiltration_factor(source=src, building_type=bt)
         ) for (src, bt) in rels
     ) / length(rels)
 end
@@ -199,27 +199,27 @@ Essentially, this function performs the following steps:
 function mean_hru_efficiency(
     building_period::Object,
     building_type::Object;
-    weight::Float64 = 0.5,
-    lookback_if_empty::Int64 = 10,
-    max_lookbacks::Int64 = 20,
-    mod::Module = @__MODULE__,
+    weight::Float64=0.5,
+    lookback_if_empty::Int64=10,
+    max_lookbacks::Int64=20,
+    mod::Module=@__MODULE__
 )
     0 <= weight <= 1 ? nothing : @error "`weight` must be between 0 and 1!"
     relevant_sources = _filter_relevant_sources(
         building_period,
         mod.ventilation_source__building_type;
-        lookback_if_empty = lookback_if_empty,
-        max_lookbacks = max_lookbacks,
-        mod = mod,
+        lookback_if_empty=lookback_if_empty,
+        max_lookbacks=max_lookbacks,
+        mod=mod
     )
     rels = mod.ventilation_source__building_type(
-        source = relevant_sources,
-        building_type = building_type;
-        _compact = false,
+        source=relevant_sources,
+        building_type=building_type;
+        _compact=false
     )
     return sum(
-        weight * mod.max_HRU_efficiency(source = src, building_type = bt) +
-        (1 - weight) * mod.min_HRU_efficiency(source = src, building_type = bt) for
+        weight * mod.max_HRU_efficiency(source=src, building_type=bt) +
+        (1 - weight) * mod.min_HRU_efficiency(source=src, building_type=bt) for
         (src, bt) in rels
     ) / length(rels)
 end
@@ -250,23 +250,23 @@ U_{\\text{mean}} = \\frac{\\sum_{s \\in \\text{relevant sources}} U_{\\text{max,
 function mean_window_U_value(
     building_period::Object,
     building_type::Object;
-    lookback_if_empty::Int64 = 10,
-    max_lookbacks::Int64 = 20,
-    mod::Module = @__MODULE__,
+    lookback_if_empty::Int64=10,
+    max_lookbacks::Int64=20,
+    mod::Module=@__MODULE__
 )
     relevant_sources = _filter_relevant_sources(
         building_period,
         mod.fenestration_source__building_type;
-        lookback_if_empty = lookback_if_empty,
-        max_lookbacks = max_lookbacks,
-        mod = mod,
+        lookback_if_empty=lookback_if_empty,
+        max_lookbacks=max_lookbacks,
+        mod=mod
     )
     rels = mod.fenestration_source__building_type(
-        source = relevant_sources,
-        building_type = building_type;
-        _compact = false,
+        source=relevant_sources,
+        building_type=building_type;
+        _compact=false
     )
-    return sum(mod.U_value_W_m2K(source = src, building_type = bt) for (src, bt) in rels) /
+    return sum(mod.U_value_W_m2K(source=src, building_type=bt) for (src, bt) in rels) /
            length(rels)
 end
 
@@ -298,25 +298,25 @@ g_{\\text{mean}} = \\frac{\\sum_{s \\in \\text{relevant sources}} (1-f) g}{\\sum
 function mean_total_normal_solar_energy_transmittance(
     building_period::Object,
     building_type::Object;
-    lookback_if_empty::Int64 = 10,
-    max_lookbacks::Int64 = 20,
-    mod::Module = @__MODULE__,
+    lookback_if_empty::Int64=10,
+    max_lookbacks::Int64=20,
+    mod::Module=@__MODULE__
 )
     relevant_sources = _filter_relevant_sources(
         building_period,
         mod.fenestration_source__building_type;
-        lookback_if_empty = lookback_if_empty,
-        max_lookbacks = max_lookbacks,
-        mod = mod,
+        lookback_if_empty=lookback_if_empty,
+        max_lookbacks=max_lookbacks,
+        mod=mod
     )
     rels = mod.fenestration_source__building_type(
-        source = relevant_sources,
-        building_type = building_type;
-        _compact = false,
+        source=relevant_sources,
+        building_type=building_type;
+        _compact=false
     )
     return sum(
-        (1 - mod.frame_area_fraction(source = src, building_type = bt)) *
-        mod.solar_energy_transmittance(source = src, building_type = bt) for
+        (1 - mod.frame_area_fraction(source=src, building_type=bt)) *
+        mod.solar_energy_transmittance(source=src, building_type=bt) for
         (src, bt) in rels
     ) / length(rels)
 end

@@ -26,30 +26,30 @@ by using the optional keyword arguments, and the `mod` keyword is used to
 tweak the Module scope of the calculations.
 """
 function _average_gross_floor_area_m2_per_building_values(;
-    building_stock = anything,
-    building_type = anything,
-    building_period = anything,
-    location_id = anything,
-    heat_source = anything,
-    mod::Module = @__MODULE__,
+    building_stock=anything,
+    building_type=anything,
+    building_period=anything,
+    location_id=anything,
+    heat_source=anything,
+    mod::Module=@__MODULE__
 )
     average_gross_floor_area_m2_per_building_values = Dict(
         (bsy, bt, bp, lid, hs) => Dict(
             :average_gross_floor_area_m2_per_building => parameter_value(
                 mod.average_floor_area_m2(
-                    building_type = bt,
-                    location_id = lid,
-                    building_period = bp,
+                    building_type=bt,
+                    location_id=lid,
+                    building_period=bp,
                 ),
             ),
         ) for (bsy, bt, bp, lid, hs) in
         mod.building_stock__building_type__building_period__location_id__heat_source(
-            building_stock = building_stock,
-            building_type = building_type,
-            building_period = building_period,
-            location_id = location_id,
-            heat_source = heat_source;
-            _compact = false,
+            building_stock=building_stock,
+            building_type=building_type,
+            building_period=building_period,
+            location_id=location_id,
+            heat_source=heat_source;
+            _compact=false
         )
     )
     return average_gross_floor_area_m2_per_building_values
@@ -77,7 +77,7 @@ and the `mod` keyword is used to tweak the Module scope of the calculations.
 Essentially, performs the following steps:
 1. Include the filtered `building_stock__building_type__building_period__location_id__heat_source` raw input data relationships.
 2. Merge the [`filtered_parameter_values`](@ref) with the [`_average_gross_floor_area_m2_per_building_values`](@ref) for the relationships.
-3. Set the default value of `average_gross_floor_area_m2_per_building` to `NothingParameterValue`.
+3. Set an empty default value for `average_gross_floor_area_m2_per_building`.
 4. Create the SpineInterface `Parameter`s for `number_of_buildings` and `average_gross_floor_area_m2_per_building`.
 5. Evaluate `building_stock_statistics` and the associated parameters into the desired `mod`.
 
@@ -86,11 +86,11 @@ building is assumed independent of `building_stock` and `heat_source`.
 """
 function create_building_stock_statistics!(
     mod::Module;
-    building_stock = anything,
-    building_type = anything,
-    building_period = anything,
-    location_id = anything,
-    heat_source = anything,
+    building_stock=anything,
+    building_type=anything,
+    building_period=anything,
+    location_id=anything,
+    heat_source=anything
 )
     # Define object classes for the relationship class
     object_class_names =
@@ -100,31 +100,31 @@ function create_building_stock_statistics!(
         :building_stock_statistics,
         object_class_names,
         mod.building_stock__building_type__building_period__location_id__heat_source(
-            building_stock = building_stock,
-            building_type = building_type,
-            building_period = building_period,
-            location_id = location_id,
-            heat_source = heat_source;
-            _compact = false,
+            building_stock=building_stock,
+            building_type=building_type,
+            building_period=building_period,
+            location_id=location_id,
+            heat_source=heat_source;
+            _compact=false
         ),
         # Merge filtered `number_of_buildings` with filtered `average_gross_floor_area_m2_per_building`.
         mergewith(
             merge,
             filtered_parameter_values(
                 mod.building_stock__building_type__building_period__location_id__heat_source;
-                building_stock = building_stock,
-                building_type = building_type,
-                building_period = building_period,
-                location_id = location_id,
-                heat_source = heat_source,
+                building_stock=building_stock,
+                building_type=building_type,
+                building_period=building_period,
+                location_id=location_id,
+                heat_source=heat_source
             ),
             _average_gross_floor_area_m2_per_building_values(;
-                building_stock = building_stock,
-                building_type = building_type,
-                building_period = building_period,
-                location_id = location_id,
-                heat_source = heat_source,
-                mod = mod,
+                building_stock=building_stock,
+                building_type=building_type,
+                building_period=building_period,
+                location_id=location_id,
+                heat_source=heat_source,
+                mod=mod
             ),
         ),
         # Define parameter defaults.
@@ -240,11 +240,11 @@ being mapped to `exterior_wall` and `partition_wall` repsectively.
 """
 function _map_structure_types(
     is_load_bearing::SpineInterface.Parameter;
-    mod::Module = @__MODULE__,
+    mod::Module=@__MODULE__
 )
     Dict(
         st =>
-            is_load_bearing(structure_type = st) ? st :
+            is_load_bearing(structure_type=st) ? st :
             first(
                 filter(s -> string(s.name) == string(st.name)[7:end], mod.structure_type()),
             ) for st in mod.structure_type()
@@ -272,18 +272,18 @@ function _form_building_structures(;
     thermal_conductivity_weight::Float64,
     interior_node_depth::Float64,
     variation_period::Float64,
-    mod::Module = @__MODULE__,
+    mod::Module=@__MODULE__
 )
     [
         BuildingStructure(
             src,
             str;
-            thermal_conductivity_weight = thermal_conductivity_weight,
-            interior_node_depth = interior_node_depth,
-            variation_period = variation_period,
-            mod = mod,
+            thermal_conductivity_weight=thermal_conductivity_weight,
+            interior_node_depth=interior_node_depth,
+            variation_period=variation_period,
+            mod=mod
         ) for (src, str) in mod.source__structure() if
-        total_building_type_weight(src, str; mod = mod) > 0
+        total_building_type_weight(src, str; mod=mod) > 0
     ]
 end
 
@@ -314,9 +314,9 @@ function _filter_relevant_building_structures(
     building_period::Object,
     structure_type::Object,
     st_map::Dict;
-    lookback_if_empty::Int64 = 10,
-    max_lookbacks::Int64 = 20,
-    mod::Module = @__MODULE__,
+    lookback_if_empty::Int64=10,
+    max_lookbacks::Int64=20,
+    mod::Module=@__MODULE__
 )
     n = 0
     relevant_building_structures = Array{BuildingStructure,1}()
@@ -325,9 +325,9 @@ function _filter_relevant_building_structures(
             structure ->
                 structure.type == st_map[structure_type] &&
                     building_type in structure.building_types &&
-                    mod.period_start(building_period = building_period) -
+                    mod.period_start(building_period=building_period) -
                     n * lookback_if_empty <= structure.year &&
-                    structure.year <= mod.period_end(building_period = building_period),
+                    structure.year <= mod.period_end(building_period=building_period),
             building_structures,
         )
         n += 1
@@ -372,10 +372,10 @@ function _structure_type_parameter_values(
     building_structures::Array{BuildingStructure,1},
     inds::NamedTuple,
     is_load_bearing::SpineInterface.Parameter;
-    mod::Module = @__MODULE__,
+    mod::Module=@__MODULE__
 )
     (bt, bp, lid, st) = inds
-    st_map = _map_structure_types(is_load_bearing; mod = mod)
+    st_map = _map_structure_types(is_load_bearing; mod=mod)
     # Only consider structures for the correct period and building type.
     relevant_building_structures = _filter_relevant_building_structures(
         building_structures,
@@ -383,23 +383,23 @@ function _structure_type_parameter_values(
         bp,
         st,
         st_map;
-        lookback_if_empty = 10,
-        mod = mod,
+        lookback_if_empty=10,
+        mod=mod
     )
     # Calculate the frame material weights for the structures.
     total_frame_material_share = sum(
-        mod.share(building_type = bt, location_id = lid, frame_material = mat) + 1e-6
+        mod.share(building_type=bt, location_id=lid, frame_material=mat) + 1e-6
         for structure in relevant_building_structures for
         mat in mod.structure_material__frame_material(
-            structure_material = structure.load_bearing_materials,
+            structure_material=structure.load_bearing_materials,
         )
     )
     frame_material_weight = Dict(
         structure =>
             sum(
-                mod.share(building_type = bt, location_id = lid, frame_material = mat) +
+                mod.share(building_type=bt, location_id=lid, frame_material=mat) +
                 1e-6 for mat in mod.structure_material__frame_material(
-                    structure_material = structure.load_bearing_materials,
+                    structure_material=structure.load_bearing_materials,
                 )
             ) / total_frame_material_share for structure in relevant_building_structures
     )
@@ -407,7 +407,7 @@ function _structure_type_parameter_values(
         @error "Frame material weights don't add up to one! `$(inds)` results in `$(sum(values(frame_material_weight)))`"
     end
     # Select which property to use depending on whether the structure is load-bearing
-    property = is_load_bearing(structure_type = st) ? :loadbearing : :min
+    property = is_load_bearing(structure_type=st) ? :loadbearing : :min
     # Form the parameter value array
     parameter_values = merge(
         Dict(
@@ -478,30 +478,30 @@ The `RelationshipClass` stores the following structural parameters:
 """
 function create_structure_statistics!(
     mod::Module;
-    building_type = anything,
-    building_period = anything,
-    location_id = anything,
+    building_type=anything,
+    building_period=anything,
+    location_id=anything,
     thermal_conductivity_weight::Float64,
     interior_node_depth::Float64,
-    variation_period::Float64,
+    variation_period::Float64
 )
     # Add non-load bearing wall types and a parameter to indicate this.
     _add_light_wall_types_and_is_load_bearing!(mod)
     # Form the building structures.
     building_structures = _form_building_structures(
-        thermal_conductivity_weight = thermal_conductivity_weight,
-        interior_node_depth = interior_node_depth,
-        variation_period = variation_period;
-        mod = mod,
+        thermal_conductivity_weight=thermal_conductivity_weight,
+        interior_node_depth=interior_node_depth,
+        variation_period=variation_period;
+        mod=mod
     )
     # Create the new relationship class
     obj_clss = [:building_type, :building_period, :location_id, :structure_type]
     rels = [
-        (building_type = bt, building_period = bp, location_id = lid, structure_type = st) for (bt, lid, bp) in mod.building_type__location_id__building_period(
-            building_type = building_type,
-            location_id = location_id,
-            building_period = building_period;
-            _compact = false,
+        (building_type=bt, building_period=bp, location_id=lid, structure_type=st) for (bt, lid, bp) in mod.building_type__location_id__building_period(
+            building_type=building_type,
+            location_id=location_id,
+            building_period=building_period;
+            _compact=false
         ) for st in mod.structure_type()
     ]
     structure_statistics = RelationshipClass(
@@ -513,7 +513,7 @@ function create_structure_statistics!(
                 building_structures,
                 inds,
                 mod.is_load_bearing;
-                mod = mod,
+                mod=mod
             ) for inds in rels
         ),
         Dict(
@@ -570,24 +570,24 @@ The `RelationshipClass` stores the following ventilation and fenestration parame
 """
 function create_ventilation_and_fenestration_statistics!(
     mod::Module;
-    building_type = anything,
-    location_id = anything,
-    building_period = anything,
-    ventilation_rate_weight::Float64 = 0.5,
-    n50_infiltration_rate_weight::Float64 = 0.5,
-    infiltration_factor_weight::Float64 = 0.5,
-    HRU_efficiency_weight::Float64 = 0.5,
-    lookback_if_empty::Int64 = 10,
-    max_lookbacks::Int64 = 20,
+    building_type=anything,
+    location_id=anything,
+    building_period=anything,
+    ventilation_rate_weight::Float64=0.5,
+    n50_infiltration_rate_weight::Float64=0.5,
+    infiltration_factor_weight::Float64=0.5,
+    HRU_efficiency_weight::Float64=0.5,
+    lookback_if_empty::Int64=10,
+    max_lookbacks::Int64=20
 )
     obj_clss = [:building_type, :building_period, :location_id]
     rels = [
-        (building_type = bt, building_period = bp, location_id = lid) for
+        (building_type=bt, building_period=bp, location_id=lid) for
         (bt, lid, bp) in mod.building_type__location_id__building_period(
-            building_type = building_type,
-            location_id = location_id,
-            building_period = building_period;
-            _compact = false,
+            building_type=building_type,
+            location_id=location_id,
+            building_period=building_period;
+            _compact=false
         )
     ]
     ventilation_and_fenestration_statistics = RelationshipClass(
@@ -600,49 +600,49 @@ function create_ventilation_and_fenestration_statistics!(
                     mean_ventilation_rate(
                         bp,
                         bt;
-                        weight = ventilation_rate_weight,
-                        lookback_if_empty = lookback_if_empty,
-                        max_lookbacks = max_lookbacks,
-                        mod = mod,
+                        weight=ventilation_rate_weight,
+                        lookback_if_empty=lookback_if_empty,
+                        max_lookbacks=max_lookbacks,
+                        mod=mod
                     ),
                 ),
                 :infiltration_rate_1_h => parameter_value(
                     mean_infiltration_rate(
                         bp,
                         bt;
-                        n50_weight = n50_infiltration_rate_weight,
-                        factor_weight = infiltration_factor_weight,
-                        lookback_if_empty = lookback_if_empty,
-                        max_lookbacks = max_lookbacks,
-                        mod = mod,
+                        n50_weight=n50_infiltration_rate_weight,
+                        factor_weight=infiltration_factor_weight,
+                        lookback_if_empty=lookback_if_empty,
+                        max_lookbacks=max_lookbacks,
+                        mod=mod
                     ),
                 ),
                 :HRU_efficiency => parameter_value(
                     mean_hru_efficiency(
                         bp,
                         bt;
-                        weight = HRU_efficiency_weight,
-                        lookback_if_empty = lookback_if_empty,
-                        max_lookbacks = max_lookbacks,
-                        mod = mod,
+                        weight=HRU_efficiency_weight,
+                        lookback_if_empty=lookback_if_empty,
+                        max_lookbacks=max_lookbacks,
+                        mod=mod
                     ),
                 ),
                 :window_U_value_W_m2K => parameter_value(
                     mean_window_U_value(
                         bp,
                         bt;
-                        lookback_if_empty = lookback_if_empty,
-                        max_lookbacks = max_lookbacks,
-                        mod = mod,
+                        lookback_if_empty=lookback_if_empty,
+                        max_lookbacks=max_lookbacks,
+                        mod=mod
                     ),
                 ),
                 :total_normal_solar_energy_transmittance => parameter_value(
                     mean_total_normal_solar_energy_transmittance(
                         bp,
                         bt;
-                        lookback_if_empty = lookback_if_empty,
-                        max_lookbacks = max_lookbacks,
-                        mod = mod,
+                        lookback_if_empty=lookback_if_empty,
+                        max_lookbacks=max_lookbacks,
+                        mod=mod
                     ),
                 ),
             ) for (bt, bp, lid) in rels
