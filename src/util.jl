@@ -239,3 +239,31 @@ function _clear_symbols!(m::Module, syms_to_clear::Vector, msg::String)
         end
     end
 end
+
+
+"""
+    _add_to_spine!(m::Module, ent::Union{Parameter,RelationshipClass})
+
+Add entity `ent` to Spine.
+"""
+function _add_to_spine!(m::Module, p::Parameter)
+    param = get(m._spine_parameters, p.name, nothing)
+    if isnothing(param)
+        m._spine_parameters[p.name] = p
+    else
+        unique!(append!(param.classes, p.classes))
+    end
+end
+function _add_to_spine!(m::Module, rc::RelationshipClass)
+    m._spine_relationship_classes[rc.name] => rc
+end
+
+
+"""
+    _get_spine_parameter(m::Module, name::Symbol, classes::Vector{T})
+
+Helper function to fetch existing Parameter or create one if missing.
+"""
+function _get_spine_parameter(m::Module, name::Symbol, classes::Vector{T}) where {T<:Union{ObjectClass,RelationshipClass}}
+    get(m._spine_parameters, name, Parameter(name, classes))
+end

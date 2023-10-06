@@ -135,12 +135,14 @@ function create_building_stock_statistics!(
     )
     # Create the associated parameters
     params = [
-        key => Parameter(key, [building_stock_statistics]) for
+        key => _get_spine_parameter(mod, key, [building_stock_statistics]) for
         key in keys(building_stock_statistics.parameter_defaults)
     ]
     # Evaluate the RelationshipClass and the associated parameters into the desired `mod`.
+    _add_to_spine!(mod, building_stock_statistics)
     @eval mod building_stock_statistics = $building_stock_statistics
     for (name, param) in params
+        _add_to_spine!(mod, param)
         @eval mod $name = $param
     end
 end
@@ -155,16 +157,26 @@ Currently, the `building_stock_year` is parsed from the name of the `building_st
 objects, assuming the names are formatted like `<NAME>_<YEAR>`.
 """
 function add_building_stock_year!(mod::Module)
-    # Create new parameter
-    building_stock_year = Parameter(:building_stock_year, [mod.building_stock])
     # Add parameter values for existing `building_stock` objects.
-    for bs in mod.building_stock.objects
-        mod.building_stock.parameter_values[bs][:building_stock_year] =
-            parameter_value(parse(Float64, split(string(bs.name), "_")[2]))
-    end
+    add_object_parameter_values!(
+        mod.building_stock,
+        Dict(
+            bs => Dict(
+                :building_stock_year => parameter_value(
+                    parse(Float64, split(string(bs.name), "_")[2])
+                )
+            )
+            for bs in mod.building_stock()
+        )
+    )
     # Add default parameter value
-    mod.building_stock.parameter_defaults[:building_stock_year] = parameter_value(nothing)
-    # Eval the created parameter into the correct module.
+    add_object_parameter_defaults!(
+        mod.building_stock,
+        Dict(:building_stock_year => parameter_value(nothing))
+    )
+    # Create and eval the new parameter
+    building_stock_year = _get_spine_parameter(mod, :building_stock_year, [mod.building_stock])
+    _add_to_spine!(mod, building_stock_year)
     @eval mod building_stock_year = $building_stock_year
 end
 
@@ -183,43 +195,44 @@ This function creates the `light_exterior_wall` and `light_partition_wall`
 except that the `:is_load_bearing` flag is set to `false`.
 """
 function _add_light_wall_types_and_is_load_bearing!(mod::Module)
-    # Create new parameter
-    is_load_bearing = Parameter(:is_load_bearing, [mod.structure_type])
     # Add parameter values for existing structure types
-    for st in mod.structure_type()
-        mod.structure_type.parameter_values[st][:is_load_bearing] = parameter_value(true)
-    end
-    mod.structure_type.parameter_defaults[:is_load_bearing] = parameter_value(nothing)
+    add_object_parameter_values!(
+        mod.structure_type,
+        Dict(
+            st => Dict(
+                :is_load_bearing => parameter_value(true)
+            )
+            for st in mod.structure_type()
+        )
+    )
+    add_object_parameter_defaults!(
+        mod.structure_type,
+        Dict(:is_load_bearing => parameter_value(nothing))
+    )
     # Add the new structure type objects for light structures and their "parents".
     # NOTE! Link to pre-existing objects instead of creating new ones if possible.
     objs = [
-        (
-            isnothing(mod.structure_type(Symbol("light_exterior_wall"))) ?
-            Object(Symbol("light_exterior_wall")) :
-            mod.structure_type(Symbol("light_exterior_wall"))
-        ) => mod.structure_type(Symbol("exterior_wall")),
-        (
-            isnothing(mod.structure_type(Symbol("light_partition_wall"))) ?
-            Object(Symbol("light_partition_wall")) :
-            mod.structure_type(Symbol("light_partition_wall"))
-        ) => mod.structure_type(Symbol("partition_wall")),
+        _get(mod.structure_type, :light_exterior_wall) => _get(mod.structure_type, :exterior_wall),
+        _get(mod.structure_type, :light_partition_wall) => _get(mod.structure_type, :partition_wall)
     ]
-    add_objects!(mod.structure_type, getfield.(objs, 1))
     # Add parameter values for the new structure types
-    for (obj, parent) in objs
-        mod.structure_type.parameter_values[obj][:structure_type_notes] =
-            parameter_value("Automatically generated.")
-        mod.structure_type.parameter_values[obj][:exterior_resistance_m2K_W] =
-            mod.structure_type.parameter_values[parent][:exterior_resistance_m2K_W]
-        mod.structure_type.parameter_values[obj][:interior_resistance_m2K_W] =
-            mod.structure_type.parameter_values[parent][:interior_resistance_m2K_W]
-        mod.structure_type.parameter_values[obj][:linear_thermal_bridge_W_mK] =
-            mod.structure_type.parameter_values[parent][:linear_thermal_bridge_W_mK]
-        mod.structure_type.parameter_values[obj][:is_load_bearing] = parameter_value(false)
-        mod.structure_type.parameter_values[obj][:is_internal] =
-            mod.structure_type.parameter_values[parent][:is_internal]
-    end
-    # Eval is_load_bearing to the desired `mod`
+    add_object_parameter_values!(
+        mod.structure_type,
+        Dict(
+            st => Dict(
+                :structure_type_notes => parameter_value("Autogenerated"),
+                :exterior_resistance_m2K_W => parameter_value(mod.exterior_resistance_m2K_W(structure_type=parent)),
+                :interior_resistance_m2K_W => parameter_value(mod.interior_resistance_m2K_W(structure_type=parent)),
+                :linear_thermal_bridge_W_mK => parameter_value(mod.linear_thermal_bridge_W_mK(structure_type=parent)),
+                :is_load_bearing => parameter_value(false),
+                :is_internal => parameter_value(mod.is_internal(structure_type=parent))
+            )
+            for (st, parent) in objs
+        )
+    )
+    # Create and eval the new parameter
+    is_load_bearing = _get_spine_parameter(mod, :is_load_bearing, [mod.structure_type])
+    _add_to_spine!(mod, is_load_bearing)
     @eval mod is_load_bearing = $is_load_bearing
 end
 
@@ -497,12 +510,14 @@ function create_structure_statistics!(
     # Create the new relationship class
     obj_clss = [:building_type, :building_period, :location_id, :structure_type]
     rels = [
-        (building_type=bt, building_period=bp, location_id=lid, structure_type=st) for (bt, lid, bp) in mod.building_type__location_id__building_period(
+        (building_type=bt, building_period=bp, location_id=lid, structure_type=st)
+        for (bt, lid, bp) in mod.building_type__location_id__building_period(
             building_type=building_type,
             location_id=location_id,
             building_period=building_period;
             _compact=false
-        ) for st in mod.structure_type()
+        )
+        for st in mod.structure_type()
     ]
     structure_statistics = RelationshipClass(
         :structure_statistics,
@@ -528,10 +543,11 @@ function create_structure_statistics!(
     )
     # Create the associated parameters
     params = [
-        key => Parameter(key, [structure_statistics]) for
+        key => _get_spine_parameter(mod, key, [structure_statistics]) for
         key in keys(structure_statistics.parameter_defaults)
     ]
     # Eval the RelationshipClass and parameters to the desired `mod`
+    _add_to_spine!(mod, structure_statistics)
     @eval mod structure_statistics = $structure_statistics
     for (name, param) in params
         @eval mod $name = $param
@@ -659,13 +675,14 @@ function create_ventilation_and_fenestration_statistics!(
     )
     # Create the associated parameters
     params = [
-        name => Parameter(name, [ventilation_and_fenestration_statistics]) for
-        name in keys(ventilation_and_fenestration_statistics.parameter_defaults)
+        name => _get_spine_parameter(mod, name, [ventilation_and_fenestration_statistics])
+        for name in keys(ventilation_and_fenestration_statistics.parameter_defaults)
     ]
     # Evaluate the RelationshipClass and parameters to the desired `mod`
-    @eval mod ventilation_and_fenestration_statistics =
-        $ventilation_and_fenestration_statistics
+    _add_to_spine!(mod, ventilation_and_fenestration_statistics)
+    @eval mod ventilation_and_fenestration_statistics = $ventilation_and_fenestration_statistics
     for (name, param) in params
+        _add_to_spine!(mod, param)
         @eval mod $name = $param
     end
 end
