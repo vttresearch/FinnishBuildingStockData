@@ -166,6 +166,9 @@ end
     )
 
 Filter `m` so that only the desired convenience functions remain.
+
+NOTE! This function doesn't cross-check dependencies between object
+and relationship classes. That is left up to the user.
 """
 function filter_module!(
     m::Module;
@@ -176,15 +179,7 @@ function filter_module!(
     # Figure out object classes to clear.
     ocs_to_clear = setdiff(collect(keys(m._spine_object_classes)), obj_classes)
     # Figure out relationship classes to clear.
-    relclss = collect(keys(m._spine_relationship_classes))
-    filter!(
-        x -> !all([
-            cls in obj_classes
-            for cls in m._spine_relationship_classes[x].intact_object_class_names
-        ]),
-        relclss
-    )
-    rcs_to_clear = setdiff(relclss, rel_classes)
+    rcs_to_clear = setdiff(collect(keys(m._spine_relationship_classes)), rel_classes)
     # Clear parameters.
     _clear_spine_parameters!(m, :_spine_relationship_classes => rcs_to_clear, msg)
     _clear_spine_parameters!(m, :_spine_object_classes => ocs_to_clear, msg)
