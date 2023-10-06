@@ -173,52 +173,26 @@ function filter_module!(
     rel_classes::Vector{Symbol}=Vector{Symbol}(),
     msg::String="Variable has been cleared."
 )
-    if !isempty(obj_classes)
-        @info "Filtering object classes..."
-        @time begin
-            # Figure out which relationships to clear while filtering.
-            rcs_to_clear = collect(keys(m._spine_relationship_classes))
-            filter!(
-                x -> all([
-                    cls in obj_classes
-                    for cls in last(x).intact_object_class_names
-                ]),
-                m._spine_relationship_classes
-            )
-            setdiff!(rcs_to_clear, keys(m._spine_relationship_classes))
-            _clear_symbols!(m, rcs_to_clear, msg)
-            # Figure out which parameters to clear while filtering.
-            ocs_to_clear = setdiff(
-                collect(keys(m._spine_object_classes)),
-                obj_classes
-            )
-            _clear_spine_parameters!(
-                m,
-                :_spine_object_classes => ocs_to_clear,
-                msg
-            )
-            # Clear object classes
-            filter!(x -> first(x) in obj_classes, m._spine_object_classes)
-            _clear_symbols!(m, ocs_to_clear, msg)
-        end
-    end
-    if !isempty(rel_classes)
-        @info "Filtering relationship classes..."
-        @time begin
-            # Figure out which parameters to clear while filtering.
-            rcs_to_clear = setdiff(
-                collect(keys(m._spine_relationship_classes)),
-                rel_classes
-            )
-            _clear_spine_parameters!(
-                m,
-                :_spine_relationship_classes => rcs_to_clear,
-                msg
-            )
-            # Clear relationship classes
-            filter!(x -> first(x) in rel_classes, m._spine_relationship_classes)
-            _clear_symbols!(m, rcs_to_clear, msg)
-        end
-    end
+    # Figure out object classes to clear.
+    ocs_to_clear = setdiff(collect(keys(m._spine_object_classes)), obj_classes)
+    # Figure out relationship classes to clear.
+    relclss = collect(keys(m._spine_relationship_classes))
+    filter!(
+        x -> !all([
+            cls in obj_classes
+            for cls in m._spine_relationship_classes[x].intact_object_class_names
+        ]),
+        relclss
+    )
+    rcs_to_clear = setdiff(relclss, rel_classes)
+    # Clear parameters.
+    _clear_spine_parameters!(m, :_spine_relationship_classes => rcs_to_clear, msg)
+    _clear_spine_parameters!(m, :_spine_object_classes => ocs_to_clear, msg)
+    # Clear relationship classes.
+    filter!(x -> !in(first(x), rcs_to_clear), m._spine_relationship_classes)
+    _clear_symbols!(m, rcs_to_clear, msg)
+    # Clear object classes.
+    filter!(x -> !in(first(x), ocs_to_clear), m._spine_object_classes)
+    _clear_symbols!(m, ocs_to_clear, msg)
     return m
 end

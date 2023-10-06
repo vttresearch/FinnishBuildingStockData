@@ -131,8 +131,9 @@ rsd = fbsd.RawSpineData()
 
 ## Test post-process filtering
 
+@info "Filtering module..."
 @time filter_module!(
-    m;
+    m2;
     obj_classes=[
         :building_period,
         :building_stock,

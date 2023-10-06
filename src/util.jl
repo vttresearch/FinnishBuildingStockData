@@ -221,6 +221,7 @@ function _clear_spine_parameters!(
         setdiff!(v.classes, [getfield(m, to_clear[1])[c] for c in to_clear[2]])
         isempty(v.classes) && push!(ps_to_clear, p)
     end
+    filter!(x -> !in(first(x), ps_to_clear), m._spine_parameters)
     _clear_symbols!(m, ps_to_clear, msg)
 end
 
