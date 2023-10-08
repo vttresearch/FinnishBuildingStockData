@@ -43,6 +43,5 @@ export add_building_stock_year!,
     layers_with_properties,
     import_data,
     scramble_parameter_data!,
-    merge_spine_modules,
     merge_spine_modules!
 end # module

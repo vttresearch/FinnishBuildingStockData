@@ -109,30 +109,30 @@ rsd = fbsd.RawSpineData()
 ## Test importing definitions from URL
 
 @info "Import definitions from URL..."
-@time defs = using_spinedb(defs_url, m_defs)
+@time using_spinedb(defs_url, m_defs)
 
 
 ## Test merging data and definitions
 
 @info "Merge definitions and data..."
-@time m_data_and_defs = fbsd.merge_spine_modules(m_data, m_defs)
+@time merge_spine_modules!(m_defs, m_data)
 
 
 ## Test processing the data
 
-@time create_processed_statistics!(m_data_and_defs, num_lids, tcw, ind, vp)
+@time create_processed_statistics!(m_defs, num_lids, tcw, ind, vp)
 
 
 ## Test importing processed data. NOTE! This can take a long while with large datasets.
 
-@time import_processed_data("sqlite://"; mod=m_data_and_defs)
+@time import_processed_data("sqlite://"; mod=m_defs)
 
 
 ## Test post-process filtering
 
 @info "Filtering module..."
 @time filter_module!(
-    m_data_and_defs;
+    m_defs;
     obj_classes=[
         :building_period,
         :building_stock,

@@ -270,18 +270,6 @@ end
 
 
 """
-    merge_spine_modules(args::Module...)
-
-Merge the contents of Spine modules and return a new module.
-"""
-function merge_spine_modules(args::Module...)
-    m = Module()
-    merge_spine_modules!(m, args...)
-    return m
-end
-
-
-"""
     merge_spine_modules!(m::Module, args::Module...)
 
 Merge the contents of Spine modules into `m`.
@@ -290,7 +278,7 @@ function merge_spine_modules!(m::Module, args::Module...)
     fields = [:_spine_object_classes, :_spine_relationship_classes, :_spine_parameters]
     for field in fields
         for arg in args
-            mergewith!(_merge, _getfield(m, field), getfield(arg, field))
+            mergewith!(_merge!, _getfield(m, field), getfield(arg, field))
         end
         for (key, val) in getfield(m, field)
             @eval m begin
@@ -320,43 +308,38 @@ end
 
 
 # Convenience functions for different merges
-function _merge!(ent::T, args::T...) where {T<:Union{ObjectClass,RelationshipClass,Parameter}}
-    if !all(getfield.(args, :name) .== ent.name)
-        error("Entitity names to be merged don't match! `$(ent.name)` != $(first(args).name)")
+function _merge!(oc::ObjectClass, args::ObjectClass...)
+    if !all(getfield.(args, :name) .== oc.name)
+        error("ObjectClass names to be merged don't match! `$(oc.name)` != $(first(args).name)")
     end
     for arg in args
-        for field in fieldnames(T)[2:end]
-            _merge!(getfield(ent, field), getfield(arg, field))
+        for field in fieldnames(ObjectClass)[2:end]
+            _merge!(getfield(oc, field), getfield(arg, field))
         end
-    end
-    return ent
-end
-function _merge(args::ObjectClass...)
-    oc = ObjectClass(first(args).name, Array{ObjectLike,1}())
-    for arg in args
-        _merge!(oc, arg)
     end
     return oc
 end
-function _merge(args::RelationshipClass...)
-    rc = RelationshipClass(
-        first(args).name,
-        Array{Symbol,1}(),
-        Array{Any,1}()
-    )
-    for arg in args
-        _merge!(rc, arg)
+function _merge!(rc::RelationshipClass, args::RelationshipClass...)
+    for field in [:name, :intact_object_class_names, :object_class_names]
+        if !all(getfield.(args, field) .== getfield(rc, field))
+            error("RelationshipClass `$(field)` don't match!")
+        end
     end
-    return rc
-end
-function _merge(args::Parameter...)
-    p = Parameter(first(args).name)
     for arg in args
-        _merge!(p, arg)
+        for field in fieldnames(RelationshipClass)[4:end]
+            _merge!(getfield(rc, field), getfield(arg, field))
+        end
+    end
+    return oc
+end
+function _merge!(p::Parameter, args::Parameter...)
+    if !all(getfield.(args, :name) .== p.name)
+        error("Parameter names to be merged don't match!")
+    end
+    for arg in args
+        unique!(append!(p.classes, arg.classes))
     end
     return p
 end
 _merge!(v::Vector...) = unique!(append!(v...))
-_merge(v::Vector...) = unique(vcat(v...))
 _merge!(args...) = merge!(args...)
-_merge(args...) = merge(args...)
