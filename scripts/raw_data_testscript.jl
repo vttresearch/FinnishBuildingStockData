@@ -18,8 +18,8 @@ def_structural_path = "data/Finnish-building-stock-default-structural-data/"
 defs_url = "sqlite:///C:\\_SYMLINKS\\archetype_definitions.sqlite"
 
 # Define parameter values and modules for processing.
-m = Module()
-m2 = Module()
+m_data = Module()
+m_defs = Module()
 num_lids = 3.0 # Limit number of location ids to save time on test processing.
 tcw = 0.5
 ind = 0.1
@@ -95,45 +95,44 @@ rsd = fbsd.RawSpineData()
 ## Test generating convenience functions for raw data
 
 @info "Generating convenience functions..."
-@time using_spinedb(data, m)
+@time using_spinedb(data, m_data)
 
 
 ## Run input data tests to see if they pass
 
 @info "Running structural input data tests..."
-@time run_structural_tests(; limit=Inf, mod=m)
+@time run_structural_tests(; limit=Inf, mod=m_data)
 @info "Running statistical input data tests..."
-@time run_statistical_tests(; limit=Inf, mod=m)
+@time run_statistical_tests(; limit=Inf, mod=m_data)
 
 
 ## Test importing definitions from URL
 
 @info "Import definitions from URL..."
-@time defs = data_from_url(defs_url)
+@time defs = using_spinedb(defs_url, m_defs)
 
 
 ## Test merging data and definitions
 
-@info "Merge definitions and generate convenience functions..."
-@time data_and_defs = merge(data, defs)
-@time using_spinedb(data_and_defs, m2)
+@info "Merge definitions and data..."
+@time m_data_and_defs = fbsd.merge_spine_modules(m_data, m_defs)
 
 
 ## Test processing the data
 
-@time create_processed_statistics!(m2, num_lids, tcw, ind, vp)
+@time create_processed_statistics!(m_data_and_defs, num_lids, tcw, ind, vp)
 
 
 ## Test importing processed data. NOTE! This can take a long while with large datasets.
 
-@time import_processed_data("sqlite://"; mod=m2)
+@time import_processed_data("sqlite://"; mod=m_data_and_defs)
 
 
 ## Test post-process filtering
 
 @info "Filtering module..."
 @time filter_module!(
-    m2;
+    m_data_and_defs;
     obj_classes=[
         :building_period,
         :building_stock,

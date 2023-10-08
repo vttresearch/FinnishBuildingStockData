@@ -267,3 +267,96 @@ Helper function to fetch existing Parameter or create one if missing.
 function _get_spine_parameter(m::Module, name::Symbol, classes::Vector{T}) where {T<:Union{ObjectClass,RelationshipClass}}
     get(m._spine_parameters, name, Parameter(name, classes))
 end
+
+
+"""
+    merge_spine_modules(args::Module...)
+
+Merge the contents of Spine modules and return a new module.
+"""
+function merge_spine_modules(args::Module...)
+    m = Module()
+    merge_spine_modules!(m, args...)
+    return m
+end
+
+
+"""
+    merge_spine_modules!(m::Module, args::Module...)
+
+Merge the contents of Spine modules into `m`.
+"""
+function merge_spine_modules!(m::Module, args::Module...)
+    fields = [:_spine_object_classes, :_spine_relationship_classes, :_spine_parameters]
+    for field in fields
+        for arg in args
+            mergewith!(_merge, _getfield(m, field), getfield(arg, field))
+        end
+        for (key, val) in getfield(m, field)
+            @eval m begin
+                $key = $val
+            end
+        end
+    end
+    return m
+end
+
+
+"""
+    _getfield(m::Module, field::Symbol, default::Dict=Dict())
+
+Try to get `field` from `m`, create `default` if unable.
+"""
+function _getfield(m::Module, field::Symbol, default::Dict=Dict())
+    try
+        getfield(m, field)
+    catch
+        @eval m begin
+            $field = $default
+        end
+        getfield(m, field)
+    end
+end
+
+
+# Convenience functions for different merges
+function _merge!(ent::T, args::T...) where {T<:Union{ObjectClass,RelationshipClass,Parameter}}
+    if !all(getfield.(args, :name) .== ent.name)
+        error("Entitity names to be merged don't match! `$(ent.name)` != $(first(args).name)")
+    end
+    for arg in args
+        for field in fieldnames(T)[2:end]
+            _merge!(getfield(ent, field), getfield(arg, field))
+        end
+    end
+    return ent
+end
+function _merge(args::ObjectClass...)
+    oc = ObjectClass(first(args).name, Array{ObjectLike,1}())
+    for arg in args
+        _merge!(oc, arg)
+    end
+    return oc
+end
+function _merge(args::RelationshipClass...)
+    rc = RelationshipClass(
+        first(args).name,
+        Array{Symbol,1}(),
+        Array{Any,1}()
+    )
+    for arg in args
+        _merge!(rc, arg)
+    end
+    return rc
+end
+function _merge(args::Parameter...)
+    p = Parameter(first(args).name)
+    for arg in args
+        _merge!(p, arg)
+    end
+    return p
+end
+_merge!(v::Vector...) = unique!(append!(v...))
+_merge(v::Vector...) = unique(vcat(v...))
+_merge!(args...) = merge!(args...)
+_merge(args...) = merge(args...)
