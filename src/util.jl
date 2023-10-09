@@ -143,28 +143,6 @@ end
 
 
 """
-    filtered_parameter_values(oc::ObjectClass; kwargs...)
-
-Filters the `parameter_values` field of an `ObjectClass` or a `RelationshipClass`.
-Methods for the entitity classes are provided separately.
-"""
-function filtered_parameter_values(oc::ObjectClass; kwargs...)
-    filter!(kw -> kw[1] == oc.name, kwargs)
-    Dict(
-        key => val_dict for
-        (key, val_dict) in oc.parameter_values if key in first(kwargs)[2]
-    )
-end
-function filtered_parameter_values(rc::SpineInterface.RelationshipClass; kwargs...)
-    kw_index_map = Dict(kw => findfirst(kw[1] .== rc.object_class_names) for kw in kwargs)
-    Dict(
-        rel => val_dict for (rel, val_dict) in rc.parameter_values if
-        all(rel[i] in kw[2] for (kw, i) in kw_index_map)
-    )
-end
-
-
-"""
     filter_entity_class!(oc::ObjectClass; kwargs...)
 
 Filters and `ObjectClass` or a `RelationshipClass` to only contain the desired objects or relationships.
@@ -260,6 +238,20 @@ Helper function to fetch existing Parameter or create one if missing.
 """
 function _get_spine_parameter(m::Module, name::Symbol, classes::Vector{T}) where {T<:Union{ObjectClass,RelationshipClass}}
     get(m._spine_parameters, name, Parameter(name, classes))
+end
+
+
+"""
+    _get_spine_relclass(m::Module, name::Symbol, objclss::Vector{Symbol})
+
+Helper function to fetch existing RelationshipClass or create one if missing.
+"""
+function _get_spine_relclass(m::Module, name::Symbol, objclss::Vector{Symbol})
+    get(
+        m._spine_relationship_classes,
+        name,
+        RelationshipClass(name, objclss, Vector{RelationshipLike}())
+    )
 end
 
 
