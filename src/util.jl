@@ -255,7 +255,7 @@ function _add_to_spine!(m::Module, p::Parameter)
     end
 end
 function _add_to_spine!(m::Module, rc::RelationshipClass)
-    m._spine_relationship_classes[rc.name] => rc
+    m._spine_relationship_classes[rc.name] = rc
 end
 
 
