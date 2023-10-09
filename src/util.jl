@@ -7,12 +7,6 @@ Contains miscellaneous utility functions and extensions to other modules.
 ## Extend Base where necessary
 
 Base.String(x::Int64) = String(string(x))
-Base.merge!(rsd1::RawSpineData, rsds::RawSpineData...) = _merge_data!(rsd1, rsds...)
-function Base.merge(rsds::RawSpineData...)
-    args = collect(rsds)
-    data = deepcopy(popfirst!(args))
-    return _merge_data!(data, args...)
-end
 
 
 ## Extend SpineInterface where necessary
@@ -35,11 +29,11 @@ SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), cl
 ## Miscellaneous functions
 
 """
-    _merge_data!(rsd1::RawSpineData, rsds::RawSpineData ...)
+    merge_data!(rsd1::RawSpineData, rsds::RawSpineData ...)
 
 Helper function for merging [`FinnishBuildingStockData.RawSpineData`](@ref).
 """
-function _merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
+function merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
     for rsd in rsds
         for fn in fieldnames(RawSpineData)
             unique!(append!(getfield(rsd1, fn), getfield(rsd, fn)))
@@ -266,4 +260,27 @@ Helper function to fetch existing Parameter or create one if missing.
 """
 function _get_spine_parameter(m::Module, name::Symbol, classes::Vector{T}) where {T<:Union{ObjectClass,RelationshipClass}}
     get(m._spine_parameters, name, Parameter(name, classes))
+end
+
+
+"""
+    _parse_db_values!(raw::Dict)
+
+Parse exported database values into something manageable.
+"""
+function _parse_db_values!(raw::Dict)
+    to_parse = Dict(
+        "object_parameters" => 3,
+        "relationship_parameters" => 3,
+        "relationship_parameter_values" => 4,
+        "object_parameter_values" => 4,
+        "parameter_value_lists" => 2
+    )
+    for (key, ind) in to_parse
+        data = get(raw, key, nothing)
+        if !isnothing(data)
+            map(r -> setindex!(r, parse_db_value(r[ind]), ind), data)
+        end
+    end
+    return raw
 end

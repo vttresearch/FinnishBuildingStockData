@@ -42,5 +42,6 @@ export add_building_stock_year!,
     filter_module!,
     layers_with_properties,
     import_data,
+    merge_data!,
     scramble_parameter_data!
 end # module
