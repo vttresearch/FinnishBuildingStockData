@@ -131,6 +131,12 @@ function data_from_package(filepaths::String...)
     for dp in dps
         @time import_datapackage!(rsd, dp)
     end
+    @info "Removing duplicate entries..."
+    @time begin
+        for fn in fieldnames(RawSpineData)
+            unique!(getfield(rsd, fn))
+        end
+    end
     return rsd
 end
 

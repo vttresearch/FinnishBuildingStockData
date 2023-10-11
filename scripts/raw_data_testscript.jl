@@ -114,8 +114,9 @@ rsd = fbsd.RawSpineData()
 
 ## Test merging data and definitions
 
-@info "Merge definitions and generate convenience functions..."
+@info "Merge definitions..."
 @time merge_data!(defs, data)
+@info "Generate convenience functions..."
 @time using_spinedb(defs, m_defs)
 
 

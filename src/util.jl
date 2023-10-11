@@ -12,7 +12,6 @@ Base.String(x::Int64) = String(string(x))
 ## Extend SpineInterface where necessary
 
 SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
-SpineInterface.parameter_value(x::Missing) = parameter_value(nothing)
 function SpineInterface.using_spinedb(rsd::RawSpineData, mod=@__MODULE__; filters=nothing)
     using_spinedb(
         Dict(
@@ -34,9 +33,33 @@ SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), cl
 Helper function for merging [`FinnishBuildingStockData.RawSpineData`](@ref).
 """
 function merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
+    # Define which indices are used to deduce unique entries.
+    unique_inds_mapping = Dict(
+        :object_classes => 1:1,
+        :objects => 1:2,
+        :object_parameters => 1:2,
+        :object_parameter_values => 1:3,
+        :relationship_classes => 1:1,
+        :relationships => 1:2,
+        :relationship_parameters => 1:2,
+        :relationship_parameter_values => 1:3,
+        :alternatives => 1:1,
+        :parameter_value_lists => 1:2
+    )
+    # Loop over the fields of the datasets, combine, and remove duplicates.
     for rsd in rsds
         for fn in fieldnames(RawSpineData)
-            unique!(append!(getfield(rsd1, fn), getfield(rsd, fn)))
+            inds = unique_inds_mapping[fn]
+            data = sort!(append!(getfield(rsd1, fn), getfield(rsd, fn)))
+            inds_to_pop = []
+            for (i, (row1, row2)) in Iterators.reverse(enumerate(zip(data[2:end], data[1:end-1])))
+                row1[inds] == row2[inds] ? push!(inds_to_pop, i) : nothing
+            end
+            if !isempty(inds_to_pop)
+                for i in inds_to_pop
+                    popat!(data, i)
+                end
+            end
         end
     end
     return rsd1
