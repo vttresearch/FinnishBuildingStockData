@@ -481,6 +481,7 @@ function _import_oc!(
             [String(oc), String(r[oc]), String(param), r[param]]
             for r in eachrow(df)
             for param in params
+            if !ismissing(r[param])
         ]
     )
 end
@@ -805,6 +806,7 @@ function _import_rc!(
             [String(rc), [String(r[oc]) for oc in object_classes], String(param), r[param]]
             for r in eachrow(df)
             for param in params
+            if !ismissing(r[param])
         ]
     )
 end
