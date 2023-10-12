@@ -10,9 +10,9 @@ using FinnishBuildingStockData
 fbsd = FinnishBuildingStockData
 
 # Define paths to the datasets to be processed
-statistical_path = "data/finnish_building_stock_forecasts/"
-RT_structural_path = "data/finnish_RT_structural_data/"
-def_structural_path = "data/Finnish-building-stock-default-structural-data/"
+statistical_path = "data\\finnish_building_stock_forecasts\\datapackage.json"
+RT_structural_path = "data\\finnish_RT_structural_data\\datapackage.json"
+def_structural_path = "data\\Finnish-building-stock-default-structural-data\\datapackage.json"
 
 # Define url for archetype building definitions
 defs_url = "sqlite:///C:\\_SYMLINKS\\archetype_definitions.sqlite"
