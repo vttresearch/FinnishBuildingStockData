@@ -318,7 +318,7 @@ end
 
 # Convenience functions for different merges
 function _merge!(oc::ObjectClass, args::ObjectClass...)
-    if !all(getfield.(args, :name) .== oc.name)
+    if !all(getfield.(args, :name) .== [oc.name])
         error("ObjectClass names to be merged don't match! `$(oc.name)` != $(first(args).name)")
     end
     for arg in args
@@ -349,6 +349,9 @@ function _merge!(p::Parameter, args::Parameter...)
         unique!(append!(p.classes, arg.classes))
     end
     return p
+end
+function _merge!(d::Dict{T,Dict{Symbol,SpineInterface.ParameterValue}}...) where {T}
+    mergewith!(merge!, d...)
 end
 _merge!(v::Vector...) = unique!(append!(v...))
 _merge!(args...) = merge!(args...)
