@@ -286,7 +286,9 @@ Merge the contents of Spine modules into `m`.
 function merge_spine_modules!(m::Module, args::Module...)
     fields = [:_spine_object_classes, :_spine_relationship_classes, :_spine_parameters]
     for field in fields
-        mergewith!(_merge!, getfield(m, field), getfield.(args, field)...)
+        for arg in args
+            mergewith!(_merge!, getfield(m, field), getfield(arg, field))
+        end
         for (key, val) in getfield(m, field)
             @eval m begin
                 $key = $val
