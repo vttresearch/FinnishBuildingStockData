@@ -106,6 +106,16 @@ rsd = fbsd.RawSpineData()
 @time run_statistical_tests(; limit=Inf, mod=m_data)
 
 
+## Test processing the data
+
+@time create_processed_statistics!(m_data, num_lids, tcw, ind, vp)
+
+
+## Test importing processed data. NOTE! This can take a long while with large datasets.
+
+@time import_processed_data("sqlite://"; mod=m_data)
+
+
 ## Test importing definitions from URL
 
 @info "Import definitions from URL..."
@@ -116,16 +126,6 @@ rsd = fbsd.RawSpineData()
 
 @info "Merge definitions and data..."
 @time merge_spine_modules!(m_defs, m_data)
-
-
-## Test processing the data
-
-@time create_processed_statistics!(m_defs, num_lids, tcw, ind, vp)
-
-
-## Test importing processed data. NOTE! This can take a long while with large datasets.
-
-@time import_processed_data("sqlite://"; mod=m_defs)
 
 
 ## Test post-process filtering

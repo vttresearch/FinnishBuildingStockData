@@ -330,8 +330,8 @@ function _merge!(oc::ObjectClass, args::ObjectClass...)
 end
 function _merge!(rc::RelationshipClass, args::RelationshipClass...)
     for field in [:name, :intact_object_class_names, :object_class_names]
-        if !all(getfield.(args, field) .== getfield(rc, field))
-            error("RelationshipClass `$(field)` don't match!")
+        if !all(getfield.(args, field) .== [getfield(rc, field)])
+            error("RelationshipClass `$(rc.name)` `$(field)` don't match!")
         end
     end
     for arg in args
@@ -339,7 +339,7 @@ function _merge!(rc::RelationshipClass, args::RelationshipClass...)
             _merge!(getfield(rc, field), getfield(arg, field))
         end
     end
-    return oc
+    return rc
 end
 function _merge!(p::Parameter, args::Parameter...)
     if !all(getfield.(args, :name) .== p.name)
