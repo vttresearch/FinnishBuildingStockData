@@ -265,6 +265,20 @@ end
 
 
 """
+    _get_spine_relclass(m::Module, name::Symbol, objclss::Vector{Symbol})
+
+Helper function to fetch existing RelationshipClass or create one if missing.
+"""
+function _get_spine_relclass(m::Module, name::Symbol, objclss::Vector{Symbol})
+    get(
+        m._spine_relationship_classes,
+        name,
+        RelationshipClass(name, objclss, Vector{RelationshipLike}())
+    )
+end
+
+
+"""
     merge_spine_modules!(m::Module, args::Module...)
 
 Merge the contents of Spine modules into `m`.
