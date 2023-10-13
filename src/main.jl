@@ -131,6 +131,12 @@ function data_from_package(filepaths::String...)
     for dp in dps
         @time import_datapackage!(rsd, dp)
     end
+    @info "Removing duplicate entries..."
+    @time begin
+        for fn in fieldnames(RawSpineData)
+            unique!(getfield(rsd, fn))
+        end
+    end
     return rsd
 end
 
@@ -144,14 +150,11 @@ function data_from_url(urls::String...; upgrade=false, filters=Dict())
     @info "Importing from URLs..."
     rsd = RawSpineData()
     for url in urls
-        @time merge!(
-            rsd,
-            RawSpineData(
-                SpineInterface._db(url; upgrade=upgrade) do db
-                    SpineInterface._export_data(db; filters=filters)
-                end
-            )
-        )
+        raw = SpineInterface._db(url; upgrade=upgrade) do db
+            SpineInterface._export_data(db; filters=filters)
+        end
+        _parse_db_values!(raw)
+        merge_data!(rsd, RawSpineData(raw))
     end
     return rsd
 end

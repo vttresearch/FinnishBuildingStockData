@@ -5,58 +5,6 @@ This file contains functions for processing the statistical data.
 =#
 
 """
-    _average_gross_floor_area_m2_per_building_values(;
-        building_stock=anything,
-        building_type=anything,
-        building_period=anything,
-        location_id=anything,
-        heat_source=anything,
-        mod::Module = @__MODULE__
-    )
-
-Create the `average_gross_floor_area_m2_per_building` parameter values
-for the `building_stock_statistics` `RelationshipClass`.
-
-Essentially, this function loops over all
-`(building_stock, building_type, building_period, location_id, heat_source)`
-in the data, and fetches the corresponding
-`average_floor_area_m2(building_type, location_id, building_period)` data.
-The calculations can be limited to only the desired object classes
-by using the optional keyword arguments, and the `mod` keyword is used to
-tweak the Module scope of the calculations.
-"""
-function _average_gross_floor_area_m2_per_building_values(;
-    building_stock=anything,
-    building_type=anything,
-    building_period=anything,
-    location_id=anything,
-    heat_source=anything,
-    mod::Module=@__MODULE__
-)
-    average_gross_floor_area_m2_per_building_values = Dict(
-        (bsy, bt, bp, lid, hs) => Dict(
-            :average_gross_floor_area_m2_per_building => parameter_value(
-                mod.average_floor_area_m2(
-                    building_type=bt,
-                    location_id=lid,
-                    building_period=bp,
-                ),
-            ),
-        ) for (bsy, bt, bp, lid, hs) in
-        mod.building_stock__building_type__building_period__location_id__heat_source(
-            building_stock=building_stock,
-            building_type=building_type,
-            building_period=building_period,
-            location_id=location_id,
-            heat_source=heat_source;
-            _compact=false
-        )
-    )
-    return average_gross_floor_area_m2_per_building_values
-end
-
-
-"""
     create_building_stock_statistics!(
         mod::Module;
         building_stock=anything,
@@ -75,9 +23,9 @@ Optional keyword arguments can be used to limit the scope of the calculations,
 and the `mod` keyword is used to tweak the Module scope of the calculations.
 
 Essentially, performs the following steps:
-1. Include the filtered `building_stock__building_type__building_period__location_id__heat_source` raw input data relationships.
-2. Merge the [`filtered_parameter_values`](@ref) with the [`_average_gross_floor_area_m2_per_building_values`](@ref) for the relationships.
-3. Set an empty default value for `average_gross_floor_area_m2_per_building`.
+1. Fetch an existing `building_stock_statistics` if exists, and initialize one if not.
+2. Loop over the filtered `building_stock__building_type__building_period__location_id__heat_source` raw input to collect parameter values.
+3. Set empty default values for the `number_of_buildings` and `average_gross_floor_area_m2_per_building` parameters.
 4. Create the SpineInterface `Parameter`s for `number_of_buildings` and `average_gross_floor_area_m2_per_building`.
 5. Evaluate `building_stock_statistics` and the associated parameters into the desired `mod`.
 
@@ -95,50 +43,56 @@ function create_building_stock_statistics!(
     # Define object classes for the relationship class
     object_class_names =
         [:building_stock, :building_type, :building_period, :location_id, :heat_source]
-    # Create the `building_stock_statistics` relationship class based on raw input.
-    building_stock_statistics = RelationshipClass(
-        :building_stock_statistics,
-        object_class_names,
-        mod.building_stock__building_type__building_period__location_id__heat_source(
-            building_stock=building_stock,
-            building_type=building_type,
-            building_period=building_period,
-            location_id=location_id,
-            heat_source=heat_source;
-            _compact=false
-        ),
-        # Merge filtered `number_of_buildings` with filtered `average_gross_floor_area_m2_per_building`.
-        mergewith(
-            merge,
-            filtered_parameter_values(
-                mod.building_stock__building_type__building_period__location_id__heat_source;
-                building_stock=building_stock,
-                building_type=building_type,
-                building_period=building_period,
-                location_id=location_id,
-                heat_source=heat_source
-            ),
-            _average_gross_floor_area_m2_per_building_values(;
-                building_stock=building_stock,
-                building_type=building_type,
-                building_period=building_period,
-                location_id=location_id,
-                heat_source=heat_source,
-                mod=mod
-            ),
-        ),
-        # Define parameter defaults.
-        merge(
-            mod.building_stock__building_type__building_period__location_id__heat_source.parameter_defaults,
-            Dict(:average_gross_floor_area_m2_per_building => parameter_value(nothing)),
-        ),
+    # Fetch existing building_stock_statistics, create new one if missing.
+    building_stock_statistics = _get_spine_relclass(
+        mod, :building_stock_statistics, object_class_names
     )
-    # Create the associated parameters
+    # Add relationship parameter values.
+    add_relationship_parameter_values!(
+        building_stock_statistics,
+        Dict(
+            (building_stock=bs, building_type=bt, building_period=bp, location_id=lid, heat_source=hs) => Dict(
+                :number_of_buildings => parameter_value(
+                    mod.number_of_buildings(
+                        building_stock=bs,
+                        building_type=bt,
+                        building_period=bp,
+                        location_id=lid,
+                        heat_source=hs
+                    )
+                ),
+                :average_gross_floor_area_m2_per_building => parameter_value(
+                    mod.average_floor_area_m2(
+                        building_type=bt,
+                        location_id=lid,
+                        building_period=bp,
+                    )
+                )
+            )
+            for (bs, bt, bp, lid, hs) in mod.building_stock__building_type__building_period__location_id__heat_source(
+                building_stock=building_stock,
+                building_type=building_type,
+                building_period=building_period,
+                location_id=location_id,
+                heat_source=heat_source;
+                _compact=false
+            )
+        )
+    )
+    # Add parameter defaults.
+    add_relationship_parameter_defaults!(
+        building_stock_statistics,
+        Dict(
+            :number_of_buildings => parameter_value(nothing),
+            :average_gross_floor_area_m2_per_building => parameter_value(nothing)
+        )
+    )
+    # Fetch or create the associated Parameters
     params = [
         key => _get_spine_parameter(mod, key, [building_stock_statistics]) for
         key in keys(building_stock_statistics.parameter_defaults)
     ]
-    # Evaluate the RelationshipClass and the associated parameters into the desired `mod`.
+    # Evaluate the RelationshipClass and the associated Parameters into the desired `mod`.
     _add_to_spine!(mod, building_stock_statistics)
     @eval mod building_stock_statistics = $building_stock_statistics
     for (name, param) in params
@@ -507,8 +461,13 @@ function create_structure_statistics!(
         variation_period=variation_period;
         mod=mod
     )
-    # Create the new relationship class
+    # Define object class names for the new relationship class
     obj_clss = [:building_type, :building_period, :location_id, :structure_type]
+    # Fetch or create structure_statistics.
+    structure_statistics = _get_spine_relclass(
+        mod, :structure_statistics, obj_clss
+    )
+    # Calculate and add parameter values.
     rels = [
         (building_type=bt, building_period=bp, location_id=lid, structure_type=st)
         for (bt, lid, bp) in mod.building_type__location_id__building_period(
@@ -519,18 +478,18 @@ function create_structure_statistics!(
         )
         for st in mod.structure_type()
     ]
-    structure_statistics = RelationshipClass(
-        :structure_statistics,
-        obj_clss,
-        rels,
-        Dict(
-            tuple(inds...) => _structure_type_parameter_values(
-                building_structures,
-                inds,
-                mod.is_load_bearing;
-                mod=mod
-            ) for inds in rels
-        ),
+    param_val_dict = Dict(
+        tuple(inds...) => _structure_type_parameter_values(
+            building_structures,
+            inds,
+            mod.is_load_bearing;
+            mod=mod
+        ) for inds in rels
+    )
+    add_relationship_parameter_values!(structure_statistics, param_val_dict)
+    # Add parameter defaults
+    add_relationship_parameter_defaults!(
+        structure_statistics,
         Dict(
             :effective_thermal_mass_J_m2K => parameter_value(nothing),
             :linear_thermal_bridges_W_mK => parameter_value(nothing),
@@ -539,9 +498,9 @@ function create_structure_statistics!(
             :external_U_value_to_ambient_air_W_m2K => parameter_value(0.0),
             :external_U_value_to_ground_W_m2K => parameter_value(0.0),
             :internal_U_value_to_structure_W_m2K => parameter_value(nothing),
-        ),
+        )
     )
-    # Create the associated parameters
+    # Create the associated Parameters
     params = [
         key => _get_spine_parameter(mod, key, [structure_statistics]) for
         key in keys(structure_statistics.parameter_defaults)
@@ -596,7 +555,13 @@ function create_ventilation_and_fenestration_statistics!(
     lookback_if_empty::Int64=10,
     max_lookbacks::Int64=20
 )
+    # Define object classes for the relationship class
     obj_clss = [:building_type, :building_period, :location_id]
+    # Fetch existing or create ventilation_and_fenestration_statistics
+    ventilation_and_fenestration_statistics = _get_spine_relclass(
+        mod, :ventilation_and_fenestration_statistics, obj_clss
+    )
+    # Calculate and add parameter values.
     rels = [
         (building_type=bt, building_period=bp, location_id=lid) for
         (bt, lid, bp) in mod.building_type__location_id__building_period(
@@ -606,63 +571,65 @@ function create_ventilation_and_fenestration_statistics!(
             _compact=false
         )
     ]
-    ventilation_and_fenestration_statistics = RelationshipClass(
-        :ventilation_and_fenestration_statistics,
-        obj_clss,
-        rels,
-        Dict(
-            tuple(bt, bp, lid) => Dict(
-                :ventilation_rate_1_h => parameter_value(
-                    mean_ventilation_rate(
-                        bp,
-                        bt;
-                        weight=ventilation_rate_weight,
-                        lookback_if_empty=lookback_if_empty,
-                        max_lookbacks=max_lookbacks,
-                        mod=mod
-                    ),
+    param_val_dict = Dict(
+        tuple(bt, bp, lid) => Dict(
+            :ventilation_rate_1_h => parameter_value(
+                mean_ventilation_rate(
+                    bp,
+                    bt;
+                    weight=ventilation_rate_weight,
+                    lookback_if_empty=lookback_if_empty,
+                    max_lookbacks=max_lookbacks,
+                    mod=mod
                 ),
-                :infiltration_rate_1_h => parameter_value(
-                    mean_infiltration_rate(
-                        bp,
-                        bt;
-                        n50_weight=n50_infiltration_rate_weight,
-                        factor_weight=infiltration_factor_weight,
-                        lookback_if_empty=lookback_if_empty,
-                        max_lookbacks=max_lookbacks,
-                        mod=mod
-                    ),
+            ),
+            :infiltration_rate_1_h => parameter_value(
+                mean_infiltration_rate(
+                    bp,
+                    bt;
+                    n50_weight=n50_infiltration_rate_weight,
+                    factor_weight=infiltration_factor_weight,
+                    lookback_if_empty=lookback_if_empty,
+                    max_lookbacks=max_lookbacks,
+                    mod=mod
                 ),
-                :HRU_efficiency => parameter_value(
-                    mean_hru_efficiency(
-                        bp,
-                        bt;
-                        weight=HRU_efficiency_weight,
-                        lookback_if_empty=lookback_if_empty,
-                        max_lookbacks=max_lookbacks,
-                        mod=mod
-                    ),
+            ),
+            :HRU_efficiency => parameter_value(
+                mean_hru_efficiency(
+                    bp,
+                    bt;
+                    weight=HRU_efficiency_weight,
+                    lookback_if_empty=lookback_if_empty,
+                    max_lookbacks=max_lookbacks,
+                    mod=mod
                 ),
-                :window_U_value_W_m2K => parameter_value(
-                    mean_window_U_value(
-                        bp,
-                        bt;
-                        lookback_if_empty=lookback_if_empty,
-                        max_lookbacks=max_lookbacks,
-                        mod=mod
-                    ),
+            ),
+            :window_U_value_W_m2K => parameter_value(
+                mean_window_U_value(
+                    bp,
+                    bt;
+                    lookback_if_empty=lookback_if_empty,
+                    max_lookbacks=max_lookbacks,
+                    mod=mod
                 ),
-                :total_normal_solar_energy_transmittance => parameter_value(
-                    mean_total_normal_solar_energy_transmittance(
-                        bp,
-                        bt;
-                        lookback_if_empty=lookback_if_empty,
-                        max_lookbacks=max_lookbacks,
-                        mod=mod
-                    ),
+            ),
+            :total_normal_solar_energy_transmittance => parameter_value(
+                mean_total_normal_solar_energy_transmittance(
+                    bp,
+                    bt;
+                    lookback_if_empty=lookback_if_empty,
+                    max_lookbacks=max_lookbacks,
+                    mod=mod
                 ),
-            ) for (bt, bp, lid) in rels
-        ),
+            ),
+        ) for (bt, bp, lid) in rels
+    )
+    add_relationship_parameter_values!(
+        ventilation_and_fenestration_statistics, param_val_dict
+    )
+    # Add parameter defaults
+    add_relationship_parameter_defaults!(
+        ventilation_and_fenestration_statistics,
         Dict(
             param => parameter_value(nothing) for param in [
                 :ventilation_rate_1_h,
@@ -671,11 +638,13 @@ function create_ventilation_and_fenestration_statistics!(
                 :window_U_value_W_m2K,
                 :total_normal_solar_energy_transmittance,
             ]
-        ),
+        )
     )
-    # Create the associated parameters
+    # Create the associated Parameters
     params = [
-        name => _get_spine_parameter(mod, name, [ventilation_and_fenestration_statistics])
+        name => _get_spine_parameter(
+            mod, name, [ventilation_and_fenestration_statistics]
+        )
         for name in keys(ventilation_and_fenestration_statistics.parameter_defaults)
     ]
     # Evaluate the RelationshipClass and parameters to the desired `mod`

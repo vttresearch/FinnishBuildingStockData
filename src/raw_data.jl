@@ -46,13 +46,14 @@ end
 
 
 """
-    read_datapackage(datpack_path::String)
+    read_datapackage(filepath::String)
 
 Read the resources of a Data Package into a dictionary of DataFrames.
 """
-function read_datapackage(datpack_path::String)
+function read_datapackage(filepath::String)
     # Read `datapackage.json` and extract resource filepaths and filenames.
-    dp = JSON.parsefile(datpack_path * "datapackage.json")
+    dp = JSON.parsefile(filepath)
+    datpack_path = join(split(filepath, '\\')[1:end-1], '\\') * '\\'
     files = get.(dp["resources"], "path", nothing)
     names = first.(split.(getindex.(split.(files, '\\'), 2), '.'))
     # Return a dictionary mapping filename to its path.
@@ -481,6 +482,7 @@ function _import_oc!(
             [String(oc), String(r[oc]), String(param), r[param]]
             for r in eachrow(df)
             for param in params
+            if !ismissing(r[param])
         ]
     )
 end
@@ -805,6 +807,7 @@ function _import_rc!(
             [String(rc), [String(r[oc]) for oc in object_classes], String(param), r[param]]
             for r in eachrow(df)
             for param in params
+            if !ismissing(r[param])
         ]
     )
 end

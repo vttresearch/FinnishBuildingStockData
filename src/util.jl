@@ -7,18 +7,11 @@ Contains miscellaneous utility functions and extensions to other modules.
 ## Extend Base where necessary
 
 Base.String(x::Int64) = String(string(x))
-Base.merge!(rsd1::RawSpineData, rsds::RawSpineData...) = _merge_data!(rsd1, rsds...)
-function Base.merge(rsds::RawSpineData...)
-    args = collect(rsds)
-    data = deepcopy(popfirst!(args))
-    return _merge_data!(data, args...)
-end
 
 
 ## Extend SpineInterface where necessary
 
 SpineInterface.parameter_value(x::String31) = parameter_value(String(x))
-SpineInterface.parameter_value(x::Missing) = parameter_value(nothing)
 function SpineInterface.using_spinedb(rsd::RawSpineData, mod=@__MODULE__; filters=nothing)
     using_spinedb(
         Dict(
@@ -35,14 +28,38 @@ SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), cl
 ## Miscellaneous functions
 
 """
-    _merge_data!(rsd1::RawSpineData, rsds::RawSpineData ...)
+    merge_data!(rsd1::RawSpineData, rsds::RawSpineData ...)
 
 Helper function for merging [`FinnishBuildingStockData.RawSpineData`](@ref).
 """
-function _merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
+function merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
+    # Define which indices are used to deduce unique entries.
+    unique_inds_mapping = Dict(
+        :object_classes => 1:1,
+        :objects => 1:2,
+        :object_parameters => 1:2,
+        :object_parameter_values => 1:3,
+        :relationship_classes => 1:1,
+        :relationships => 1:2,
+        :relationship_parameters => 1:2,
+        :relationship_parameter_values => 1:3,
+        :alternatives => 1:1,
+        :parameter_value_lists => 1:2
+    )
+    # Loop over the fields of the datasets, combine, and remove duplicates.
     for rsd in rsds
         for fn in fieldnames(RawSpineData)
-            unique!(append!(getfield(rsd1, fn), getfield(rsd, fn)))
+            inds = unique_inds_mapping[fn]
+            data = sort!(append!(getfield(rsd1, fn), getfield(rsd, fn)))
+            inds_to_pop = []
+            for (i, (row1, row2)) in Iterators.reverse(enumerate(zip(data[2:end], data[1:end-1])))
+                row1[inds] == row2[inds] ? push!(inds_to_pop, i) : nothing
+            end
+            if !isempty(inds_to_pop)
+                for i in inds_to_pop
+                    popat!(data, i)
+                end
+            end
         end
     end
     return rsd1
@@ -149,28 +166,6 @@ end
 
 
 """
-    filtered_parameter_values(oc::ObjectClass; kwargs...)
-
-Filters the `parameter_values` field of an `ObjectClass` or a `RelationshipClass`.
-Methods for the entitity classes are provided separately.
-"""
-function filtered_parameter_values(oc::ObjectClass; kwargs...)
-    filter!(kw -> kw[1] == oc.name, kwargs)
-    Dict(
-        key => val_dict for
-        (key, val_dict) in oc.parameter_values if key in first(kwargs)[2]
-    )
-end
-function filtered_parameter_values(rc::SpineInterface.RelationshipClass; kwargs...)
-    kw_index_map = Dict(kw => findfirst(kw[1] .== rc.object_class_names) for kw in kwargs)
-    Dict(
-        rel => val_dict for (rel, val_dict) in rc.parameter_values if
-        all(rel[i] in kw[2] for (kw, i) in kw_index_map)
-    )
-end
-
-
-"""
     filter_entity_class!(oc::ObjectClass; kwargs...)
 
 Filters and `ObjectClass` or a `RelationshipClass` to only contain the desired objects or relationships.
@@ -255,7 +250,7 @@ function _add_to_spine!(m::Module, p::Parameter)
     end
 end
 function _add_to_spine!(m::Module, rc::RelationshipClass)
-    m._spine_relationship_classes[rc.name] => rc
+    m._spine_relationship_classes[rc.name] = rc
 end
 
 
