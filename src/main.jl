@@ -167,6 +167,7 @@ Serialize processed data as a `RawSpineData` to speed up processing.
 function serialize_processed_data(
     m::Module,
     hsh::UInt64;
+    filepath::String=string("data\\", hsh, ".ser"),
     processed_data_fields=[
         (:_spine_object_classes, :building_period),
         (:_spine_object_classes, :building_stock),
@@ -179,7 +180,6 @@ function serialize_processed_data(
         (:_spine_relationship_classes, :ventilation_and_fenestration_statistics)
     ]
 )
-    filename = string("data\\", hsh, ".ser")
     rsd = RawSpineData()
     merge_data!(
         rsd,
@@ -188,5 +188,5 @@ function serialize_processed_data(
             for (f, k) in processed_data_fields
         ]...
     )
-    return serialize(filename, rsd)
+    return serialize(filepath, rsd)
 end
