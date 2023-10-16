@@ -102,12 +102,12 @@ rsd = fbsd.RawSpineData()
 
 
 ## Run input data tests to see if they pass
-#=
+
 @info "Running structural input data tests..."
 @time run_structural_tests(; limit=Inf, mod=m_data)
 @info "Running statistical input data tests..."
 @time run_statistical_tests(; limit=Inf, mod=m_data)
-=#
+
 
 ## Test processing the data
 
@@ -139,24 +139,3 @@ rsd = fbsd.RawSpineData()
 ## Test importing processed data. NOTE! This can take a long while with large datasets.
 
 @time import_processed_data("sqlite://"; mod=m_defs)
-
-
-## Test post-process filtering
-
-@info "Filtering module..."
-@time filter_module!(
-    m_defs;
-    obj_classes=[
-        :building_period,
-        :building_stock,
-        :building_type,
-        :heat_source,
-        :location_id,
-        :structure_type
-    ],
-    rel_classes=[
-        :building_stock_statistics,
-        :structure_statistics,
-        :ventilation_and_fenestration_statistics
-    ]
-)

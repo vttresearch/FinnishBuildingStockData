@@ -279,28 +279,6 @@ function _get_spine_relclass(m::Module, name::Symbol, objclss::Vector{Symbol})
 end
 
 
-"""
-    _parse_db_values!(raw::Dict)
-
-Parse exported database values into something manageable.
-"""
-function _parse_db_values!(raw::Dict)
-    to_parse = Dict(
-        "object_parameters" => 3,
-        "relationship_parameters" => 3,
-        "relationship_parameter_values" => 4,
-        "object_parameter_values" => 4,
-        "parameter_value_lists" => 2
-    )
-    for (key, ind) in to_parse
-        data = get(raw, key, nothing)
-        if !isnothing(data)
-            map(r -> setindex!(r, parse_db_value(r[ind]), ind), data)
-        end
-    end
-    return raw
-end
-
 
 """
     to_dict()
