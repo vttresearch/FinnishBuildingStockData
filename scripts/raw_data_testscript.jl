@@ -25,6 +25,9 @@ tcw = 0.5
 ind = 0.1
 vp = 2225140.0
 
+# Form a hash from data processing settings to deduce whether to recreate and retest data.
+hsh = hash((num_lids, tcw, ind, vp))
+
 ## Test reading data into dataframes
 #=
 stat_data = fbsd.read_datapackage(statistical_path)
@@ -99,11 +102,24 @@ rsd = fbsd.RawSpineData()
 
 
 ## Run input data tests to see if they pass
-
+#=
 @info "Running structural input data tests..."
 @time run_structural_tests(; limit=Inf, mod=m_data)
 @info "Running statistical input data tests..."
 @time run_statistical_tests(; limit=Inf, mod=m_data)
+=#
+
+## Test processing the data
+
+@time create_processed_statistics!(m_data, num_lids, tcw, ind, vp)
+
+
+## Create processed data dict and serialize.
+
+@info "Serialize and save processed data..."
+@time serialize_processed_data(m_data, hsh)
+@info "Deserialize saved data..."
+@time data = fbsd.deserialize("data\\$(hsh).ser")
 
 
 ## Test importing definitions from URL
@@ -118,11 +134,6 @@ rsd = fbsd.RawSpineData()
 @time merge_data!(defs, data)
 @info "Generate convenience functions..."
 @time using_spinedb(defs, m_defs)
-
-
-## Test processing the data
-
-@time create_processed_statistics!(m_defs, num_lids, tcw, ind, vp)
 
 
 ## Test importing processed data. NOTE! This can take a long while with large datasets.

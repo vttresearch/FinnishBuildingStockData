@@ -13,6 +13,7 @@ using Random
 using JSON
 using CSV
 using DataFrames
+using Serialization
 
 include("raw_data.jl")
 include("util.jl")
@@ -29,6 +30,7 @@ export create_processed_statistics!,
     import_processed_data,
     run_structural_tests,
     run_statistical_tests,
+    serialize_processed_data,
     using_spinedb
 # Exports required for testscripts
 export add_building_stock_year!,

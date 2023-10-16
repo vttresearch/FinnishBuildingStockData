@@ -153,7 +153,7 @@ function data_from_url(urls::String...; upgrade=false, filters=Dict())
         raw = SpineInterface._db(url; upgrade=upgrade) do db
             SpineInterface._export_data(db; filters=filters)
         end
-        _parse_db_values!(raw)
+        #_parse_db_values!(raw)
         merge_data!(rsd, RawSpineData(raw))
     end
     return rsd
@@ -193,4 +193,37 @@ function filter_module!(
     filter!(x -> !in(first(x), ocs_to_clear), m._spine_object_classes)
     _clear_symbols!(m, ocs_to_clear, msg)
     return m
+end
+
+
+"""
+    serialize_processed_data
+
+Serialize processed data as a `RawSpineData` to speed up processing.
+"""
+function serialize_processed_data(
+    m::Module,
+    hsh::UInt64;
+    processed_data_fields=[
+        (:_spine_object_classes, :building_period),
+        (:_spine_object_classes, :building_stock),
+        (:_spine_object_classes, :building_type),
+        (:_spine_object_classes, :heat_source),
+        (:_spine_object_classes, :location_id),
+        (:_spine_object_classes, :structure_type),
+        (:_spine_relationship_classes, :building_stock_statistics),
+        (:_spine_relationship_classes, :structure_statistics),
+        (:_spine_relationship_classes, :ventilation_and_fenestration_statistics)
+    ]
+)
+    filename = string("data\\", hsh, ".ser")
+    rsd = RawSpineData()
+    merge_data!(
+        rsd,
+        [
+            RawSpineData(to_dict(getfield(m, f)[k]))
+            for (f, k) in processed_data_fields
+        ]...
+    )
+    return serialize(filename, rsd)
 end

@@ -23,6 +23,7 @@ function SpineInterface.using_spinedb(rsd::RawSpineData, mod=@__MODULE__; filter
     )
 end
 SpineInterface.Object(name::Int64, class_name::String) = Object(string(name), class_name)
+SpineInterface.parse_db_value(value_and_type::Tuple) = parse_db_value(value_and_type...)
 
 
 ## Miscellaneous functions
@@ -50,7 +51,7 @@ function merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
     for rsd in rsds
         for fn in fieldnames(RawSpineData)
             inds = unique_inds_mapping[fn]
-            data = sort!(append!(getfield(rsd1, fn), getfield(rsd, fn)))
+            data = sort!(append!(getfield(rsd1, fn), getfield(rsd, fn)), by=r -> r[inds])
             inds_to_pop = []
             for (i, (row1, row2)) in Iterators.reverse(enumerate(zip(data[2:end], data[1:end-1])))
                 row1[inds] == row2[inds] ? push!(inds_to_pop, i) : nothing
@@ -298,4 +299,47 @@ function _parse_db_values!(raw::Dict)
         end
     end
     return raw
+end
+
+
+"""
+    to_dict()
+"""
+function to_dict(obj_cls::ObjectClass)
+    Dict(
+        "object_classes" => [[String(obj_cls.name)]],
+        "object_parameters" => [
+            [String(obj_cls.name), String(parameter_name), unparse_db_value(parameter_default_value)]
+            for (parameter_name, parameter_default_value) in obj_cls.parameter_defaults
+        ],
+        "objects" => [String.([obj_cls.name, object.name]) for object in obj_cls.objects],
+        "object_parameter_values" => [
+            [String(obj_cls.name), String(object.name), String(parameter_name), unparse_db_value(parameter_value)]
+            for (object, parameter_values) in obj_cls.parameter_values
+            for (parameter_name, parameter_value) in parameter_values
+        ]
+    )
+end
+function to_dict(rel_cls::RelationshipClass)
+    Dict(
+        "object_classes" => [[String(oc)] for oc in unique(rel_cls.intact_object_class_names)],
+        "objects" => unique(
+            String.([obj_cls_name, obj.name])
+            for relationship in rel_cls.relationships
+            for (obj_cls_name, obj) in zip(rel_cls.intact_object_class_names, relationship)
+        ),
+        "relationship_classes" => [[String(rel_cls.name), String.(rel_cls.intact_object_class_names)]],
+        "relationship_parameters" => [
+            [String(rel_cls.name), String(parameter_name), unparse_db_value(parameter_default_value)]
+            for (parameter_name, parameter_default_value) in rel_cls.parameter_defaults
+        ],
+        "relationships" => [
+            [String(rel_cls.name), [String(obj.name) for obj in relationship]] for relationship in rel_cls.relationships
+        ],
+        "relationship_parameter_values" => [
+            [String(rel_cls.name), [String(obj.name) for obj in relationship], String(parameter_name), unparse_db_value(parameter_value)]
+            for (relationship, parameter_values) in rel_cls.parameter_values
+            for (parameter_name, parameter_value) in parameter_values
+        ]
+    )
 end
