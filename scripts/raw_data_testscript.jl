@@ -25,6 +25,9 @@ tcw = 0.5
 ind = 0.1
 vp = 2225140.0
 
+# Form a hash from data processing settings to deduce whether to recreate and retest data.
+hsh = hash((num_lids, tcw, ind, vp))
+
 ## Test reading data into dataframes
 #=
 stat_data = fbsd.read_datapackage(statistical_path)
@@ -106,6 +109,19 @@ rsd = fbsd.RawSpineData()
 @time run_statistical_tests(; limit=Inf, mod=m_data)
 
 
+## Test processing the data
+
+@time create_processed_statistics!(m_data, num_lids, tcw, ind, vp)
+
+
+## Create processed data dict and serialize.
+
+@info "Serialize and save processed data..."
+@time serialize_processed_data(m_data, hsh)
+@info "Deserialize saved data..."
+@time data = fbsd.deserialize("data\\$(hsh).ser")
+
+
 ## Test importing definitions from URL
 
 @info "Import definitions from URL..."
@@ -120,32 +136,6 @@ rsd = fbsd.RawSpineData()
 @time using_spinedb(defs, m_defs)
 
 
-## Test processing the data
-
-@time create_processed_statistics!(m_defs, num_lids, tcw, ind, vp)
-
-
 ## Test importing processed data. NOTE! This can take a long while with large datasets.
 
 @time import_processed_data("sqlite://"; mod=m_defs)
-
-
-## Test post-process filtering
-
-@info "Filtering module..."
-@time filter_module!(
-    m_defs;
-    obj_classes=[
-        :building_period,
-        :building_stock,
-        :building_type,
-        :heat_source,
-        :location_id,
-        :structure_type
-    ],
-    rel_classes=[
-        :building_stock_statistics,
-        :structure_statistics,
-        :ventilation_and_fenestration_statistics
-    ]
-)

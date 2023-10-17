@@ -40,7 +40,11 @@ struct RawSpineData
         new([Vector{Any}() for fn in fieldnames(RawSpineData)]...)
     end
     function RawSpineData(d::Dict)
-        new([d[String(fn)] for fn in fieldnames(RawSpineData)]...)
+        new(
+            [
+                get(d, String(fn), Vector{Any}()) for fn in fieldnames(RawSpineData)
+            ]...
+        )
     end
 end
 

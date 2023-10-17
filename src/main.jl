@@ -153,7 +153,6 @@ function data_from_url(urls::String...; upgrade=false, filters=Dict())
         raw = SpineInterface._db(url; upgrade=upgrade) do db
             SpineInterface._export_data(db; filters=filters)
         end
-        _parse_db_values!(raw)
         merge_data!(rsd, RawSpineData(raw))
     end
     return rsd
@@ -161,36 +160,33 @@ end
 
 
 """
-    filter_module!(
-        m::Module;
-        obj_classes::Vector{Symbol}=Vector{Symbol}(),
-        rel_classes::Vector{Symbol}=Vector{Symbol}(),
-        msg::String="Variable has been cleared."
-    )
+    serialize_processed_data
 
-Filter `m` so that only the desired convenience functions remain.
-
-NOTE! This function doesn't cross-check dependencies between object
-and relationship classes. That is left up to the user.
+Serialize processed data as a `RawSpineData` to speed up processing.
 """
-function filter_module!(
-    m::Module;
-    obj_classes::Vector{Symbol}=Vector{Symbol}(),
-    rel_classes::Vector{Symbol}=Vector{Symbol}(),
-    msg::String="Variable has been cleared."
+function serialize_processed_data(
+    m::Module,
+    hsh::UInt64;
+    filepath::String=string("data\\", hsh, ".ser"),
+    processed_data_fields=[
+        (:_spine_object_classes, :building_period),
+        (:_spine_object_classes, :building_stock),
+        (:_spine_object_classes, :building_type),
+        (:_spine_object_classes, :heat_source),
+        (:_spine_object_classes, :location_id),
+        (:_spine_object_classes, :structure_type),
+        (:_spine_relationship_classes, :building_stock_statistics),
+        (:_spine_relationship_classes, :structure_statistics),
+        (:_spine_relationship_classes, :ventilation_and_fenestration_statistics)
+    ]
 )
-    # Figure out object classes to clear.
-    ocs_to_clear = setdiff(collect(keys(m._spine_object_classes)), obj_classes)
-    # Figure out relationship classes to clear.
-    rcs_to_clear = setdiff(collect(keys(m._spine_relationship_classes)), rel_classes)
-    # Clear parameters.
-    _clear_spine_parameters!(m, :_spine_relationship_classes => rcs_to_clear, msg)
-    _clear_spine_parameters!(m, :_spine_object_classes => ocs_to_clear, msg)
-    # Clear relationship classes.
-    filter!(x -> !in(first(x), rcs_to_clear), m._spine_relationship_classes)
-    _clear_symbols!(m, rcs_to_clear, msg)
-    # Clear object classes.
-    filter!(x -> !in(first(x), ocs_to_clear), m._spine_object_classes)
-    _clear_symbols!(m, ocs_to_clear, msg)
-    return m
+    rsd = RawSpineData()
+    merge_data!(
+        rsd,
+        [
+            RawSpineData(to_dict(getfield(m, f)[k]))
+            for (f, k) in processed_data_fields
+        ]...
+    )
+    return serialize(filepath, rsd)
 end
