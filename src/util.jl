@@ -281,13 +281,13 @@ end
 """
 function to_dict(obj_cls::ObjectClass)
     Dict(
-        "object_classes" => [[String(obj_cls.name)]],
-        "object_parameters" => [
+        "entity_classes" => [[String(obj_cls.name), []]],
+        "parameter_definitions" => [
             [String(obj_cls.name), String(parameter_name), unparse_db_value(parameter_default_value)]
             for (parameter_name, parameter_default_value) in obj_cls.parameter_defaults
         ],
-        "objects" => [String.([obj_cls.name, object.name]) for object in obj_cls.objects],
-        "object_parameter_values" => [
+        "entities" => [String.([obj_cls.name, object.name]) for object in obj_cls.objects],
+        "parameter_values" => [
             [String(obj_cls.name), String(object.name), String(parameter_name), unparse_db_value(parameter_value)]
             for (object, parameter_values) in obj_cls.parameter_values
             for (parameter_name, parameter_value) in parameter_values
@@ -296,21 +296,15 @@ function to_dict(obj_cls::ObjectClass)
 end
 function to_dict(rel_cls::RelationshipClass)
     Dict(
-        "object_classes" => [[String(oc)] for oc in unique(rel_cls.intact_object_class_names)],
-        "objects" => unique(
-            String.([obj_cls_name, obj.name])
-            for relationship in rel_cls.relationships
-            for (obj_cls_name, obj) in zip(rel_cls.intact_object_class_names, relationship)
-        ),
-        "relationship_classes" => [[String(rel_cls.name), String.(rel_cls.intact_object_class_names)]],
-        "relationship_parameters" => [
+        "entity_classes" => [[String(rel_cls.name), String.(rel_cls.intact_object_class_names)]],
+        "parameters_definitions" => [
             [String(rel_cls.name), String(parameter_name), unparse_db_value(parameter_default_value)]
             for (parameter_name, parameter_default_value) in rel_cls.parameter_defaults
         ],
-        "relationships" => [
+        "entities" => [
             [String(rel_cls.name), [String(obj.name) for obj in relationship]] for relationship in rel_cls.relationships
         ],
-        "relationship_parameter_values" => [
+        "parameter_values" => [
             [String(rel_cls.name), [String(obj.name) for obj in relationship], String(parameter_name), unparse_db_value(parameter_value)]
             for (relationship, parameter_values) in rel_cls.parameter_values
             for (parameter_name, parameter_value) in parameter_values
