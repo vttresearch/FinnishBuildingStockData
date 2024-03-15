@@ -118,6 +118,10 @@ rsd = fbsd.RawSpineData()
 
 @info "Serialize and save processed data..."
 @time serialize_processed_data(m_data, hsh)
+
+
+## Deserialize processed data dict.
+
 @info "Deserialize saved data..."
 @time data = fbsd.deserialize("data\\$(hsh).ser")
 
