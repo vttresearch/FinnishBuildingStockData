@@ -25,8 +25,8 @@ variation_period = 26.0 * 24 * 60 * 60
 ## Open database
 
 @info "Opening database"
-db_url = "sqlite:///<REDACTED>"
-db_out_url = "sqlite:///<REDACTED>"
+db_url = "sqlite:///C:\\_SPINEPROJECTS\\flexib_ida_comparisons_fluent\\datastores\\ESBO_inputs.sqlite"
+db_out_url = "sqlite:///C:\\_SPINEPROJECTS\\flexib_ida_comparisons_fluent\\datastores\\ESBO_processed_inputs_and_definitions.sqlite"
 @time using_spinedb(db_url, m; upgrade = true)
 
 

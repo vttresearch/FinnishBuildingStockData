@@ -36,14 +36,10 @@ Helper function for merging [`FinnishBuildingStockData.RawSpineData`](@ref).
 function merge_data!(rsd1::RawSpineData, rsds::RawSpineData...)
     # Define which indices are used to deduce unique entries.
     unique_inds_mapping = Dict(
-        :object_classes => 1:1,
-        :objects => 1:2,
-        :object_parameters => 1:2,
-        :object_parameter_values => 1:3,
-        :relationship_classes => 1:1,
-        :relationships => 1:2,
-        :relationship_parameters => 1:2,
-        :relationship_parameter_values => 1:3,
+        :entity_classes => 1:2,
+        :entities => 1:2,
+        :parameter_definitions => 1:2,
+        :parameter_values => 1:3,
         :alternatives => 1:1,
         :parameter_value_lists => 1:2
     )
