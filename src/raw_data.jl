@@ -13,27 +13,18 @@ become prohibitively slow to read and write to at full-Finland-scales.
 A `struct` for holding the raw Spine Datastore contents.
 
 Follows the raw JSON formatting of Spine Datastores, with the following fields:
-- `object_classes::Vector`
-- `object_classes::Vector`
-- `objects::Vector`
-- `object_parameters::Vector`
-- `object_parameter_values::Vector`
-- `relationship_classes::Vector`
-- `relationships::Vector`
-- `relationship_parameters::Vector`
-- `relationship_parameter_values::Vector`
-- `alternatives::Vector`
-- `parameter_value_lists::Vector`
+ - `entity_classes::Vector`
+ - `entities::Vector`
+ - `parameter_definitions::Vector`
+ - `parameter_values::Vector`
+ - `alternatives::Vector`
+ - `parameter_value_lists::Vector`
 """
 struct RawSpineData
-    object_classes::Vector
-    objects::Vector
-    object_parameters::Vector
-    object_parameter_values::Vector
-    relationship_classes::Vector
-    relationships::Vector
-    relationship_parameters::Vector
-    relationship_parameter_values::Vector
+    entity_classes::Vector
+    entities::Vector
+    parameter_definitions::Vector
+    parameter_values::Vector
     alternatives::Vector
     parameter_value_lists::Vector
     function RawSpineData()
@@ -394,13 +385,13 @@ function import_ventilation_space_heat_flow_direction!(
     param = "thermal_resistance_m2K_W"
     dirs = Symbol.(names(df[!, 2:end]))
     # Import object class and objects
-    push!(rsd.object_classes, [oc])
-    append!(rsd.objects, [[oc, String(dir)] for dir in dirs])
+    push!(rsd.entity_classes, [oc, []])
+    append!(rsd.entities, [[oc, String(dir)] for dir in dirs])
     # Import parameter defaults.
-    push!(rsd.object_parameters, [oc, param, nothing])
+    push!(rsd.parameter_definitions, [oc, param, nothing])
     # Import map parameter value.
     append!(
-        rsd.object_parameter_values,
+        rsd.parameter_values,
         [
             [
                 oc,
@@ -455,9 +446,9 @@ function _import_oc!(
     # Abort import if df is empty
     isempty(df) && return nothing
     # Fetch and add the relevant objects
-    push!(rsd.object_classes, [String(oc)])
+    push!(rsd.entity_classes, [String(oc), []])
     append!(
-        rsd.objects,
+        rsd.entities,
         [[String(oc), String(obj)] for obj in unique(df[!, oc])]
     )
 end
@@ -473,7 +464,7 @@ function _import_oc!(
     _import_oc!(rsd, df, oc)
     # Import the desired parameter defaults.
     append!(
-        rsd.object_parameters,
+        rsd.parameter_definitions,
         [
             [String(oc), String(param), nothing]
             for param in params
@@ -481,7 +472,7 @@ function _import_oc!(
     )
     # Import the parameter values.
     append!(
-        rsd.object_parameter_values,
+        rsd.parameter_values,
         [
             [String(oc), String(r[oc]), String(param), r[param]]
             for r in eachrow(df)
@@ -798,7 +789,7 @@ function _import_rc!(
     _import_rc!(rsd, df, rc; object_classes=object_classes)
     # Import relationship parameter defaults.
     append!(
-        rsd.relationship_parameters,
+        rsd.parameter_definitions,
         [
             [String(rc), String(param), nothing]
             for param in params
@@ -806,7 +797,7 @@ function _import_rc!(
     )
     # Import relationship parameter values.
     append!(
-        rsd.relationship_parameter_values,
+        rsd.parameter_values,
         [
             [String(rc), [String(r[oc]) for oc in object_classes], String(param), r[param]]
             for r in eachrow(df)
@@ -825,11 +816,11 @@ function _import_rc!(
     isempty(df) && return nothing
     # Add relationships
     push!(
-        rsd.relationship_classes,
+        rsd.entity_classes,
         [String(rc), String.(object_classes)]
     )
     append!(
-        rsd.relationships,
+        rsd.entities,
         unique(
             [String(rc), [String(r[oc]) for oc in object_classes]]
             for r in eachrow(df)

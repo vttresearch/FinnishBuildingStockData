@@ -6,6 +6,7 @@ A testing script for direct raw data input and processing.
 
 ## Necessary packages and definitions
 
+cd(*(@__DIR__,"\\.."))
 using FinnishBuildingStockData
 fbsd = FinnishBuildingStockData
 
@@ -15,7 +16,7 @@ RT_structural_path = "data\\finnish_RT_structural_data\\datapackage.json"
 def_structural_path = "data\\Finnish-building-stock-default-structural-data\\datapackage.json"
 
 # Define url for archetype building definitions
-defs_url = "sqlite:///C:\\_SYMLINKS\\archetype_definitions.sqlite"
+defs_url = "sqlite:///C:\\_SPINEPROJECTS\\flexib_finnish_building_stock_validation_v08_fluid\\archetype_definitions.sqlite"
 
 # Define parameter values and modules for processing.
 m_data = Module()
@@ -118,6 +119,10 @@ rsd = fbsd.RawSpineData()
 
 @info "Serialize and save processed data..."
 @time serialize_processed_data(m_data, hsh)
+
+
+## Deserialize processed data dict.
+
 @info "Deserialize saved data..."
 @time data = fbsd.deserialize("data\\$(hsh).ser")
 

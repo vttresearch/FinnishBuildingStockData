@@ -47,6 +47,6 @@ else
     create_processed_statistics!(m, num_lids, tcw, ind, vp)
 
     # Import processed data into the datastore at `url_out`
-    import_processed_data(url_out; scramble_data=scramble_data)
+    import_processed_data(url_out; mod=m, scramble_data=scramble_data)
     @info "Done"
 end
