@@ -6,6 +6,7 @@ A testing script for direct raw data input and processing.
 
 ## Necessary packages and definitions
 
+cd(*(@__DIR__,"\\.."))
 using FinnishBuildingStockData
 fbsd = FinnishBuildingStockData
 
