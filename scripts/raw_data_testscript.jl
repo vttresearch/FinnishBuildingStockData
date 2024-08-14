@@ -15,7 +15,7 @@ RT_structural_path = "data\\finnish_RT_structural_data\\datapackage.json"
 def_structural_path = "data\\Finnish-building-stock-default-structural-data\\datapackage.json"
 
 # Define url for archetype building definitions
-defs_url = "sqlite:///C:\\_SPINEPROJECTS\\flexib_finnish_building_stock_validation_v08\\archetype_definitions.sqlite"
+defs_url = "sqlite:///C:\\_SPINEPROJECTS\\flexib_finnish_building_stock_validation_v08_fluid\\archetype_definitions.sqlite"
 
 # Define parameter values and modules for processing.
 m_data = Module()
