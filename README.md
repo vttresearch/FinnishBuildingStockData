@@ -13,6 +13,9 @@ along with the building stock statistical data in
 [*Finnish building stock forecasts for 2020, 2030, 2040, and 2050*](http://urn.fi/urn:nbn:fi:att:a567a84b-fea4-4ca8-84a1-fe97f52caff4),
 and processes them into something usable by the [ArchetypeBuildingModel.jl](https://github.com/vttresearch/ArchetypeBuildingModel).
 
+>[!IMPORTANT]
+>2024-08-16: The *FlexiB* project funding this research is ending, making it unlikely that this module will receive see further active development.
+
 
 ## Key contents
 
@@ -90,6 +93,12 @@ julia> include("documentation/make.jl")
 ## License
 
 MIT, see `LICENSE` for more information.
+
+
+## How to cite
+
+Please refer to the *Cite this* section of the `FinnishBuildingStockData.jl` entry in
+[VTT's Research Information Portal](https://cris.vtt.fi/en/publications/finnishbuildingstockdatajl-a-julia-module-for-processing-and-aggr).
 
 
 ## Acknowledgements
