@@ -1,8 +1,8 @@
 name = "FinnishBuildingStockData"
 uuid = "e9c5a5b1-9140-4320-a2af-ba1393a35d40"
 authors = ["Topi Rasku <topi.rasku@vtt.fi>"]
-version = "2.3.1"
-version_note = "Update `plot_statistics.jl` testscript to use data packages directly."
+version = "2.3.2"
+version_note = "Sort statistics plot axes."
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
