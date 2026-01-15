@@ -107,15 +107,10 @@ Please refer to the *Cite this* section of the `FinnishBuildingStockData.jl` ent
 <table width=500px frame="none">
 <tr>
 <td valign="middle" width=100px>
-<img src=https://www.aka.fi/globalassets/aka_en_vaaka_valkoinen.svg alt="AKA emblem" width=100%></td>
+<img src=https://www.aka.fi/globalassets/etusivujen-kuvat/aka_en_vaaka_sininen.svg alt="AKA emblem" width=100%></td>
 <td valign="middle">
 This module was built for the Research Council of Finland project "Integration of building flexibility into future energy systems (FlexiB)" under grant agreement No 332421.
 </td>
-</table>
-</center>
-
-<center>
-<table width=500px frame="none">
 <tr>
 <td valign="middle" width=100px>
 <img src=https://european-union.europa.eu/themes/contrib/oe_theme/dist/eu/images/logo/standard-version/positive/logo-eu--en.svg alt="EU emblem" width=100%></td>
