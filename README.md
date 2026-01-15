@@ -1,6 +1,6 @@
 # FinnishBuildingStockData.jl
 
-[![DOI](https://zenodo.org/badge/570018940.svg)](https://zenodo.org/badge/latestdoi/570018940)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18253579.svg)](https://doi.org/10.5281/zenodo.18253579)
 [![documentation](https://img.shields.io/badge/documentation-latest-blue)](https://vttresearch.github.io/FinnishBuildingStockData/)
 [![license](https://img.shields.io/badge/license-MIT-brightgreen)](https://mit-license.org/)
 
